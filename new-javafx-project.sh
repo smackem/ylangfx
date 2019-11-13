@@ -1,0 +1,1 @@
+mvn archetype:generate -DgroupId=net.smackem.ylang -DartifactId=ylangfx -DarchetypeGroupId=org.openjfx -DarchetypeArtifactId=javafx-archetype-fxml -DarchetypeVersion=0.0.3 -DinteractiveMode=false
