@@ -1,4 +1,4 @@
-package net.smackem.ylang;
+package net.smackem.ylang.gui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 /**
  * JavaFX App
@@ -14,6 +15,7 @@ import java.io.IOException;
 public class App extends Application {
     private static App INSTANCE;
     private Scene scene;
+    private Stage stage;
 
     public App() {
         if (INSTANCE != null) {
@@ -26,9 +28,13 @@ public class App extends Application {
         return INSTANCE;
     }
 
+    public Stage getStage() {
+        return this.stage;
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
-        this.scene = new Scene(loadFXML("primary"), 640, 480);
+        this.scene = new Scene(loadFXML("imageproc"), 640, 480);
         stage.setScene(this.scene);
         stage.show();
     }
@@ -38,7 +44,8 @@ public class App extends Application {
     }
 
     private static Parent loadFXML(String fxml) throws IOException {
-        final FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
+        final URL fxmlUrl = App.class.getResource(fxml + ".fxml");
+        final FXMLLoader fxmlLoader = new FXMLLoader(fxmlUrl);
         return fxmlLoader.load();
     }
 
