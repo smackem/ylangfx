@@ -25,10 +25,10 @@ public class ImageProcController {
     private final RemoteImageProcService imageProcService;
 
     @FXML
-    public TextArea sourceCodeTextArea;
+    private TextArea sourceCodeTextArea;
 
     @FXML
-    public TextArea messageTextArea;
+    private TextArea messageTextArea;
 
     @FXML
     private ImageView imageView;
@@ -38,10 +38,10 @@ public class ImageProcController {
     }
 
     @FXML
-    public void initialize() {
+    private void initialize() {
         this.imageView.imageProperty().bind(this.image);
-        this.imageView.visibleProperty().bind(this.message.isEmpty());
         this.messageTextArea.visibleProperty().bind(this.message.isNotEmpty());
+        this.messageTextArea.textProperty().bind(this.message);
     }
 
     @FXML

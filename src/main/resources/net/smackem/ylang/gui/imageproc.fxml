@@ -14,7 +14,8 @@
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="net.smackem.ylang.gui.ImageProcController"
-            style="-fx-background-color: #cfc">
+            styleClass="root"
+            stylesheets="@imageproc.css">
    <padding>
       <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
    </padding>
@@ -29,16 +30,14 @@
    <center>
       <ScrollPane>
          <StackPane>
-            <TextArea fx:id="messageTextArea" prefRowCount="3"
-                      style="-fx-font-family: 'Cascadia Code',monospace; -fx-font-size: 12pt" />
             <ImageView fx:id="imageView" preserveRatio="true" style="-fx-background-color: #000" />
+            <TextArea fx:id="messageTextArea" />
          </StackPane>
       </ScrollPane>
    </center>
    <bottom>
       <VBox>
-         <TextArea fx:id="sourceCodeTextArea" minHeight="200"
-                   style="-fx-font-family: 'Cascadia Code',monospace; -fx-font-size: 13pt"/>
+         <TextArea fx:id="sourceCodeTextArea" minHeight="200" />
       </VBox>
    </bottom>
 </BorderPane>

@@ -1,0 +1,15 @@
+.root {
+    -fx-background-color: #cfc;
+}
+
+#messageTextArea {
+    -fx-font-family: 'Cascadia Code',monospace;
+    -fx-font-size: 12pt;
+    -fx-background-color: #fff;
+    -fx-opacity: 0.5;
+}
+
+#sourceCodeTextArea {
+    -fx-font-family: 'Cascadia Code',monospace;
+    -fx-font-size: 13pt;
+}
