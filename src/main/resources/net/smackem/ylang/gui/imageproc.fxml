@@ -11,6 +11,8 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.Tab?>
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="net.smackem.ylang.gui.ImageProcController"
@@ -25,15 +27,25 @@
          <Button text="Say Hello" onAction="#sayHello"/>
          <Button text="Load Image..." onAction="#loadImage"/>
          <Button text="Run" onAction="#processImage"/>
+         <Button text="Take" onAction="#takeImage"/>
       </HBox>
    </top>
    <center>
-      <ScrollPane>
-         <StackPane>
-            <ImageView fx:id="imageView" preserveRatio="true" style="-fx-background-color: #000" />
-            <TextArea fx:id="messageTextArea" />
-         </StackPane>
-      </ScrollPane>
+      <TabPane>
+         <Tab text="Source">
+            <ScrollPane>
+               <ImageView fx:id="sourceImageView" preserveRatio="true" style="-fx-background-color: #000" />
+            </ScrollPane>
+         </Tab>
+         <Tab text="Target">
+            <ScrollPane>
+               <StackPane>
+                  <ImageView fx:id="targetImageView" preserveRatio="true" style="-fx-background-color: #000" />
+                  <TextArea fx:id="messageTextArea" />
+               </StackPane>
+            </ScrollPane>
+         </Tab>
+      </TabPane>
    </center>
    <bottom>
       <VBox>

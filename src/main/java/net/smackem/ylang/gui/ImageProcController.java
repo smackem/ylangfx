@@ -21,8 +21,15 @@ import javax.imageio.ImageIO;
 public class ImageProcController {
 
     private final ReadOnlyObjectWrapper<Image> sourceImage = new ReadOnlyObjectWrapper<>();
+    private final ReadOnlyObjectWrapper<Image> targetImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
     private final RemoteImageProcService imageProcService;
+
+    @FXML
+    private ImageView sourceImageView;
+
+    @FXML
+    private ImageView targetImageView;
 
     @FXML
     private TextArea sourceCodeTextArea;
@@ -30,16 +37,14 @@ public class ImageProcController {
     @FXML
     private TextArea messageTextArea;
 
-    @FXML
-    private ImageView imageView;
-
     public ImageProcController() {
         this.imageProcService = new RemoteImageProcService("localhost", 50051);
     }
 
     @FXML
     private void initialize() {
-        this.imageView.imageProperty().bind(this.sourceImage);
+        this.sourceImageView.imageProperty().bind(this.sourceImage);
+        this.targetImageView.imageProperty().bind(this.targetImage);
         this.messageTextArea.visibleProperty().bind(this.message.isNotEmpty());
         this.messageTextArea.textProperty().bind(this.message);
     }
@@ -69,7 +74,7 @@ public class ImageProcController {
         }
     }
 
-    private byte[] saveImage() throws Exception {
+    private byte[] serializeImage() throws Exception {
         final BufferedImage bimg = SwingFXUtils.fromFXImage(this.sourceImage.getValue(), null);
 
         try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
@@ -87,19 +92,24 @@ public class ImageProcController {
     @FXML
     private void processImage(ActionEvent actionEvent) {
         try {
-            final byte[] imageDataPng = saveImage();
+            final byte[] imageDataPng = serializeImage();
             final String sourceCode = this.sourceCodeTextArea.getText();
             final ProcessImageResult result = this.imageProcService.processImage(sourceCode, imageDataPng);
             final byte[] resultImageDataPng = result.getImageDataPng();
 
             if (resultImageDataPng.length > 0) {
                 try (final InputStream is = new ByteArrayInputStream(resultImageDataPng)) {
-                    this.sourceImage.setValue(new Image(is));
+                    this.targetImage.setValue(new Image(is));
                 }
             }
             this.message.setValue(result.getMessage());
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
         }
+    }
+
+    @FXML
+    private void takeImage(ActionEvent actionEvent) {
+        this.sourceImage.setValue(this.targetImage.getValue());
     }
 }
