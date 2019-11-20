@@ -35,6 +35,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         this.scene = new Scene(loadFXML("imageproc"), 640, 480);
+        this.stage = stage;
         stage.setScene(this.scene);
         stage.show();
     }

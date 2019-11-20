@@ -20,7 +20,7 @@ import javax.imageio.ImageIO;
 
 public class ImageProcController {
 
-    private final ReadOnlyObjectWrapper<Image> image = new ReadOnlyObjectWrapper<>();
+    private final ReadOnlyObjectWrapper<Image> sourceImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
     private final RemoteImageProcService imageProcService;
 
@@ -39,7 +39,7 @@ public class ImageProcController {
 
     @FXML
     private void initialize() {
-        this.imageView.imageProperty().bind(this.image);
+        this.imageView.imageProperty().bind(this.sourceImage);
         this.messageTextArea.visibleProperty().bind(this.message.isNotEmpty());
         this.messageTextArea.textProperty().bind(this.message);
     }
@@ -62,7 +62,7 @@ public class ImageProcController {
 
         if (file != null) {
             try {
-                this.image.setValue(loadImage(file));
+                this.sourceImage.setValue(loadImage(file));
             } catch (IOException e) {
                 new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             }
@@ -70,7 +70,7 @@ public class ImageProcController {
     }
 
     private byte[] saveImage() throws Exception {
-        final BufferedImage bimg = SwingFXUtils.fromFXImage(this.image.getValue(), null);
+        final BufferedImage bimg = SwingFXUtils.fromFXImage(this.sourceImage.getValue(), null);
 
         try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
             ImageIO.write(bimg, "png", stream);
@@ -94,7 +94,7 @@ public class ImageProcController {
 
             if (resultImageDataPng.length > 0) {
                 try (final InputStream is = new ByteArrayInputStream(resultImageDataPng)) {
-                    this.image.setValue(new Image(is));
+                    this.sourceImage.setValue(new Image(is));
                 }
             }
             this.message.setValue(result.getMessage());
