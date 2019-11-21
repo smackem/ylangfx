@@ -9,6 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -35,7 +36,7 @@ public class ImageProcController {
     private TextArea sourceCodeTextArea;
 
     @FXML
-    private TextArea messageTextArea;
+    private Label messageTextArea;
 
     public ImageProcController() {
         this.imageProcService = new RemoteImageProcService("localhost", 50051);

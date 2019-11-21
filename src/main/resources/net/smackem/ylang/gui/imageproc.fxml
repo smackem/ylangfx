@@ -31,7 +31,7 @@
       </HBox>
    </top>
    <center>
-      <TabPane>
+      <TabPane tabClosingPolicy="UNAVAILABLE">
          <Tab text="Source">
             <ScrollPane>
                <ImageView fx:id="sourceImageView" preserveRatio="true" style="-fx-background-color: #000" />
@@ -40,8 +40,10 @@
          <Tab text="Target">
             <ScrollPane>
                <StackPane>
-                  <ImageView fx:id="targetImageView" preserveRatio="true" style="-fx-background-color: #000" />
-                  <TextArea fx:id="messageTextArea" />
+                  <ImageView fx:id="targetImageView" preserveRatio="true" style="-fx-background-color: #000"
+                             StackPane.alignment="TOP_LEFT" />
+                  <Label fx:id="messageTextArea"
+                         StackPane.alignment="TOP_LEFT" />
                </StackPane>
             </ScrollPane>
          </Tab>
