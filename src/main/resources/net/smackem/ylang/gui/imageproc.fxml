@@ -13,45 +13,42 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.SplitPane?>
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="net.smackem.ylang.gui.ImageProcController"
             styleClass="root"
             stylesheets="@imageproc.css">
-   <padding>
-      <Insets bottom="4.0" left="4.0" right="4.0" top="4.0" />
-   </padding>
    <top>
-      <HBox spacing="4">
-         <Button text="Switch to Secondary View" onAction="#switchToSecondary"/>
-         <Button text="Say Hello" onAction="#sayHello"/>
-         <Button text="Load Image..." onAction="#loadImage"/>
-         <Button text="Run" onAction="#processImage"/>
-         <Button text="Take" onAction="#takeImage"/>
+      <HBox spacing="4" style="-fx-padding: 4,4,4,4">
+         <Button text="Switch to Secondary View" onAction="#switchToSecondary" />
+         <Button text="Say Hello" onAction="#sayHello" />
+         <Button text="Load Image..." onAction="#loadImage" />
+         <Button text="Run" onAction="#processImage" />
+         <Button text="Take" onAction="#takeImage" />
+         <Button text="Save As..." onAction="#saveImageAs" />
       </HBox>
    </top>
    <center>
-      <TabPane tabClosingPolicy="UNAVAILABLE">
-         <Tab text="Source">
-            <ScrollPane>
-               <ImageView fx:id="sourceImageView" preserveRatio="true" style="-fx-background-color: #000" />
-            </ScrollPane>
-         </Tab>
-         <Tab text="Target">
-            <ScrollPane>
-               <StackPane>
-                  <ImageView fx:id="targetImageView" preserveRatio="true" style="-fx-background-color: #000"
-                             StackPane.alignment="TOP_LEFT" />
-                  <Label fx:id="messageTextArea"
-                         StackPane.alignment="TOP_LEFT" />
-               </StackPane>
-            </ScrollPane>
-         </Tab>
-      </TabPane>
+      <SplitPane orientation="VERTICAL">
+         <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" SplitPane.resizableWithParent="true">
+            <Tab fx:id="sourceTab" text="Source">
+               <ScrollPane>
+                  <ImageView fx:id="sourceImageView" preserveRatio="true" />
+               </ScrollPane>
+            </Tab>
+            <Tab fx:id="targetTab" text="Target">
+               <ScrollPane>
+                  <StackPane>
+                     <ImageView fx:id="targetImageView" preserveRatio="true"
+                                StackPane.alignment="TOP_LEFT" />
+                     <Label fx:id="messageTextArea"
+                            StackPane.alignment="TOP_LEFT" />
+                  </StackPane>
+               </ScrollPane>
+            </Tab>
+         </TabPane>
+         <TextArea fx:id="sourceCodeTextArea" minHeight="100" />
+      </SplitPane>
    </center>
-   <bottom>
-      <VBox>
-         <TextArea fx:id="sourceCodeTextArea" minHeight="200" />
-      </VBox>
-   </bottom>
 </BorderPane>

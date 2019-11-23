@@ -1,5 +1,5 @@
 .root {
-    -fx-background-color: #cfc;
+    -fx-snap-to-pixel: true;
 }
 
 #messageTextArea {
