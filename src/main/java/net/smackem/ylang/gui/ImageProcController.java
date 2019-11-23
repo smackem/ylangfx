@@ -10,6 +10,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import net.smackem.ylang.model.ProcessImageResult;
 import net.smackem.ylang.model.RemoteImageProcService;
@@ -23,6 +29,12 @@ public class ImageProcController {
     private final ReadOnlyObjectWrapper<Image> targetImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
     private final RemoteImageProcService imageProcService;
+    private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
+    private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
+    private static final KeyCombination KEY_COMBINATION_SAVEAS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+
+    @FXML
+    private Pane self;
 
     @FXML
     private Tab targetTab;
@@ -138,6 +150,17 @@ public class ImageProcController {
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             }
+        }
+    }
+
+    @FXML
+    private void onKeyPressed(KeyEvent keyEvent) {
+        if (KEY_COMBINATION_RUN.match(keyEvent)) {
+            processImage(new ActionEvent());
+        } else if (KEY_COMBINATION_TAKE.match(keyEvent)) {
+            takeImage(new ActionEvent());
+        } else if (KEY_COMBINATION_SAVEAS.match(keyEvent)) {
+            saveImageAs(new ActionEvent());
         }
     }
 }
