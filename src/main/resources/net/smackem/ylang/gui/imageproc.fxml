@@ -15,6 +15,7 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.SplitPane?>
 
+<?import net.smackem.ylang.gui.CodeEditor?>
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="net.smackem.ylang.gui.ImageProcController"
@@ -51,7 +52,7 @@
                </ScrollPane>
             </Tab>
          </TabPane>
-         <TextArea fx:id="sourceCodeTextArea" minHeight="100" />
+         <CodeEditor fx:id="codeEditor" minHeight="100" />
       </SplitPane>
    </center>
 </BorderPane>

@@ -14,14 +14,12 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import net.smackem.ylang.model.ProcessImageResult;
 import net.smackem.ylang.model.RemoteImageProcService;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageOutputStream;
 
 public class ImageProcController {
 
@@ -32,9 +30,6 @@ public class ImageProcController {
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVEAS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
-
-    @FXML
-    private Pane self;
 
     @FXML
     private Tab targetTab;
@@ -52,7 +47,7 @@ public class ImageProcController {
     private ImageView targetImageView;
 
     @FXML
-    private TextArea sourceCodeTextArea;
+    private CodeEditor codeEditor;
 
     @FXML
     private Label messageTextArea;
@@ -114,7 +109,7 @@ public class ImageProcController {
     private void processImage(ActionEvent actionEvent) {
         try {
             final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
-            final String sourceCode = this.sourceCodeTextArea.getText();
+            final String sourceCode = this.codeEditor.getText();
             final ProcessImageResult result = this.imageProcService.processImage(sourceCode, imageDataPng);
             final byte[] resultImageDataPng = result.getImageDataPng();
 

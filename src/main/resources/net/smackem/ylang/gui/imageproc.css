@@ -9,7 +9,7 @@
     -fx-opacity: 0.5;
 }
 
-#sourceCodeTextArea {
+#codeEditor {
     -fx-font-family: 'Cascadia Code',monospace;
     -fx-font-size: 13pt;
 }
