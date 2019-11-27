@@ -26,7 +26,6 @@
    <top>
       <HBox spacing="4" style="-fx-padding: 4,4,4,4">
          <Button text="Switch to Secondary View" onAction="#switchToSecondary" />
-         <Button text="Say Hello" onAction="#sayHello" />
          <Button text="Load Image..." onAction="#loadImage" />
          <Button text="Run" onAction="#processImage" />
          <Button text="Take" onAction="#takeImage" />

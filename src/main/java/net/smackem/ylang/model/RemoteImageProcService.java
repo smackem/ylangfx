@@ -3,13 +3,18 @@ package net.smackem.ylang.model;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 import net.smackem.ylang.listener.ImageProcGrpc;
 import net.smackem.ylang.listener.YLangProtos.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+
 public class RemoteImageProcService implements AutoCloseable {
-    private final ImageProcGrpc.ImageProcBlockingStub stub;
+    private final ImageProcGrpc.ImageProcStub stub;
     private final ManagedChannel channel;
     private final Logger log = LoggerFactory.getLogger(RemoteImageProcService.class);
 
@@ -19,25 +24,24 @@ public class RemoteImageProcService implements AutoCloseable {
                 // needing certificates.
                 .usePlaintext()
                 .build();
-        this.stub = ImageProcGrpc.newBlockingStub(channel);
+        this.stub = ImageProcGrpc.newStub(channel);
     }
 
-    public void sayHello(String text) {
-        final SimpleMsg request = SimpleMsg.newBuilder()
-                .setText(text)
-                .build();
-        final SimpleMsg response = this.stub.sayHello(request);
+    public CompletableFuture<ProcessImageResult> processImage(String source, byte[] imageDataPng) {
+        final CompletableFuture<ProcessImageResponse> future = new CompletableFuture<>();
+        final StreamObserver<ProcessImageRequest> writer =
+            this.stub.processImage(new ProcessImageResponseReader(future));
 
-        log.info(response.getText());
-    }
+        try {
+            writeProcessImageRequest(source, imageDataPng, writer);
+        } catch (Throwable e) {
+            writer.onError(e);
+            log.error("error writing request", e);
+            throw e;
+        }
+        writer.onCompleted();
 
-    public ProcessImageResult processImage(String sourceCode, byte[] imageDataPng) {
-        final ProcessImageRequest request = ProcessImageRequest.newBuilder()
-                .setSourceCode(sourceCode)
-                .setImageDataPng(ByteString.copyFrom(imageDataPng))
-                .build();
-        final ProcessImageResponse response = this.stub.processImage(request);
-        return new ProcessImageResult() {
+        return future.thenApply(response -> new ProcessImageResult() {
             @Override
             public boolean isSuccess() {
                 return response.getResult() == ProcessImageResponse.CompilationResult.OK;
@@ -52,7 +56,61 @@ public class RemoteImageProcService implements AutoCloseable {
             public byte[] getImageDataPng() {
                 return response.getImageDataPng().toByteArray();
             }
-        };
+        });
+    }
+
+    private void writeProcessImageRequest(String source, byte[] imageDataPng, StreamObserver<ProcessImageRequest> writer) {
+        final int chunkSize = 64 * 1024;
+        int remaining = imageDataPng.length;
+        int index = 0;
+        while (remaining > 0) {
+            final int toWrite = Math.min(remaining, chunkSize);
+            final ProcessImageRequest.Builder request = ProcessImageRequest.newBuilder()
+                    .setImageDataPng(ByteString.copyFrom(imageDataPng, index, toWrite));
+            if (index == 0) {
+                request.setSourceCode(source);
+            }
+            writer.onNext(request.build());
+            index += toWrite;
+            remaining -= toWrite;
+        }
+    }
+
+    private final class ProcessImageResponseReader implements StreamObserver<ProcessImageResponse> {
+        private final CompletableFuture<ProcessImageResponse> future;
+        private final ProcessImageResponse.Builder builder = ProcessImageResponse.newBuilder();
+        private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        private boolean isFirstMessage = true;
+
+        ProcessImageResponseReader(CompletableFuture<ProcessImageResponse> future) {
+            this.future = future;
+        }
+
+        @Override
+        public void onNext(ProcessImageResponse response) {
+            if (this.isFirstMessage) {
+                this.builder
+                        .setResultValue(response.getResultValue())
+                        .setMessage(response.getMessage());
+                this.isFirstMessage = false;
+            }
+            try {
+                response.getImageDataPng().writeTo(buffer);
+            } catch (IOException e) {
+                log.error("error receiving response from server", e);
+            }
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            future.completeExceptionally(throwable);
+        }
+
+        @Override
+        public void onCompleted() {
+            this.builder.setImageDataPng(ByteString.copyFrom(buffer.toByteArray()));
+            future.complete(this.builder.build());
+        }
     }
 
     @Override

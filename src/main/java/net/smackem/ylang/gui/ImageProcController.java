@@ -2,7 +2,11 @@ package net.smackem.ylang.gui;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -70,11 +74,6 @@ public class ImageProcController {
     }
 
     @FXML
-    private void sayHello() throws Exception {
-        this.imageProcService.sayHello("gurke");
-    }
-
-    @FXML
     private void loadImage(ActionEvent actionEvent) {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Image File");
@@ -90,12 +89,14 @@ public class ImageProcController {
         }
     }
 
-    private static byte[] serializeImagePng(Image image) throws Exception {
+    private static byte[] serializeImagePng(Image image) {
         final BufferedImage bimg = SwingFXUtils.fromFXImage(image, null);
 
         try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
             ImageIO.write(bimg, "png", stream);
             return stream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException(); // never happens
         }
     }
 
@@ -107,22 +108,23 @@ public class ImageProcController {
 
     @FXML
     private void processImage(ActionEvent actionEvent) {
-        try {
-            final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
-            final String sourceCode = this.codeEditor.getText();
-            final ProcessImageResult result = this.imageProcService.processImage(sourceCode, imageDataPng);
+        final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
+        final String sourceCode = this.codeEditor.getText();
+        this.imageProcService.processImage(sourceCode, imageDataPng).thenAccept(result -> {
             final byte[] resultImageDataPng = result.getImageDataPng();
 
-            if (resultImageDataPng.length > 0) {
-                try (final InputStream is = new ByteArrayInputStream(resultImageDataPng)) {
-                    this.targetImage.setValue(new Image(is));
+            Platform.runLater(() -> {
+                if (resultImageDataPng.length > 0) {
+                    try (final InputStream is = new ByteArrayInputStream(resultImageDataPng)) {
+                        this.targetImage.setValue(new Image(is));
+                    } catch (Exception e) {
+                        new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
+                    }
                 }
-            }
-            this.message.setValue(result.getMessage());
-            this.tabPane.getSelectionModel().select(targetTab);
-        } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
-        }
+                this.message.setValue(result.getMessage());
+                this.tabPane.getSelectionModel().select(targetTab);
+            });
+        });
     }
 
     @FXML
