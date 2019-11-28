@@ -61,14 +61,15 @@ public class RemoteImageProcService implements AutoCloseable {
 
     private void writeProcessImageRequest(String source, byte[] imageDataPng, StreamObserver<ProcessImageRequest> writer) {
         final int chunkSize = 64 * 1024;
-        int remaining = imageDataPng.length;
         int index = 0;
-        while (remaining > 0) {
+        boolean isFirstMessage = true;
+        for (int remaining = imageDataPng.length; remaining > 0 || isFirstMessage; ) {
             final int toWrite = Math.min(remaining, chunkSize);
             final ProcessImageRequest.Builder request = ProcessImageRequest.newBuilder()
                     .setImageDataPng(ByteString.copyFrom(imageDataPng, index, toWrite));
-            if (index == 0) {
+            if (isFirstMessage) {
                 request.setSourceCode(source);
+                isFirstMessage = false;
             }
             writer.onNext(request.build());
             index += toWrite;
