@@ -4,4 +4,5 @@ public interface ProcessImageResult {
     boolean isSuccess();
     String getMessage();
     byte[] getImageDataPng();
+    String getLogOutput();
 }

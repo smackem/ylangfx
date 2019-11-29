@@ -50,6 +50,9 @@
                   </StackPane>
                </ScrollPane>
             </Tab>
+            <Tab fx:id="logTab" text="Log">
+               <TextArea fx:id="logTextArea" editable="false" minHeight="200" />
+            </Tab>
          </TabPane>
          <CodeEditor fx:id="codeEditor" minHeight="100" />
       </SplitPane>

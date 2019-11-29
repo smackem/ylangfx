@@ -13,3 +13,8 @@
     -fx-font-family: 'Cascadia Code',monospace;
     -fx-font-size: 13pt;
 }
+
+#logTextArea {
+    -fx-font-family: 'Cascadia Code',monospace;
+    -fx-font-size: 12pt;
+}

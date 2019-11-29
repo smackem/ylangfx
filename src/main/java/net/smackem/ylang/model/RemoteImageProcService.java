@@ -56,6 +56,11 @@ public class RemoteImageProcService implements AutoCloseable {
             public byte[] getImageDataPng() {
                 return response.getImageDataPng().toByteArray();
             }
+
+            @Override
+            public String getLogOutput() {
+                return response.getLogOutput();
+            }
         });
     }
 
@@ -92,7 +97,8 @@ public class RemoteImageProcService implements AutoCloseable {
             if (this.isFirstMessage) {
                 this.builder
                         .setResultValue(response.getResultValue())
-                        .setMessage(response.getMessage());
+                        .setMessage(response.getMessage())
+                        .setLogOutput(response.getLogOutput());
                 this.isFirstMessage = false;
             }
             try {

@@ -30,10 +30,17 @@ public class ImageProcController {
     private final ReadOnlyObjectWrapper<Image> sourceImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyObjectWrapper<Image> targetImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
+    private final ReadOnlyStringWrapper logOutput = new ReadOnlyStringWrapper();
     private final RemoteImageProcService imageProcService;
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVEAS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+
+    @FXML
+    private TextArea logTextArea;
+
+    @FXML
+    private Tab logTab;
 
     @FXML
     private Tab targetTab;
@@ -66,6 +73,7 @@ public class ImageProcController {
         this.targetImageView.imageProperty().bind(this.targetImage);
         this.messageTextArea.visibleProperty().bind(this.message.isNotEmpty());
         this.messageTextArea.textProperty().bind(this.message);
+        this.logTextArea.textProperty().bind(this.logOutput);
     }
 
     @FXML
@@ -122,6 +130,7 @@ public class ImageProcController {
                     }
                 }
                 this.message.setValue(result.getMessage());
+                this.logOutput.setValue(result.getLogOutput());
                 this.tabPane.getSelectionModel().select(targetTab);
             });
         });
