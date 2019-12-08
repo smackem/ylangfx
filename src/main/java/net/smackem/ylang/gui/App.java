@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import net.smackem.ylang.model.RemoteImageProcService;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,10 +13,11 @@ import java.net.URL;
 /**
  * JavaFX App
  */
-public class App extends Application {
+public final class App extends Application {
     private static App INSTANCE;
     private Scene scene;
     private Stage stage;
+    private RemoteImageProcService imageProcService;
 
     public App() {
         if (INSTANCE != null) {
@@ -32,12 +34,25 @@ public class App extends Application {
         return this.stage;
     }
 
+    public RemoteImageProcService getImageProcService() {
+        return this.imageProcService;
+    }
+
     @Override
     public void start(Stage stage) throws IOException {
         this.scene = new Scene(loadFXML("imageproc"), 640, 480);
         this.stage = stage;
+        this.imageProcService = new RemoteImageProcService("localhost", 50051);
         stage.setScene(this.scene);
         stage.show();
+    }
+
+    @Override
+    public void stop() throws Exception {
+        if (this.imageProcService != null) {
+            this.imageProcService.close();
+        }
+        super.stop();
     }
 
     void setRoot(String fxml) throws IOException {

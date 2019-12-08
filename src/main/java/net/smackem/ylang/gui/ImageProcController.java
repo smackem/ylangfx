@@ -31,10 +31,13 @@ public class ImageProcController {
     private final ReadOnlyObjectWrapper<Image> targetImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
     private final ReadOnlyStringWrapper logOutput = new ReadOnlyStringWrapper();
-    private final RemoteImageProcService imageProcService;
+    private final ReadOnlyBooleanWrapper isRunning = new ReadOnlyBooleanWrapper();
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVEAS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+
+    @FXML
+    private Button runButton;
 
     @FXML
     private TextArea logTextArea;
@@ -63,10 +66,6 @@ public class ImageProcController {
     @FXML
     private Label messageTextArea;
 
-    public ImageProcController() {
-        this.imageProcService = new RemoteImageProcService("localhost", 50051);
-    }
-
     @FXML
     private void initialize() {
         this.sourceImageView.imageProperty().bind(this.sourceImage);
@@ -74,6 +73,7 @@ public class ImageProcController {
         this.messageTextArea.visibleProperty().bind(this.message.isNotEmpty());
         this.messageTextArea.textProperty().bind(this.message);
         this.logTextArea.textProperty().bind(this.logOutput);
+        this.runButton.disableProperty().bind(this.isRunning);
     }
 
     @FXML
@@ -116,9 +116,10 @@ public class ImageProcController {
 
     @FXML
     private void processImage(ActionEvent actionEvent) {
+        this.isRunning.setValue(true);
         final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
         final String sourceCode = this.codeEditor.getText();
-        this.imageProcService.processImage(sourceCode, imageDataPng).thenAccept(result -> {
+        App.getInstance().getImageProcService().processImage(sourceCode, imageDataPng).thenAccept(result -> {
             final byte[] resultImageDataPng = result.getImageDataPng();
 
             Platform.runLater(() -> {
@@ -132,6 +133,7 @@ public class ImageProcController {
                 this.message.setValue(result.getMessage());
                 this.logOutput.setValue(result.getLogOutput());
                 this.tabPane.getSelectionModel().select(targetTab);
+                this.isRunning.setValue(false);
             });
         });
     }
