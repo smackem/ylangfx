@@ -1,6 +1,7 @@
 package net.smackem.ylang.gui;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -9,15 +10,23 @@ import net.smackem.ylang.model.RemoteImageProcService;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.Executor;
 
 /**
  * JavaFX App
  */
 public final class App extends Application {
-    private static App INSTANCE;
+    public static final Executor UI_EXECUTOR = runnable -> {
+        if (Platform.isFxApplicationThread()) {
+            runnable.run();
+        } else {
+            Platform.runLater(runnable);
+        }
+    };
     private Scene scene;
     private Stage stage;
     private RemoteImageProcService imageProcService;
+    private static App INSTANCE;
 
     public App() {
         if (INSTANCE != null) {
@@ -42,7 +51,7 @@ public final class App extends Application {
     public void start(Stage stage) throws IOException {
         this.scene = new Scene(loadFXML("imageproc"), 640, 480);
         this.stage = stage;
-        this.imageProcService = new RemoteImageProcService("localhost", 50051);
+        this.imageProcService = new RemoteImageProcService("localhost", 50051, UI_EXECUTOR);
         stage.setScene(this.scene);
         stage.show();
     }

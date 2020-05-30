@@ -14,16 +14,20 @@ import java.io.IOException;
 import java.util.concurrent.*;
 
 public class RemoteImageProcService implements AutoCloseable {
+    private static final Logger log = LoggerFactory.getLogger(RemoteImageProcService.class);
     private final ImageProcGrpc.ImageProcStub stub;
     private final ManagedChannel channel;
-    private final Logger log = LoggerFactory.getLogger(RemoteImageProcService.class);
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ExecutorService rpcExecutor;
+    private final Executor callbackExecutor;
 
-    public RemoteImageProcService(String host, int port) {
+    public RemoteImageProcService(String host, int port, Executor executor) {
+        this.rpcExecutor = Executors.newSingleThreadExecutor();
+        this.callbackExecutor = executor;
         this.channel = ManagedChannelBuilder.forAddress(host, port)
                 // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
                 // needing certificates.
                 .usePlaintext()
+                .executor(this.rpcExecutor)
                 .build();
         this.stub = ImageProcGrpc.newStub(channel);
     }
@@ -33,7 +37,7 @@ public class RemoteImageProcService implements AutoCloseable {
         final StreamObserver<ProcessImageRequest> writer =
             this.stub.processImage(new ProcessImageResponseReader(future));
 
-        this.executor.submit(() -> {
+        this.rpcExecutor.submit(() -> {
             try {
                 writeProcessImageRequest(source, imageDataPng, writer);
             } catch (Throwable e) {
@@ -64,7 +68,7 @@ public class RemoteImageProcService implements AutoCloseable {
             public String getLogOutput() {
                 return response.getLogOutput();
             }
-        }, this.executor);
+        }, this.callbackExecutor);
     }
 
     private void writeProcessImageRequest(String source, byte[] imageDataPng, StreamObserver<ProcessImageRequest> writer) {
@@ -126,16 +130,16 @@ public class RemoteImageProcService implements AutoCloseable {
     @Override
     public void close() throws Exception {
         this.channel.shutdownNow();
-        this.executor.shutdown();
+        this.rpcExecutor.shutdown();
         try {
-            if (this.executor.awaitTermination(60, TimeUnit.SECONDS) == false) {
-                this.executor.shutdownNow();
-                if (this.executor.awaitTermination(60, TimeUnit.SECONDS) == false) {
+            if (this.rpcExecutor.awaitTermination(60, TimeUnit.SECONDS) == false) {
+                this.rpcExecutor.shutdownNow();
+                if (this.rpcExecutor.awaitTermination(60, TimeUnit.SECONDS) == false) {
                     log.error("Pool did not terminate");
                 }
             }
         } catch (InterruptedException ie) {
-            this.executor.shutdownNow();
+            this.rpcExecutor.shutdownNow();
             Thread.currentThread().interrupt();
         }
     }

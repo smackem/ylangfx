@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 import javafx.application.Platform;
@@ -122,19 +123,17 @@ public class ImageProcController {
         App.getInstance().getImageProcService().processImage(sourceCode, imageDataPng).thenAccept(result -> {
             final byte[] resultImageDataPng = result.getImageDataPng();
 
-            Platform.runLater(() -> {
-                if (resultImageDataPng.length > 0) {
-                    try (final InputStream is = new ByteArrayInputStream(resultImageDataPng)) {
-                        this.targetImage.setValue(new Image(is));
-                    } catch (Exception e) {
-                        new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
-                    }
+            if (resultImageDataPng.length > 0) {
+                try (final InputStream is = new ByteArrayInputStream(resultImageDataPng)) {
+                    this.targetImage.setValue(new Image(is));
+                } catch (Exception e) {
+                    new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
                 }
-                this.message.setValue(result.getMessage());
-                this.logOutput.setValue(result.getLogOutput());
-                this.tabPane.getSelectionModel().select(targetTab);
-                this.isRunning.setValue(false);
-            });
+            }
+            this.message.setValue(result.getMessage());
+            this.logOutput.setValue(result.getLogOutput());
+            this.tabPane.getSelectionModel().select(targetTab);
+            this.isRunning.setValue(false);
         });
     }
 
