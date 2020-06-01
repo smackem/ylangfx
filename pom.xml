@@ -7,7 +7,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
-        <project.runtime.mainClass>net.smackem.ylang.gui.App</project.runtime.mainClass>
+        <project.runtime.mainClass>net.smackem.ylang.gui.JarMain</project.runtime.mainClass>
     </properties>
     <dependencies>
         <dependency>
@@ -95,7 +95,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
+                <version>3.1.1</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -116,6 +116,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
                 <configuration>
                     <archive>
                         <manifest>
