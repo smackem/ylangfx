@@ -26,9 +26,8 @@
    <top>
       <HBox spacing="4" style="-fx-padding: 4,4,4,4">
          <Button text="Switch to Secondary View" onAction="#switchToSecondary" />
-         <Button text="Say Hello" onAction="#sayHello" />
          <Button text="Load Image..." onAction="#loadImage" />
-         <Button text="Run" onAction="#processImage" />
+         <Button text="Run" onAction="#processImage" fx:id="runButton" />
          <Button text="Take" onAction="#takeImage" />
          <Button text="Save As..." onAction="#saveImageAs" />
       </HBox>
@@ -50,6 +49,9 @@
                             StackPane.alignment="TOP_LEFT" />
                   </StackPane>
                </ScrollPane>
+            </Tab>
+            <Tab fx:id="logTab" text="Log">
+               <TextArea fx:id="logTextArea" editable="false" minHeight="200" />
             </Tab>
          </TabPane>
          <CodeEditor fx:id="codeEditor" minHeight="100" />

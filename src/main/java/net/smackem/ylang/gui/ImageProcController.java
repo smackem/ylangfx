@@ -2,7 +2,12 @@ package net.smackem.ylang.gui;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Future;
 
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -26,10 +31,20 @@ public class ImageProcController {
     private final ReadOnlyObjectWrapper<Image> sourceImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyObjectWrapper<Image> targetImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
-    private final RemoteImageProcService imageProcService;
+    private final ReadOnlyStringWrapper logOutput = new ReadOnlyStringWrapper();
+    private final ReadOnlyBooleanWrapper isRunning = new ReadOnlyBooleanWrapper();
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVEAS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+
+    @FXML
+    private Button runButton;
+
+    @FXML
+    private TextArea logTextArea;
+
+    @FXML
+    private Tab logTab;
 
     @FXML
     private Tab targetTab;
@@ -52,26 +67,19 @@ public class ImageProcController {
     @FXML
     private Label messageTextArea;
 
-    public ImageProcController() {
-        this.imageProcService = new RemoteImageProcService("localhost", 50051);
-    }
-
     @FXML
     private void initialize() {
         this.sourceImageView.imageProperty().bind(this.sourceImage);
         this.targetImageView.imageProperty().bind(this.targetImage);
         this.messageTextArea.visibleProperty().bind(this.message.isNotEmpty());
         this.messageTextArea.textProperty().bind(this.message);
+        this.logTextArea.textProperty().bind(this.logOutput);
+        this.runButton.disableProperty().bind(this.isRunning);
     }
 
     @FXML
     private void switchToSecondary() throws IOException {
         App.getInstance().setRoot("secondary");
-    }
-
-    @FXML
-    private void sayHello() throws Exception {
-        this.imageProcService.sayHello("gurke");
     }
 
     @FXML
@@ -90,12 +98,14 @@ public class ImageProcController {
         }
     }
 
-    private static byte[] serializeImagePng(Image image) throws Exception {
+    private static byte[] serializeImagePng(Image image) {
         final BufferedImage bimg = SwingFXUtils.fromFXImage(image, null);
 
         try (final ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
             ImageIO.write(bimg, "png", stream);
             return stream.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException(); // never happens
         }
     }
 
@@ -107,22 +117,24 @@ public class ImageProcController {
 
     @FXML
     private void processImage(ActionEvent actionEvent) {
-        try {
-            final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
-            final String sourceCode = this.codeEditor.getText();
-            final ProcessImageResult result = this.imageProcService.processImage(sourceCode, imageDataPng);
+        this.isRunning.setValue(true);
+        final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
+        final String sourceCode = this.codeEditor.getText();
+        App.getInstance().getImageProcService().processImage(sourceCode, imageDataPng).thenAccept(result -> {
             final byte[] resultImageDataPng = result.getImageDataPng();
 
             if (resultImageDataPng.length > 0) {
                 try (final InputStream is = new ByteArrayInputStream(resultImageDataPng)) {
                     this.targetImage.setValue(new Image(is));
+                } catch (Exception e) {
+                    new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
                 }
             }
             this.message.setValue(result.getMessage());
+            this.logOutput.setValue(result.getLogOutput());
             this.tabPane.getSelectionModel().select(targetTab);
-        } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
-        }
+            this.isRunning.setValue(false);
+        });
     }
 
     @FXML
