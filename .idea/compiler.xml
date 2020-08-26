@@ -6,8 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="ylangfx" />
+        <module name="ylangfx-gui" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ylangfx" target="14" />
+      <module name="ylangfx-gui" target="14" />
+    </bytecodeTargetLevel>
   </component>
 </project>
