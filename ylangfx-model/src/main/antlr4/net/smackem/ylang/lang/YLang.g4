@@ -1,0 +1,5 @@
+grammar YLang;
+
+program
+    : 'YLANG'
+    ;

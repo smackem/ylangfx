@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ylangfx.iml" filepath="$PROJECT_DIR$/ylangfx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/ylangfx.iml" filepath="$PROJECT_DIR$/.idea/ylangfx.iml" />
       <module fileurl="file://$PROJECT_DIR$/ylangfx-gui/ylangfx-gui.iml" filepath="$PROJECT_DIR$/ylangfx-gui/ylangfx-gui.iml" />
       <module fileurl="file://$PROJECT_DIR$/ylangfx-model/ylangfx-model.iml" filepath="$PROJECT_DIR$/ylangfx-model/ylangfx-model.iml" />
     </modules>

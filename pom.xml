@@ -77,6 +77,11 @@
                 <artifactId>richtextfx</artifactId>
                 <version>0.10.2</version>
             </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>4.7.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
@@ -113,6 +118,11 @@
                     <groupId>org.xolstice.maven.plugins</groupId>
                     <artifactId>protobuf-maven-plugin</artifactId>
                     <version>0.6.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4-maven-plugin</artifactId>
+                    <version>4.7.2</version>
                 </plugin>
             </plugins>
         </pluginManagement>

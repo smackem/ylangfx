@@ -13,7 +13,7 @@
     <bytecodeTargetLevel>
       <module name="ylangfx" target="14" />
       <module name="ylangfx-gui" target="14" />
-      <module name="ylangfx-model" target="1.7" />
+      <module name="ylangfx-model" target="14" />
     </bytecodeTargetLevel>
   </component>
 </project>
