@@ -9,6 +9,7 @@ statement
     | pixelStmt
     | ifStmt
     | forStmt
+    | whileStmt
     ) ';'?
     ;
 
@@ -39,23 +40,77 @@ block
     : '{' statement* '}'
     ;
 
-expr
-    : '@'? (number
-    | Ident)
-    ;
-
 arguments
     : expr (',' expr)*
     ;
 
 forStmt
     : 'for' Ident 'in' expr block
-    | 'for' Ident 'in' range expr block
+    | 'for' Ident 'in' range block
     ;
 
 range
     : number '..' number ('..' number)?
     ;
+
+whileStmt
+    : 'while' expr block
+    ;
+
+expr
+    : condition ('?' term ':' expr)?
+    ;
+
+condition
+    : comparison (conditionOperator comparison)?
+    ;
+
+conditionOperator
+    : Or
+    | And
+    ;
+
+comparison
+    : term (comparator term)*
+    ;
+
+comparator
+    : Eq
+    | Lt
+    | Le
+    | Gt
+    | Ge
+    | Ne
+    ;
+
+term
+    : atom (termOperator atom)*
+    ;
+
+termOperator
+    : Plus
+    | Minus
+    ;
+
+atom
+    : Number
+    | Ident
+    ;
+
+Or      : 'or';
+And     : 'and';
+Plus    : '+';
+Minus   : '-';
+Times   : '*';
+Div     : '/';
+Mod     : '%';
+Lt      : '<';
+Le      : '<=';
+Gt      : '>';
+Ge      : '>=';
+Eq      : '==';
+Ne      : '!=';
+Beq     : '=';
 
 number
     : ('+' | '-')? Number
