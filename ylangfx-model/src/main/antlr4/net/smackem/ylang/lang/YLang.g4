@@ -62,16 +62,16 @@ expr
     ;
 
 condition
-    : comparison (conditionOperator comparison)?
+    : comparison (conditionOp comparison)?
     ;
 
-conditionOperator
+conditionOp
     : Or
     | And
     ;
 
 comparison
-    : term (comparator term)*
+    : tuple (comparator tuple)*
     ;
 
 comparator
@@ -81,20 +81,53 @@ comparator
     | Gt
     | Ge
     | Ne
+    | In
+    ;
+
+tuple
+    : term (Pair term)?
     ;
 
 term
-    : atom (termOperator atom)*
+    : product (termOp product)*
     ;
 
-termOperator
+termOp
     : Plus
     | Minus
+    | Concat
+    ;
+
+product
+    : molecule (productOp molecule)*
+    ;
+
+productOp
+    : Times
+    | Div
+    | Mod
+    ;
+
+molecule
+    : atomPrefix? atom atomSuffix*
+    ;
+
+atomPrefix
+    : Minus
+    | Not
+    ;
+
+atomSuffix
+    : Dot Ident
+    | '[' expr ']'
+    | '[' range ']'
     ;
 
 atom
-    : Number
+    : number
     | Ident
+    | String
+    | '(' expr ')'
     ;
 
 Or      : 'or';
@@ -111,6 +144,11 @@ Ge      : '>=';
 Eq      : '==';
 Ne      : '!=';
 Beq     : '=';
+Concat  : '::';
+Pair    : ';';
+In      : 'in';
+Not     : 'not';
+Dot     : '.';
 
 number
     : ('+' | '-')? Number
@@ -122,6 +160,10 @@ Ident
 
 Number
     : [0-9]+ ('.' [0-9]+)?
+    ;
+
+String
+    : '"' ~["\\\r\n]* '"'
     ;
 
 Comment
