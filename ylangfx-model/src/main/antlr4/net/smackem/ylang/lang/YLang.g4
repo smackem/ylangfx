@@ -5,23 +5,28 @@ program
     ;
 
 statement
-    : (identStmt
+    : (assignStmt
     | pixelStmt
+    | invocationStmt
     | ifStmt
     | forStmt
     | whileStmt
+    | logStmt
     ) ';'?
     ;
 
-identStmt
-    : Ident ':=' expr
-    | Ident '=' expr
-    | Ident '[' expr ']' '=' expr
-    | Ident '(' arguments? ')'
+assignStmt
+    : Ident Decleq expr
+    | Ident Beq expr
+    | atom atomSuffix+ Beq expr
     ;
 
 pixelStmt
-    : '@' expr '=' expr
+    : At expr Beq expr
+    ;
+
+invocationStmt
+    : atom atomSuffix* invocationSuffix
     ;
 
 ifStmt
@@ -55,6 +60,10 @@ range
 
 whileStmt
     : 'while' expr block
+    ;
+
+logStmt
+    : 'log' '(' arguments ')'
     ;
 
 expr
@@ -115,19 +124,59 @@ molecule
 atomPrefix
     : Minus
     | Not
+    | At
     ;
 
 atomSuffix
+    : memberSuffix
+    | indexSuffix
+    | invocationSuffix
+    ;
+
+memberSuffix
     : Dot Ident
-    | '[' expr ']'
-    | '[' range ']'
+    ;
+
+indexSuffix
+    : '[' (expr | range) ']'
+    ;
+
+invocationSuffix
+    : '(' arguments? ')'
     ;
 
 atom
     : number
     | Ident
     | String
+    | Color
+    | True
+    | False
+    | Nil
+    | kernel
+    | map
+    | list
     | '(' expr ')'
+    ;
+
+kernel
+    : '|' number+ '|'
+    ;
+
+map
+    : '{' mapEntries? '}'
+    ;
+
+mapEntries
+    : mapEntry (',' mapEntry)*
+    ;
+
+mapEntry
+    : (Ident | String) ':' expr
+    ;
+
+list
+    : '[' arguments? ']'
     ;
 
 Or      : 'or';
@@ -144,11 +193,16 @@ Ge      : '>=';
 Eq      : '==';
 Ne      : '!=';
 Beq     : '=';
+Decleq  : ':=';
 Concat  : '::';
 Pair    : ';';
 In      : 'in';
 Not     : 'not';
 Dot     : '.';
+At      : '@';
+True    : 'true';
+False   : 'false';
+Nil     : 'nil';
 
 number
     : ('+' | '-')? Number
@@ -160,6 +214,14 @@ Ident
 
 Number
     : [0-9]+ ('.' [0-9]+)?
+    ;
+
+Color
+    : '#' HexLiteral+ (':' HexLiteral HexLiteral)?
+    ;
+
+HexLiteral
+    : ('a' .. 'f' | 'A' .. 'F' | '0' .. '9')
     ;
 
 String
