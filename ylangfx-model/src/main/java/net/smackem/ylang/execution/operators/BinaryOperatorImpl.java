@@ -1,5 +1,7 @@
-package net.smackem.ylang.execution;
+package net.smackem.ylang.execution.operators;
 
+import net.smackem.ylang.execution.Context;
+import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.runtime.Value;
 import net.smackem.ylang.runtime.ValueType;
 
@@ -13,8 +15,28 @@ public abstract class BinaryOperatorImpl {
 
     void implement(ValueType left, ValueType right, Func op) {
         this.functions[left.index()][right.index()] = op;
-        if (this.commutative) {
+        if (this.commutative && left != right) {
             this.functions[right.index()][right.index()] = op.swap();
+        }
+    }
+
+    void implementLeft(ValueType left, Func op) {
+        if (this.commutative) {
+            implementRight(left, op.swap());
+        }
+        final int leftIndex = left.index();
+        for (final var right : ValueType.values()) {
+            this.functions[leftIndex][right.index()] = op;
+        }
+    }
+
+    void implementRight(ValueType right, Func op) {
+        if (this.commutative) {
+            implementLeft(right, op.swap());
+        }
+        final int rightIndex = right.index();
+        for (final var left : ValueType.values()) {
+            this.functions[left.index()][rightIndex] = op;
         }
     }
 

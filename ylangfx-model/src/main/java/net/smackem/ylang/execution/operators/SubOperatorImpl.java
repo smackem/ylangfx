@@ -1,7 +1,8 @@
-package net.smackem.ylang.execution;
+package net.smackem.ylang.execution.operators;
 
-import net.smackem.ylang.runtime.NumberValue;
-import net.smackem.ylang.runtime.PointValue;
+import net.smackem.ylang.execution.Context;
+import net.smackem.ylang.runtime.NumberVal;
+import net.smackem.ylang.runtime.PointVal;
 import net.smackem.ylang.runtime.Value;
 import net.smackem.ylang.runtime.ValueType;
 
@@ -14,16 +15,16 @@ public class SubOperatorImpl extends BinaryOperatorImpl {
     }
 
     private static Value numberMinusNumber(Context ctx, Value l, Value r) {
-        final float ln = ((NumberValue) l).value();
-        final float rn = ((NumberValue) r).value();
-        return new NumberValue(ln - rn);
+        final float ln = ((NumberVal) l).value();
+        final float rn = ((NumberVal) r).value();
+        return new NumberVal(ln - rn);
     }
 
     private static Value pointMinusNumber(Context ctx, Value l, Value r) {
-        return ((PointValue) l).offset(-((NumberValue) r).value());
+        return ((PointVal) l).offset(-((NumberVal) r).value());
     }
 
     private static Value pointMinusPoint(Context ctx, Value l, Value r) {
-        return ((PointValue) l).translate(((PointValue) r).negate());
+        return ((PointVal) l).translate(((PointVal) r).negate());
     }
 }

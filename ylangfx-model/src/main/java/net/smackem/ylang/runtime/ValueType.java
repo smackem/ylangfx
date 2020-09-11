@@ -10,9 +10,13 @@ public enum ValueType {
     POLYGON(6),
     KERNEL(7),
     LIST(8),
-    MAP(9);
+    MAP(9),
+    IMAGE(10),
+    BOOLEAN(11),
+    STRING(12),
+    NIL(13);
 
-    public static final int MAX_INDEX = 10;
+    public static final int MAX_INDEX = 14;
 
     private final int index;
 

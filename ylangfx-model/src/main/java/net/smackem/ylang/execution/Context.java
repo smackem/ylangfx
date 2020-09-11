@@ -1,6 +1,6 @@
 package net.smackem.ylang.execution;
 
-class Context {
+public class Context {
     Context() {
     }
 }
