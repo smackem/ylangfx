@@ -1,5 +1,7 @@
 package net.smackem.ylang.runtime;
 
+import java.util.Objects;
+
 public class RgbVal extends Value {
     private final float r, g, b, a;
 
@@ -57,5 +59,25 @@ public class RgbVal extends Value {
 
     public RgbVal multiplyWith(RgbVal other) {
         return new RgbVal(r01() * other.r, g01() * other.g, b01() * other.b, this.a);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final RgbVal rgbVal = (RgbVal) o;
+        return Float.compare(rgbVal.r, r) == 0 &&
+               Float.compare(rgbVal.g, g) == 0 &&
+               Float.compare(rgbVal.b, b) == 0 &&
+               Float.compare(rgbVal.a, a) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(r, g, b, a);
     }
 }
