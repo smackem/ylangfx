@@ -6,6 +6,8 @@ import java.util.Objects;
 public class RectVal extends Value implements Iterable<Value> {
     private final float x, y, width, height;
 
+    public static final RectVal EMPTY = new RectVal(0f, 0f, 0f, 0f);
+
     public RectVal(float x, float y, float width, float height) {
         super(ValueType.RECT);
         this.x = x;
@@ -66,6 +68,11 @@ public class RectVal extends Value implements Iterable<Value> {
     @Override
     public Iterator<Value> iterator() {
         return new PointIterator();
+    }
+
+    public boolean contains(PointVal pt) {
+        return pt.x() >= this.x && pt.x() < this.right() &&
+               pt.y() >= this.y && pt.y() < this.bottom();
     }
 
     private class PointIterator implements Iterator<Value> {

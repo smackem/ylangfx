@@ -16,7 +16,7 @@ public abstract class BinaryOperatorImpl {
     void implement(ValueType left, ValueType right, Func op) {
         this.functions[left.index()][right.index()] = op;
         if (this.commutative && left != right) {
-            this.functions[right.index()][right.index()] = op.swap();
+            this.functions[right.index()][left.index()] = op.swap();
         }
     }
 
@@ -43,10 +43,10 @@ public abstract class BinaryOperatorImpl {
     public Value invoke(Context ctx, Value l, Value r) throws MissingOverloadException {
         final var func = this.functions[l.type().index()][r.type().index()];
         if (func == null) {
-            throw new MissingOverloadException("%s is not implemented for %s and %s".formatted(
+            throw new MissingOverloadException(String.format("%s is not implemented for %s and %s",
                     getClass().getName(), l.type(), r.type()));
         }
-        return this.functions[l.type().index()][r.type().index()].invoke(ctx, l, r);
+        return func.invoke(ctx, l, r);
     }
 
     @FunctionalInterface

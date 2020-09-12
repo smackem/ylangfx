@@ -61,6 +61,10 @@ public class RgbVal extends Value {
         return new RgbVal(r01() * other.r, g01() * other.g, b01() * other.b, this.a);
     }
 
+    public RgbVal invert() {
+        return new RgbVal(255f - this.r, 255f - this.g, 255f - this.b, this.a);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
