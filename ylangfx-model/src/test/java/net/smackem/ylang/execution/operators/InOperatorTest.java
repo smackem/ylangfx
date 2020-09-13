@@ -12,8 +12,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class InOperatorTest {
     @Test
     public void pointInRect() throws MissingOverloadException {
+        final RectVal rect = new RectVal(0, 0, 20, 20);
         assertThat(BinaryOperator.IN.invoke(Context.EMPTY,
-                new PointVal(10f, 10f), new RectVal(0, 0, 20, 20)))
+                new PointVal(10f, 10f), rect))
                 .isEqualTo(BoolVal.TRUE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY,
+                new PointVal(19, 19), rect))
+                .isEqualTo(BoolVal.TRUE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY,
+                new PointVal(20, 19), rect))
+                .isEqualTo(BoolVal.FALSE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY,
+                new PointVal(19, 20), rect))
+                .isEqualTo(BoolVal.FALSE);
     }
 }
