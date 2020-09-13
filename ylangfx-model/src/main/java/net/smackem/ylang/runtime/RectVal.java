@@ -94,4 +94,14 @@ public class RectVal extends Value implements Iterable<Value> {
             return pt;
         }
     }
+
+    @Override
+    public String toString() {
+        return "RectVal{" +
+               "x=" + x +
+               ", y=" + y +
+               ", width=" + width +
+               ", height=" + height +
+               '}';
+    }
 }

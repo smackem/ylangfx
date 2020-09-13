@@ -5,6 +5,8 @@ import java.util.Objects;
 public class StringVal extends Value {
     private final String value;
 
+    public static final StringVal EMPTY = new StringVal("");
+
     public StringVal(String value) {
         super(ValueType.STRING);
         this.value = value;
@@ -29,5 +31,12 @@ public class StringVal extends Value {
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+
+    @Override
+    public String toString() {
+        return "StringVal{" +
+               "value='" + value + '\'' +
+               '}';
     }
 }

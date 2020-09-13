@@ -57,4 +57,12 @@ public final class PointVal extends Value {
     public int hashCode() {
         return Objects.hash(this.x, this.y);
     }
+
+    @Override
+    public String toString() {
+        return "PointVal{" +
+               "x=" + x +
+               ", y=" + y +
+               '}';
+    }
 }

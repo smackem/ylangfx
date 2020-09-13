@@ -8,8 +8,8 @@ public class InOperatorImpl extends BinaryOperatorImpl {
         super(false);
         implement(ValueType.POINT, ValueType.RECT, InOperatorImpl::pointInRect);
         implement(ValueType.POINT, ValueType.IMAGE, InOperatorImpl::pointInImage);
-        // numberInKernel
-        // anyInList
+        implement(ValueType.NUMBER, ValueType.KERNEL, InOperatorImpl::numberInKernel);
+        implementRight(ValueType.LIST, InOperatorImpl::anyInList);
         // circleInRect
         // rectInCircle
         // polygonInRect
@@ -25,5 +25,16 @@ public class InOperatorImpl extends BinaryOperatorImpl {
         final var pt = (PointVal) l;
         return BoolVal.of(pt.x() >= 0 && pt.x() < image.width() &&
                           pt.y() >= 0 && pt.y() < image.height());
+    }
+
+    private static Value numberInKernel(Context ctx, Value l, Value r) {
+        final var n = (NumberVal) l;
+        final var kernel = (KernelVal) r;
+        return BoolVal.of(kernel.contains(n));
+    }
+
+    private static Value anyInList(Context ctx, Value l, Value r) {
+        final var list = (ListVal) r;
+        return BoolVal.of(list.contains(l));
     }
 }

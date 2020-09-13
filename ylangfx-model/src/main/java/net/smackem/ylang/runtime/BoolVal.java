@@ -35,4 +35,11 @@ public class BoolVal extends Value {
     public int hashCode() {
         return this.value ? 1 : 0;
     }
+
+    @Override
+    public String toString() {
+        return "BoolVal{" +
+               "value=" + value +
+               '}';
+    }
 }

@@ -15,10 +15,10 @@ class NotOperatorImpl extends UnaryOperatorImpl {
     }
 
     private static Value notNumber(Context ctx, Value v) {
-        return BoolVal.of(((NumberVal) v).value() != 0f);
+        return BoolVal.of(((NumberVal) v).value() == 0f);
     }
 
     private static Value notString(Context ctx, Value v) {
-        return BoolVal.of(((StringVal) v).isEmpty() == false);
+        return BoolVal.of(((StringVal) v).isEmpty());
     }
 }

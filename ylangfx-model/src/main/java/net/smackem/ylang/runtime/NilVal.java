@@ -6,4 +6,9 @@ public class NilVal extends Value {
     }
 
     public static final NilVal INSTANCE = new NilVal();
+
+    @Override
+    public String toString() {
+        return "NilVal{}";
+    }
 }

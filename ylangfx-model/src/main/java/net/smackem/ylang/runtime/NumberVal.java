@@ -32,4 +32,11 @@ public final class NumberVal extends Value {
     public int hashCode() {
         return this.value != +0.0f ? Float.floatToIntBits(this.value) : 0;
     }
+
+    @Override
+    public String toString() {
+        return "NumberVal{" +
+               "value=" + value +
+               '}';
+    }
 }

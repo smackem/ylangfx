@@ -23,4 +23,12 @@ public class ImageVal extends Value {
     public void setPixel(int x, int y, RgbVal rgb) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public String toString() {
+        return "ImageVal{" +
+               "width=" + width +
+               ", height=" + height +
+               '}';
+    }
 }

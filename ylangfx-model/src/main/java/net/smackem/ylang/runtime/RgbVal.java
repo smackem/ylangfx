@@ -5,6 +5,11 @@ import java.util.Objects;
 public class RgbVal extends Value {
     private final float r, g, b, a;
 
+    /**
+     * Transparent Black
+     */
+    public static final RgbVal EMPTY = new RgbVal(0, 0, 0, 0);
+
     public RgbVal(float r, float g, float b, float a) {
         super(ValueType.RGB);
         this.r = r;
@@ -83,5 +88,15 @@ public class RgbVal extends Value {
     @Override
     public int hashCode() {
         return Objects.hash(r, g, b, a);
+    }
+
+    @Override
+    public String toString() {
+        return "RgbVal{" +
+               "r=" + r +
+               ", g=" + g +
+               ", b=" + b +
+               ", a=" + a +
+               '}';
     }
 }
