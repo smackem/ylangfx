@@ -1,9 +1,22 @@
 package net.smackem.ylang.execution;
 
-public class Context {
-    private int dummy;
-    public static final Context EMPTY = new Context();
+import net.smackem.ylang.runtime.ImageVal;
 
-    Context() {
+public final class Context {
+    private final Stack stack = new Stack();
+    private final ImageVal inputImage;
+
+    public static final Context EMPTY = new Context(null);
+
+    Context(ImageVal inputImage) {
+        this.inputImage = inputImage;
+    }
+
+    Stack stack() {
+        return this.stack;
+    }
+
+    public ImageVal inputImage() {
+        return this.inputImage;
     }
 }

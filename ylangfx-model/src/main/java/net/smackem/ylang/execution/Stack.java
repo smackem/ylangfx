@@ -4,7 +4,7 @@ import net.smackem.ylang.runtime.Value;
 
 import java.util.Objects;
 
-public class Stack {
+class Stack {
     private final Value[] array = new Value[256];
     private int count = 0;
 

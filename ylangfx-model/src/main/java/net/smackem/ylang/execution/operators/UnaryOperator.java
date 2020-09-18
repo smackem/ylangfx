@@ -6,7 +6,8 @@ import net.smackem.ylang.runtime.Value;
 
 public enum UnaryOperator {
     NOT(new NotOperatorImpl()),
-    NEG(new NegOperatorImpl());
+    NEG(new NegOperatorImpl()),
+    BOOL(new BoolOperatorImpl());
 
     private final UnaryOperatorImpl impl;
 
