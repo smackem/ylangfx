@@ -2,10 +2,10 @@ package net.smackem.ylang.execution.operators;
 
 import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.execution.MissingOverloadException;
-import net.smackem.ylang.runtime.BoolVal;
-import net.smackem.ylang.runtime.PointVal;
-import net.smackem.ylang.runtime.RectVal;
+import net.smackem.ylang.runtime.*;
 import org.junit.Test;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,6 +24,45 @@ public class InOperatorTest {
                 .isEqualTo(BoolVal.FALSE);
         assertThat(BinaryOperator.IN.invoke(Context.EMPTY,
                 new PointVal(19, 20), rect))
+                .isEqualTo(BoolVal.FALSE);
+    }
+
+    @Test
+    public void anyInList() throws MissingOverloadException {
+        final ListVal list = new ListVal(List.of(
+                new NumberVal(100),
+                new RectVal(1, 1, 10, 10),
+                BoolVal.TRUE));
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, new NumberVal(100), list))
+                .isEqualTo(BoolVal.TRUE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, new RectVal(1, 1, 10, 10), list))
+                .isEqualTo(BoolVal.TRUE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, BoolVal.TRUE, list))
+                .isEqualTo(BoolVal.TRUE);
+
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, BoolVal.FALSE, list))
+                .isEqualTo(BoolVal.FALSE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, new NumberVal(1244), list))
+                .isEqualTo(BoolVal.FALSE);
+    }
+
+    @Test
+    public void numberInKernel() throws MissingOverloadException {
+        final KernelVal kernel = new KernelVal(List.of(
+                new NumberVal(1),
+                new NumberVal(2),
+                new NumberVal(-2),
+                new NumberVal(-1)));
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, new NumberVal(1), kernel))
+                .isEqualTo(BoolVal.TRUE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, new NumberVal(-1), kernel))
+                .isEqualTo(BoolVal.TRUE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, new NumberVal(2), kernel))
+                .isEqualTo(BoolVal.TRUE);
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, new NumberVal(-2), kernel))
+                .isEqualTo(BoolVal.TRUE);
+
+        assertThat(BinaryOperator.IN.invoke(Context.EMPTY, new NumberVal(123), kernel))
                 .isEqualTo(BoolVal.FALSE);
     }
 }

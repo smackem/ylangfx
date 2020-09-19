@@ -24,19 +24,25 @@ public class Interpreter {
 
     public void execute() throws StackException, MissingOverloadException {
         int pc = 0;
+        int stackFrameIndex = 0;
         final int codeSize = this.code.size();
         final var stack = this.ctx.stack();
-        while (pc <= codeSize) {
+        while (pc < codeSize) {
             final Instruction instr = this.code.get(pc);
             boolean branch = false;
             switch (instr.opCode()) {
-                case ADD -> {
-                    final var r = stack.pop();
-                    stack.push(BinaryOperator.ADD.invoke(this.ctx, stack.pop(), r));
-                }
+                case LD_VAL -> stack.push(instr.valueArg());
+                case LD_GLB -> stack.push(stack.get(instr.intArg()));
+                case ST_GLB -> stack.set(instr.intArg(), stack.pop());
+                case LD_LOC -> stack.push(stack.get(instr.intArg() + stackFrameIndex));
+                case ST_LOC -> stack.set(instr.intArg() + stackFrameIndex, stack.pop());
                 case EQ -> {
                     final var r = stack.pop();
                     stack.push(BoolVal.of(stack.pop().equals(r)));
+                }
+                case NEQ -> {
+                    final var r = stack.pop();
+                    stack.push(BoolVal.of(stack.pop().equals(r) == false));
                 }
                 case GE -> {
                     final var r = stack.pop();
@@ -59,14 +65,18 @@ public class Interpreter {
                     stack.push(BoolVal.of(cmp.value() < 0));
                 }
                 case OR -> {
-                    final var r = UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
-                    final var l = UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
-                    stack.push(BoolVal.of(((BoolVal) l).value() || ((BoolVal) r).value()));
+                    final var r = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    final var l = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    stack.push(BoolVal.of(l.value() || r.value()));
                 }
                 case AND -> {
-                    final var r = UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
-                    final var l = UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
-                    stack.push(BoolVal.of(((BoolVal) l).value() && ((BoolVal) r).value()));
+                    final var r = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    final var l = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    stack.push(BoolVal.of(l.value() && r.value()));
+                }
+                case ADD -> {
+                    final var r = stack.pop();
+                    stack.push(BinaryOperator.ADD.invoke(this.ctx, stack.pop(), r));
                 }
                 case DIV -> {
                     final var r = stack.pop();
@@ -80,33 +90,23 @@ public class Interpreter {
                     final var r = stack.pop();
                     stack.push(BinaryOperator.MUL.invoke(this.ctx, stack.pop(), r));
                 }
-                case NEQ -> {
-                    final var r = stack.pop();
-                    stack.push(BoolVal.of(stack.pop().equals(r) == false));
-                }
-                case NOT -> stack.push(UnaryOperator.NOT.invoke(this.ctx, stack.pop()));
-                case NEG -> stack.push(UnaryOperator.NEG.invoke(this.ctx, stack.pop()));
                 case SUB -> {
                     final var r = stack.pop();
                     stack.push(BinaryOperator.SUB.invoke(this.ctx, stack.pop(), r));
                 }
-                case DUP, LABEL -> {
-                }
-                case LD_GLB -> {
-                }
-                case LD_LOC -> {
-                }
-                case LD_VAL -> {
-                }
-                case ST_GLB -> {
-                }
-                case ST_LOC -> {
-                }
+                case NOT -> stack.push(UnaryOperator.NOT.invoke(this.ctx, stack.pop()));
+                case NEG -> stack.push(UnaryOperator.NEG.invoke(this.ctx, stack.pop()));
                 case BR_ZERO -> {
+                    if (((BoolVal) UnaryOperator.NOT.invoke(this.ctx, stack.pop())).value()) {
+                        pc = instr.intArg();
+                        branch = true;
+                    }
                 }
                 case BR -> {
                     pc = instr.intArg();
                     branch = true;
+                }
+                case DUP, LABEL-> {
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
