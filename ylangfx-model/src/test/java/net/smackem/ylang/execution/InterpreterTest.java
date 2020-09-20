@@ -93,4 +93,56 @@ public class InterpreterTest {
         assertThat(stack.size()).isEqualTo(1);
         assertThat(stack.get(0)).isEqualTo(BoolVal.TRUE);
     }
+
+    @Test
+    public void simpleConditional() throws StackException, MissingOverloadException {
+        final List<Instruction> code = List.of(
+                new Instruction(OpCode.LD_VAL, new NumberVal(100)),
+                new Instruction(OpCode.LD_VAL, new NumberVal(50)),
+                new Instruction(OpCode.EQ),
+                new Instruction(OpCode.BR_ZERO, 5), // goto 'load true'
+                new Instruction(OpCode.LD_VAL, BoolVal.FALSE),
+                new Instruction(OpCode.LD_VAL, BoolVal.TRUE)
+        );
+        final Interpreter interpreter = new Interpreter(code, null);
+        interpreter.execute();
+        final Stack stack = interpreter.context().stack();
+        assertThat(stack.size()).isEqualTo(1);
+        assertThat(stack.get(0)).isEqualTo(BoolVal.TRUE);
+    }
+
+    @Test
+    public void simpleLoop() throws StackException, MissingOverloadException {
+        // a = 0
+        // i = 10
+        // while (i != 0) { a = a + 1; i = i - 1; }
+        final List<Instruction> code = List.of(
+                new Instruction(OpCode.LD_VAL, NumberVal.ZERO), // a @ 0
+                new Instruction(OpCode.LD_VAL, new NumberVal(10)), // i @ 1
+                // if i != 0 -> end
+                new Instruction(OpCode.LABEL, "while"),
+                new Instruction(OpCode.LD_GLB, 1),
+                new Instruction(OpCode.LD_VAL, NumberVal.ZERO),
+                new Instruction(OpCode.NEQ),
+                new Instruction(OpCode.BR_ZERO, 12),
+                // a = a + 1
+                new Instruction(OpCode.LD_GLB, 0),
+                new Instruction(OpCode.LD_VAL, NumberVal.ONE),
+                new Instruction(OpCode.ADD),
+                new Instruction(OpCode.ST_GLB, 0),
+                // i = i - 1
+                new Instruction(OpCode.LD_GLB, 1),
+                new Instruction(OpCode.LD_VAL, NumberVal.ONE),
+                new Instruction(OpCode.SUB),
+                new Instruction(OpCode.ST_GLB, 1),
+                // -> while
+                new Instruction(OpCode.BR, 2),
+                new Instruction(OpCode.LABEL, "end")
+        );
+        final Interpreter interpreter = new Interpreter(code, null);
+        interpreter.execute();
+        final Stack stack = interpreter.context().stack();
+        assertThat(stack.size()).isEqualTo(3);
+        assertThat(stack.get(0)).isEqualTo(new NumberVal(10));
+    }
 }

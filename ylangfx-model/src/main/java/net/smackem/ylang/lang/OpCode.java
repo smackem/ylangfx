@@ -24,5 +24,8 @@ public enum OpCode {
     BR_ZERO,    // pop a, if 0.0 then branch to intArg
     DUP,        // pop a, push a, push a
     NOT,        // pop a push a != 0
-    NEG;        // pop a push -a
+    NEG,        // pop a push -a
+    IDX,        // pop b, pop a, push a[b]
+    IN,         // pop b, pop a, push a in b
+    CMP,        // pop b, pop a, push a compareTo b (< 0, 0, > 0)
 }

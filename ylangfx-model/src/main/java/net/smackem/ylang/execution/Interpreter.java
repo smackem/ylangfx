@@ -6,6 +6,7 @@ import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.runtime.BoolVal;
 import net.smackem.ylang.runtime.ImageVal;
 import net.smackem.ylang.runtime.NumberVal;
+import net.smackem.ylang.runtime.Value;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class Interpreter {
         int pc = 0;
         int stackFrameIndex = 0;
         final int codeSize = this.code.size();
-        final var stack = this.ctx.stack();
+        final Stack stack = this.ctx.stack();
         while (pc < codeSize) {
             final Instruction instr = this.code.get(pc);
             boolean branch = false;
@@ -37,62 +38,74 @@ public class Interpreter {
                 case LD_LOC -> stack.push(stack.get(instr.intArg() + stackFrameIndex));
                 case ST_LOC -> stack.set(instr.intArg() + stackFrameIndex, stack.pop());
                 case EQ -> {
-                    final var r = stack.pop();
+                    final Value r = stack.pop();
                     stack.push(BoolVal.of(stack.pop().equals(r)));
                 }
                 case NEQ -> {
-                    final var r = stack.pop();
+                    final Value r = stack.pop();
                     stack.push(BoolVal.of(stack.pop().equals(r) == false));
                 }
                 case GE -> {
-                    final var r = stack.pop();
-                    final var cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
+                    final Value r = stack.pop();
+                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
                     stack.push(BoolVal.of(cmp.value() >= 0));
                 }
                 case GT -> {
-                    final var r = stack.pop();
-                    final var cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
+                    final Value r = stack.pop();
+                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
                     stack.push(BoolVal.of(cmp.value() > 0));
                 }
                 case LE -> {
-                    final var r = stack.pop();
-                    final var cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
+                    final Value r = stack.pop();
+                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
                     stack.push(BoolVal.of(cmp.value() <= 0));
                 }
                 case LT -> {
-                    final var r = stack.pop();
-                    final var cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
+                    final Value r = stack.pop();
+                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
                     stack.push(BoolVal.of(cmp.value() < 0));
                 }
                 case OR -> {
-                    final var r = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
-                    final var l = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    final BoolVal r = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    final BoolVal l = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
                     stack.push(BoolVal.of(l.value() || r.value()));
                 }
                 case AND -> {
-                    final var r = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
-                    final var l = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    final BoolVal r = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    final BoolVal l = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
                     stack.push(BoolVal.of(l.value() && r.value()));
                 }
                 case ADD -> {
-                    final var r = stack.pop();
+                    final Value r = stack.pop();
                     stack.push(BinaryOperator.ADD.invoke(this.ctx, stack.pop(), r));
                 }
                 case DIV -> {
-                    final var r = stack.pop();
+                    final Value r = stack.pop();
                     stack.push(BinaryOperator.DIV.invoke(this.ctx, stack.pop(), r));
                 }
                 case MOD -> {
-                    final var r = stack.pop();
+                    final Value r = stack.pop();
                     stack.push(BinaryOperator.MOD.invoke(this.ctx, stack.pop(), r));
                 }
                 case MUL -> {
-                    final var r = stack.pop();
+                    final Value r = stack.pop();
                     stack.push(BinaryOperator.MUL.invoke(this.ctx, stack.pop(), r));
                 }
                 case SUB -> {
-                    final var r = stack.pop();
+                    final Value r = stack.pop();
                     stack.push(BinaryOperator.SUB.invoke(this.ctx, stack.pop(), r));
+                }
+                case IDX -> {
+                    final Value r = stack.pop();
+                    stack.push(BinaryOperator.INDEX.invoke(this.ctx, stack.pop(), r));
+                }
+                case IN -> {
+                    final Value r = stack.pop();
+                    stack.push(BinaryOperator.IN.invoke(this.ctx, stack.pop(), r));
+                }
+                case CMP -> {
+                    final Value r = stack.pop();
+                    stack.push(BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r));
                 }
                 case NOT -> stack.push(UnaryOperator.NOT.invoke(this.ctx, stack.pop()));
                 case NEG -> stack.push(UnaryOperator.NEG.invoke(this.ctx, stack.pop()));
@@ -106,7 +119,12 @@ public class Interpreter {
                     pc = instr.intArg();
                     branch = true;
                 }
-                case DUP, LABEL-> {
+                case DUP -> {
+                    final Value v = stack.pop();
+                    stack.push(v);
+                    stack.push(v);
+                }
+                case LABEL-> {
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }

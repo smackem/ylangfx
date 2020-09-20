@@ -11,9 +11,9 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="ylangfx" target="14" />
-      <module name="ylangfx-gui" target="14" />
-      <module name="ylangfx-model" target="14" />
+      <module name="ylangfx" target="15" />
+      <module name="ylangfx-gui" target="15" />
+      <module name="ylangfx-model" target="15" />
     </bytecodeTargetLevel>
   </component>
 </project>
