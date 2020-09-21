@@ -124,7 +124,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LD_GLB, 1),
                 new Instruction(OpCode.LD_VAL, NumberVal.ZERO),
                 new Instruction(OpCode.NEQ),
-                new Instruction(OpCode.BR_ZERO, 12),
+                new Instruction(OpCode.BR_ZERO, 16),
                 // a = a + 1
                 new Instruction(OpCode.LD_GLB, 0),
                 new Instruction(OpCode.LD_VAL, NumberVal.ONE),
@@ -142,7 +142,7 @@ public class InterpreterTest {
         final Interpreter interpreter = new Interpreter(code, null);
         interpreter.execute();
         final Stack stack = interpreter.context().stack();
-        assertThat(stack.size()).isEqualTo(3);
+        assertThat(stack.size()).isEqualTo(2);
         assertThat(stack.get(0)).isEqualTo(new NumberVal(10));
     }
 }

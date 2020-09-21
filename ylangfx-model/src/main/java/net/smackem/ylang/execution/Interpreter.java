@@ -7,10 +7,13 @@ import net.smackem.ylang.runtime.BoolVal;
 import net.smackem.ylang.runtime.ImageVal;
 import net.smackem.ylang.runtime.NumberVal;
 import net.smackem.ylang.runtime.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class Interpreter {
+    private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
     private final Context ctx;
     private final List<Instruction> code;
 
@@ -30,7 +33,7 @@ public class Interpreter {
         final Stack stack = this.ctx.stack();
         while (pc < codeSize) {
             final Instruction instr = this.code.get(pc);
-            boolean branch = false;
+            log.debug("@{}: {}, stack.size={}", pc, instr.opCode(), stack.size());
             switch (instr.opCode()) {
                 case LD_VAL -> stack.push(instr.valueArg());
                 case LD_GLB -> stack.push(stack.get(instr.intArg()));
@@ -111,26 +114,21 @@ public class Interpreter {
                 case NEG -> stack.push(UnaryOperator.NEG.invoke(this.ctx, stack.pop()));
                 case BR_ZERO -> {
                     if (((BoolVal) UnaryOperator.NOT.invoke(this.ctx, stack.pop())).value()) {
-                        pc = instr.intArg();
-                        branch = true;
+                        pc = instr.intArg() - 1;
                     }
                 }
-                case BR -> {
-                    pc = instr.intArg();
-                    branch = true;
-                }
+                case BR -> pc = instr.intArg() - 1;
                 case DUP -> {
                     final Value v = stack.pop();
                     stack.push(v);
                     stack.push(v);
                 }
                 case LABEL-> {
+                    // nop
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
-            if (branch == false) {
-                pc++;
-            }
+            pc++;
         }
     }
 }
