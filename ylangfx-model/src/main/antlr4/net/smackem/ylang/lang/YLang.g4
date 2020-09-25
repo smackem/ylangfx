@@ -6,7 +6,6 @@ program
 
 statement
     : (assignStmt
-    | pixelStmt
     | invocationStmt
     | ifStmt
     | forStmt
@@ -19,10 +18,6 @@ assignStmt
     : Ident Decleq expr
     | Ident Beq expr
     | atom atomSuffix+ Beq expr
-    ;
-
-pixelStmt
-    : At expr Beq expr
     ;
 
 invocationStmt
@@ -105,6 +100,7 @@ termOp
     : Plus
     | Minus
     | Concat
+    | Cmp
     ;
 
 product
@@ -183,6 +179,7 @@ Or      : 'or';
 And     : 'and';
 Plus    : '+';
 Minus   : '-';
+Cmp     : '~';
 Times   : '*';
 Div     : '/';
 Mod     : '%';
