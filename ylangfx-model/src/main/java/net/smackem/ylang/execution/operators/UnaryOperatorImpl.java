@@ -5,7 +5,7 @@ import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.runtime.Value;
 import net.smackem.ylang.runtime.ValueType;
 
-public abstract class UnaryOperatorImpl {
+abstract class UnaryOperatorImpl {
     private final Func[] functions = new Func[ValueType.MAX_INDEX];
 
     UnaryOperatorImpl() {

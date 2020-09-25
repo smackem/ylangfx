@@ -5,7 +5,7 @@ import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.runtime.Value;
 import net.smackem.ylang.runtime.ValueType;
 
-public abstract class BinaryOperatorImpl {
+abstract class BinaryOperatorImpl {
     private final Func[][] functions = new Func[ValueType.MAX_INDEX][ValueType.MAX_INDEX];
     private final boolean commutative;
 

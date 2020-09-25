@@ -28,4 +28,5 @@ public enum OpCode {
     IDX,        // pop b, pop a, push a[b]
     IN,         // pop b, pop a, push a in b
     CMP,        // pop b, pop a, push a compareTo b (< 0, 0, > 0)
+    INVOKE,     // pop intArg arguments, call built-in function strArg with popped arguments
 }
