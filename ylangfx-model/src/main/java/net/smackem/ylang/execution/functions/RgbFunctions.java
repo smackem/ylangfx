@@ -11,34 +11,102 @@ class RgbFunctions {
     private RgbFunctions() {}
 
     static void register(FunctionRegistry registry) {
-        registry.put(FunctionGroup.function("rgb",
-                new FunctionOverload(
+        registry.put(new FunctionGroup("rgb",
+                FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
                         RgbFunctions::rgb),
-                new FunctionOverload(
+                FunctionOverload.function(
                         List.of(ValueType.NUMBER),
                         RgbFunctions::grey)));
-        registry.put(FunctionGroup.function("rgb01",
-                new FunctionOverload(
+        registry.put(new FunctionGroup("rgb01",
+                FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
                         RgbFunctions::rgb01),
-                new FunctionOverload(
+                FunctionOverload.function(
                         List.of(ValueType.NUMBER),
                         RgbFunctions::grey01)));
-        registry.put(FunctionGroup.function("rgba",
-                new FunctionOverload(
+        registry.put(new FunctionGroup("rgba",
+                FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
                         RgbFunctions::rgba),
-                new FunctionOverload(
+                FunctionOverload.function(
                         List.of(ValueType.RGB, ValueType.NUMBER),
                         RgbFunctions::newAlpha)));
-        registry.put(FunctionGroup.function("rgba01",
-                new FunctionOverload(
+        registry.put(new FunctionGroup("rgba01",
+                FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
                         RgbFunctions::rgba01),
-                new FunctionOverload(
+                FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
                         RgbFunctions::newAlpha01)));
+        // rgb methods
+        registry.put(new FunctionGroup("r",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::red)));
+        registry.put(new FunctionGroup("r01",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::red01)));
+        registry.put(new FunctionGroup("g",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::green)));
+        registry.put(new FunctionGroup("g01",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::green01)));
+        registry.put(new FunctionGroup("b",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::blue)));
+        registry.put(new FunctionGroup("b01",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::blue01)));
+        registry.put(new FunctionGroup("a",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::alpha)));
+        registry.put(new FunctionGroup("a01",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::alpha01)));
+        registry.put(new FunctionGroup("intensity",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity)));
+        registry.put(new FunctionGroup("intensity01",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity01)));
+        registry.put(new FunctionGroup("over",
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
+                        RgbFunctions::over)));
+    }
+
+    private static Value over(List<Value> args) {
+        return ((RgbVal) args.get(0)).over((RgbVal) args.get(1));
+    }
+
+    private static Value red(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).r());
+    }
+
+    private static Value red01(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).r01());
+    }
+
+    private static Value green(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).g());
+    }
+
+    private static Value green01(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).g01());
+    }
+
+    private static Value blue(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).b());
+    }
+
+    private static Value blue01(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).b01());
+    }
+
+    private static Value alpha(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).a());
+    }
+
+    private static Value alpha01(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).a01());
+    }
+
+    private static Value intensity(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).intensity());
+    }
+
+    private static Value intensity01(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).intensity01());
     }
 
     private static Value newAlpha01(List<Value> args) {

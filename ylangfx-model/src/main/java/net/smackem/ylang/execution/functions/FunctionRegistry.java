@@ -34,18 +34,4 @@ public enum FunctionRegistry {
                 .collect(Collectors.toList());
         return fg.get(parameters).invoke(values);
     }
-
-    public Value invokeMethod(String name, List<Value> values) throws MissingOverloadException {
-        final FunctionGroup fg = this.repository.get(name);
-        if (fg == null) {
-            throw new MissingOverloadException("no function with this name found: " + name);
-        }
-        if (fg.isMethod() == false) {
-            throw new MissingOverloadException(name + " cannot be invoked as a method");
-        }
-        final List<ValueType> parameters = values.stream()
-                .map(Value::type)
-                .collect(Collectors.toList());
-        return fg.get(parameters).invoke(values);
-    }
 }

@@ -1,0 +1,8 @@
+
+out := image(img.bounds)
+
+for p in img.bounds {
+    out[p] = img[p]
+}
+
+return out

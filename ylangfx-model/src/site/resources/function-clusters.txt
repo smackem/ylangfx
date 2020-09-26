@@ -1,0 +1,62 @@
+--------- rgb
+rgb
+rgb01
+rgba
+rgba01
+compose
+hsv
+
+--------- image
+image
+convolute
+blt
+flip
+recall
+fetchRed
+fetchGreen
+fetchBlue
+fetchAlpha
+resize
+clip
+interpolate
+
+--------- math
+sin
+cos
+tan
+asin
+acos
+atan
+atan2
+sqrt
+pow
+abs
+round
+floor
+ceil
+trunc
+hypot
+
+--------- util
+random
+min
+max
+clamp
+compare
+
+--------- collection
+list
+kernel
+gauss
+sort
+sum
+
+--------- geometry
+line
+polygon
+circle
+intersect
+translate
+rect
+outline
+plot

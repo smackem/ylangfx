@@ -50,6 +50,14 @@ public class RgbVal extends Value {
         return this.a / 255f;
     }
 
+    public float intensity() {
+        return 0.299f * this.r + 0.587f * this.g + 0.114f * this.b;
+    }
+
+    public float intensity01() {
+        return intensity() / 255f;
+    }
+
     public RgbVal add(float number) {
         return new RgbVal(this.r + number, this.g + number, this.b + number, this.a);
     }
@@ -68,6 +76,36 @@ public class RgbVal extends Value {
 
     public RgbVal invert() {
         return new RgbVal(255f - this.r, 255f - this.g, 255f - this.b, this.a);
+    }
+
+    /**
+     * expresses the alpha compositing operation "over", painting this {@link RgbVal}
+     * over the {@link RgbVal} {@code background}.
+     * @param background The background color.
+     * @return The result of the alpha compositing operation.
+     */
+    public RgbVal over(RgbVal background) {
+        final float foregroundA = this.a01();
+        final float backgroundA = background.a01();
+        final float multipliedA = (1f - foregroundA) * backgroundA;
+        final float a = backgroundA + (1f - backgroundA) * foregroundA;
+
+        return new RgbVal(
+                clamp((this.r * foregroundA + background.r * multipliedA) / a),
+                clamp((this.g * foregroundA + background.g * multipliedA) / a),
+                clamp((this.b * foregroundA + background.b * multipliedA) / a),
+                255f * a);
+    }
+
+    public RgbVal clamp() {
+        return new RgbVal(clamp(this.r), clamp(this.g), clamp(this.b), clamp(this.a));
+    }
+
+    public static float clamp(float channelValue) {
+        if (channelValue > 255f) {
+            return 255f;
+        }
+        return Math.max(channelValue, 0f);
     }
 
     @Override
