@@ -37,7 +37,7 @@ class RgbFunctions {
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
                         RgbFunctions::rgba01),
                 FunctionOverload.function(
-                        List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
+                        List.of(ValueType.RGB, ValueType.NUMBER),
                         RgbFunctions::newAlpha01)));
         // rgb methods
         registry.put(new FunctionGroup("r",

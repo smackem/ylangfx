@@ -2,9 +2,7 @@ package net.smackem.ylang.execution;
 
 import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.lang.OpCode;
-import net.smackem.ylang.runtime.BoolVal;
-import net.smackem.ylang.runtime.NilVal;
-import net.smackem.ylang.runtime.NumberVal;
+import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
 import java.util.List;
@@ -144,5 +142,61 @@ public class InterpreterTest {
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(2);
         assertThat(stack.get(0)).isEqualTo(new NumberVal(10));
+    }
+
+    @Test
+    public void invoke() throws StackException, MissingOverloadException {
+        // a = rgb(255, 128, 64)
+        // a = a.r
+        final List<Instruction> code = List.of(
+                new Instruction(OpCode.LD_VAL, NumberVal.ZERO), // a @ 0
+                // a = rgb(255, 128, 64)
+                new Instruction(OpCode.LD_VAL, new NumberVal(255)),
+                new Instruction(OpCode.LD_VAL, new NumberVal(128)),
+                new Instruction(OpCode.LD_VAL, new NumberVal(64)),
+                new Instruction(OpCode.INVOKE, 3, "rgb"),
+                new Instruction(OpCode.ST_GLB, 0),
+                // a.r()
+                new Instruction(OpCode.LD_GLB, 0),
+                new Instruction(OpCode.INVOKE, 1, "r"),
+                new Instruction(OpCode.ST_GLB, 0)
+        );
+        final Interpreter interpreter = new Interpreter(code, null);
+        interpreter.execute();
+        final Stack stack = interpreter.context().stack();
+        assertThat(stack.size()).isEqualTo(1);
+        assertThat(stack.get(0)).isEqualTo(new NumberVal(255));
+    }
+
+    @Test
+    public void iterate() throws StackException, MissingOverloadException {
+        // pt = 0;0
+        // r = rect(0, 0, 2, 2)
+        // for p in a { pt = pt + p }
+        final List<Instruction> code = List.of(
+                new Instruction(OpCode.LD_VAL, new PointVal(0, 0)), // pt @ 0
+                new Instruction(OpCode.LD_VAL, new RectVal(0, 0, 2, 2)), // r @ 1
+                new Instruction(OpCode.LD_VAL, NilVal.INSTANCE), // iterator @ 2
+                // iterator = r.iterator()
+                new Instruction(OpCode.LD_GLB, 1),
+                new Instruction(OpCode.ITER),
+                new Instruction(OpCode.ST_GLB, 2),
+                // loop:
+                new Instruction(OpCode.LABEL, "loop"),
+                // push iterator.next
+                new Instruction(OpCode.LD_GLB, 2),
+                new Instruction(OpCode.BR_NEXT, 13), // goto end if next is nil
+                // pt = iterator.next + pt
+                new Instruction(OpCode.LD_GLB, 0),
+                new Instruction(OpCode.ADD, 0),
+                new Instruction(OpCode.ST_GLB, 0),
+                new Instruction(OpCode.BR, 6), // goto loop
+                new Instruction(OpCode.LABEL, "end")
+        );
+        final Interpreter interpreter = new Interpreter(code, null);
+        interpreter.execute();
+        final Stack stack = interpreter.context().stack();
+        assertThat(stack.size()).isEqualTo(3);
+        assertThat(stack.get(0)).isEqualTo(new PointVal(2, 2));
     }
 }

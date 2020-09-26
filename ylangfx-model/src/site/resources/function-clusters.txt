@@ -3,7 +3,7 @@ rgb
 rgb01
 rgba
 rgba01
-compose
+over
 hsv
 
 --------- image
@@ -19,6 +19,7 @@ fetchAlpha
 resize
 clip
 interpolate
+plot
 
 --------- math
 sin
@@ -42,7 +43,6 @@ random
 min
 max
 clamp
-compare
 
 --------- collection
 list
@@ -52,11 +52,10 @@ sort
 sum
 
 --------- geometry
+rect
 line
 polygon
 circle
 intersect
 translate
-rect
 outline
-plot

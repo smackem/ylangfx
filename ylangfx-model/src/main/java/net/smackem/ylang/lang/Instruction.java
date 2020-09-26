@@ -29,6 +29,12 @@ public final class Instruction {
         this.strArg = strArg;
     }
 
+    public Instruction(OpCode opCode, int intArg, String strArg) {
+        this.opCode = opCode;
+        this.strArg = strArg;
+        this.intArg = intArg;
+    }
+
     public OpCode opCode() {
         return this.opCode;
     }

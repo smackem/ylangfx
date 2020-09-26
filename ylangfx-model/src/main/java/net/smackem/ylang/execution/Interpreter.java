@@ -1,15 +1,15 @@
 package net.smackem.ylang.execution;
 
+import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.execution.operators.UnaryOperator;
 import net.smackem.ylang.lang.Instruction;
-import net.smackem.ylang.runtime.BoolVal;
-import net.smackem.ylang.runtime.ImageVal;
-import net.smackem.ylang.runtime.NumberVal;
-import net.smackem.ylang.runtime.Value;
+import net.smackem.ylang.runtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Interpreter {
@@ -122,6 +122,32 @@ public class Interpreter {
                     final Value v = stack.pop();
                     stack.push(v);
                     stack.push(v);
+                }
+                case POP -> stack.pop();
+                case INVOKE -> {
+                    final LinkedList<Value> args = new LinkedList<>();
+                    for (int i = 0; i < instr.intArg(); i++) {
+                        args.addFirst(stack.pop());
+                    }
+                    final Value result = FunctionRegistry.INSTANCE.invoke(instr.strArg(), args);
+                    stack.push(result);
+                }
+                case ITER -> {
+                    final Value iterable = stack.pop();
+                    if (iterable instanceof Iterable == false) {
+                        throw new MissingOverloadException(iterable + " of type " + iterable.type() + " is not iterable!");
+                    }
+                    //noinspection unchecked
+                    stack.push(new IteratorVal(((Iterable<Value>)iterable).iterator()));
+                }
+                case BR_NEXT -> {
+                    final IteratorVal iterator = (IteratorVal) stack.pop();
+                    final Value next = iterator.next();
+                    if (next != null) {
+                        stack.push(next);
+                    } else {
+                        pc = instr.intArg() - 1;
+                    }
                 }
                 case LABEL-> {
                     // nop

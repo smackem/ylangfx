@@ -3,6 +3,7 @@ package net.smackem.ylang.execution.functions;
 import net.smackem.ylang.runtime.ValueType;
 
 import java.util.List;
+import java.util.Objects;
 
 class FunctionOverload {
     private final boolean method;
@@ -10,7 +11,9 @@ class FunctionOverload {
     private final Func func;
 
     private FunctionOverload(List<ValueType> parameters, Func func, boolean method) {
-        if (method && parameters().size() == 0) {
+        Objects.requireNonNull(parameters);
+        Objects.requireNonNull(func);
+        if (method && parameters.size() == 0) {
             throw new IllegalArgumentException("cannot create a method overload without parameters");
         }
         this.parameters = parameters;
