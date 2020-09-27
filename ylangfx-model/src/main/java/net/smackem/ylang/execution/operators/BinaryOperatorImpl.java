@@ -26,7 +26,9 @@ abstract class BinaryOperatorImpl {
         }
         final int leftIndex = left.index();
         for (final var right : ValueType.values()) {
-            this.functions[leftIndex][right.index()] = op;
+            if (right.index() >= 0) {
+                this.functions[leftIndex][right.index()] = op;
+            }
         }
     }
 
@@ -36,7 +38,9 @@ abstract class BinaryOperatorImpl {
         }
         final int rightIndex = right.index();
         for (final var left : ValueType.values()) {
-            this.functions[left.index()][rightIndex] = op;
+            if (left.index() >= 0) {
+                this.functions[left.index()][rightIndex] = op;
+            }
         }
     }
 

@@ -10,13 +10,10 @@ hsv
 image
 convolute
 blt
-flip
-recall
 fetchRed
 fetchGreen
 fetchBlue
 fetchAlpha
-resize
 clip
 interpolate
 plot

@@ -33,7 +33,7 @@ public class Interpreter {
         final Stack stack = this.ctx.stack();
         while (pc < codeSize) {
             final Instruction instr = this.code.get(pc);
-            log.debug("@{}: {}, stack.size={}", pc, instr.opCode(), stack.size());
+            log.debug("@{}: {}, stack.size={}", String.format("%4d", pc), instr.opCode(), stack.size());
             switch (instr.opCode()) {
                 case LD_VAL -> stack.push(instr.valueArg());
                 case LD_GLB -> stack.push(stack.get(instr.intArg()));
