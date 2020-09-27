@@ -30,12 +30,12 @@ public class ImageVal extends Value {
         if (height <= 0) {
             throw new IllegalArgumentException("image height must be > 0");
         }
-        final RgbVal[] rgbs = new RgbVal[pixels.length];
+        final RgbVal[] rgbPixels = new RgbVal[pixels.length];
         for (int i = 0; i < pixels.length; i++) {
             final int pixel = pixels[i];
-            rgbs[i] = new RgbVal(pixel >> 24 & 0xff, pixel >> 16 & 0xff, pixel >> 8 & 0xff, pixel & 0xff);
+            rgbPixels[i] = new RgbVal(pixel >> 24 & 0xff, pixel >> 16 & 0xff, pixel >> 8 & 0xff, pixel & 0xff);
         }
-        return new ImageVal(width, height, rgbs);
+        return new ImageVal(width, height, rgbPixels);
     }
 
     public int width() {
@@ -60,10 +60,8 @@ public class ImageVal extends Value {
     }
 
     public void setPixel(int x, int y, RgbVal rgb) {
-        if (this.clipRect != null) {
-            if (this.clipRect.contains(x, y) == false) {
-                return;
-            }
+        if (this.clipRect != null && this.clipRect.contains(x, y) == false) {
+            return;
         }
         final int index = y * this.width + x;
         this.pixels[index] = rgb;
