@@ -4,21 +4,21 @@ import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.execution.operators.UnaryOperator;
 import net.smackem.ylang.lang.Instruction;
+import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Interpreter {
     private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
     private final Context ctx;
-    private final List<Instruction> code;
+    private final Program program;
 
-    public Interpreter(List<Instruction> code, ImageVal inputImage) {
-        this.code = code;
+    public Interpreter(Program program, ImageVal inputImage) {
+        this.program = program;
         this.ctx = new Context(inputImage);
     }
 
@@ -29,10 +29,11 @@ public class Interpreter {
     public void execute() throws StackException, MissingOverloadException {
         int pc = 0;
         int stackFrameIndex = 0;
-        final int codeSize = this.code.size();
+        final List<Instruction> instructions = this.program.instructions();
+        final int programSize = instructions.size();
         final Stack stack = this.ctx.stack();
-        while (pc < codeSize) {
-            final Instruction instr = this.code.get(pc);
+        while (pc < programSize) {
+            final Instruction instr = instructions.get(pc);
             log.debug("@{}: {}, stack.size={}", String.format("%4d", pc), instr.opCode(), stack.size());
             switch (instr.opCode()) {
                 case LD_VAL -> stack.push(instr.valueArg());
