@@ -36,14 +36,101 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitAssignStmt(YLangParser.AssignStmtContext ctx) {
         super.visitAssignStmt(ctx);
-        if (ctx.Beq() != null || ctx.Decleq() != null) {
+        if (ctx.atom() == null) { // assign to ident, not to lvalue-expr
             final String ident = ctx.Ident().getText();
             final Integer addr = this.globals.get(ident);
             if (addr == null) {
                 logSemanticError(ctx, "unknown identifier " + ident);
             } else {
-                this.instructions.add(new Instruction(OpCode.LD_GLB, addr));
+                this.instructions.add(new Instruction(OpCode.ST_GLB, addr));
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitCondition(YLangParser.ConditionContext ctx) {
+        super.visitCondition(ctx);
+        if (ctx.conditionOp() != null) {
+            if (ctx.conditionOp().Or() != null) {
+                this.instructions.add(new Instruction(OpCode.OR));
+            } else if (ctx.conditionOp().And() != null) {
+                this.instructions.add(new Instruction(OpCode.AND));
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitComparison(YLangParser.ComparisonContext ctx) {
+        ctx.tuple(0).accept(this);
+        int tupleIndex = 1;
+        for (final var comparator : ctx.comparator()) {
+            ctx.tuple(tupleIndex).accept(this);
+            if (comparator.Eq() != null) {
+                this.instructions.add(new Instruction(OpCode.EQ));
+            } else if (comparator.Lt() != null) {
+                this.instructions.add(new Instruction(OpCode.LT));
+            } else if (comparator.Le() != null) {
+                this.instructions.add(new Instruction(OpCode.LE));
+            } else if (comparator.Gt() != null) {
+                this.instructions.add(new Instruction(OpCode.GT));
+            } else if (comparator.Ge() != null) {
+                this.instructions.add(new Instruction(OpCode.GE));
+            } else if (comparator.Ne() != null) {
+                this.instructions.add(new Instruction(OpCode.NEQ));
+            } else if (comparator.In() != null) {
+                this.instructions.add(new Instruction(OpCode.IN));
+            }
+            tupleIndex++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitTuple(YLangParser.TupleContext ctx) {
+        super.visitTuple(ctx);
+        if (ctx.Pair() != null) {
+            this.instructions.add(new Instruction(OpCode.MK_POINT));
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitTerm(YLangParser.TermContext ctx) {
+        ctx.product(0).accept(this);
+        int index = 1;
+        for (final var op : ctx.termOp()) {
+            ctx.product(index).accept(this);
+            if (op.Plus() != null) {
+                this.instructions.add(new Instruction(OpCode.ADD));
+            } else if (op.Minus() != null) {
+                this.instructions.add(new Instruction(OpCode.SUB));
+            } else if (op.Cmp() != null) {
+                this.instructions.add(new Instruction(OpCode.CMP));
+            } else if (op.Concat() != null) {
+                throw new UnsupportedOperationException();
+            }
+            index++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitProduct(YLangParser.ProductContext ctx) {
+        super.visitProduct(ctx);
+        ctx.molecule(0).accept(this);
+        int index = 1;
+        for (final var op : ctx.productOp()) {
+            ctx.molecule(index).accept(this);
+            if (op.Times() != null) {
+                this.instructions.add(new Instruction(OpCode.MUL));
+            } else if (op.Div() != null) {
+                this.instructions.add(new Instruction(OpCode.DIV));
+            } else if (op.Mod() != null) {
+                this.instructions.add(new Instruction(OpCode.MOD));
+            }
+            index++;
         }
         return null;
     }
