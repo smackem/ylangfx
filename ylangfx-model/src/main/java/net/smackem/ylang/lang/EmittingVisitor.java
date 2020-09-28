@@ -1,6 +1,9 @@
 package net.smackem.ylang.lang;
 
+import net.smackem.ylang.runtime.BoolVal;
 import net.smackem.ylang.runtime.NilVal;
+import net.smackem.ylang.runtime.NumberVal;
+import net.smackem.ylang.runtime.StringVal;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +121,6 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
 
     @Override
     public Void visitProduct(YLangParser.ProductContext ctx) {
-        super.visitProduct(ctx);
         ctx.molecule(0).accept(this);
         int index = 1;
         for (final var op : ctx.productOp()) {
@@ -131,6 +133,55 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
                 this.instructions.add(new Instruction(OpCode.MOD));
             }
             index++;
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitMolecule(YLangParser.MoleculeContext ctx) {
+        ctx.atom().accept(this);
+        if (ctx.atomSuffix().isEmpty() == false) {
+            throw new UnsupportedOperationException();
+        }
+        if (ctx.atomPrefix() != null) {
+            ctx.atomPrefix().accept(this);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAtomPrefix(YLangParser.AtomPrefixContext ctx) {
+        if (ctx.Not() != null) {
+            this.instructions.add(new Instruction(OpCode.MOD));
+        } else if (ctx.Minus() != null) {
+            this.instructions.add(new Instruction(OpCode.NEG));
+        } else if (ctx.At() != null) {
+            throw new UnsupportedOperationException();
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitAtom(YLangParser.AtomContext ctx) {
+        if (ctx.Nil() != null) {
+            this.instructions.add(new Instruction(OpCode.LD_VAL, NilVal.INSTANCE));
+        } else if (ctx.number() != null) {
+            this.instructions.add(new Instruction(OpCode.LD_VAL, new NumberVal(Float.parseFloat(ctx.number().getText()))));
+        } else if (ctx.String() != null) {
+            this.instructions.add(new Instruction(OpCode.LD_VAL, new StringVal(ctx.number().getText())));
+        } else if (ctx.Ident() != null) {
+            final Integer addr = this.globals.get(ctx.Ident().getText());
+            if (addr == null) {
+                logSemanticError(ctx, "unknown identifier " + ctx.Ident());
+            } else {
+                this.instructions.add(new Instruction(OpCode.LD_GLB, addr));
+            }
+        } else if (ctx.True() != null) {
+            this.instructions.add(new Instruction(OpCode.LD_VAL, BoolVal.TRUE));
+        } else if (ctx.False() != null) {
+            this.instructions.add(new Instruction(OpCode.LD_VAL, BoolVal.FALSE));
+        } else if (ctx.expr() != null) {
+            ctx.expr().accept(this);
         }
         return null;
     }
