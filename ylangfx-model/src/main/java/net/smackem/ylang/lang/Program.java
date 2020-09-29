@@ -15,7 +15,10 @@ public final class Program {
      * @param instructions The emitted instructions.
      */
     public Program(List<Instruction> instructions) {
-        this.instructions = Collections.unmodifiableList(Objects.requireNonNull(instructions));
+        if (Objects.requireNonNull(instructions).size() == 0) {
+            throw new IllegalArgumentException("there must be at least one instruction");
+        }
+        this.instructions = Collections.unmodifiableList(instructions);
     }
 
     /**

@@ -26,7 +26,7 @@ public class Interpreter {
         return this.ctx;
     }
 
-    public void execute() throws StackException, MissingOverloadException {
+    public Value execute() throws StackException, MissingOverloadException {
         int pc = 0;
         int stackFrameIndex = 0;
         final List<Instruction> instructions = this.program.instructions();
@@ -153,9 +153,11 @@ public class Interpreter {
                 case LABEL-> {
                     // nop
                 }
+                case EXIT -> pc = programSize - 1;
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
             pc++;
         }
+        return stack.pop();
     }
 }
