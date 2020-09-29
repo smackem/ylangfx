@@ -53,6 +53,14 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitReturnStmt(YLangParser.ReturnStmtContext ctx) {
+        super.visitReturnStmt(ctx);
+        // TODO: replace with branch to end
+        this.instructions.add(new Instruction(OpCode.EXIT));
+        return null;
+    }
+
+    @Override
     public Void visitCondition(YLangParser.ConditionContext ctx) {
         super.visitCondition(ctx);
         if (ctx.conditionOp() != null) {
@@ -68,9 +76,9 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitComparison(YLangParser.ComparisonContext ctx) {
         ctx.tuple(0).accept(this);
-        int tupleIndex = 1;
-        for (final var comparator : ctx.comparator()) {
-            ctx.tuple(tupleIndex).accept(this);
+        final var comparator = ctx.comparator();
+        if (comparator != null) {
+            ctx.tuple(1).accept(this);
             if (comparator.Eq() != null) {
                 this.instructions.add(new Instruction(OpCode.EQ));
             } else if (comparator.Lt() != null) {
@@ -86,7 +94,6 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             } else if (comparator.In() != null) {
                 this.instructions.add(new Instruction(OpCode.IN));
             }
-            tupleIndex++;
         }
         return null;
     }

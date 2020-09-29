@@ -1,7 +1,7 @@
 grammar YLang;
 
 program
-    : statement* EOF
+    : statement* returnStmt EOF
     ;
 
 statement
@@ -11,7 +11,12 @@ statement
     | forStmt
     | whileStmt
     | logStmt
+    | returnStmt
     ) ';'?
+    ;
+
+returnStmt
+    : 'return' expr
     ;
 
 assignStmt
@@ -75,7 +80,7 @@ conditionOp
     ;
 
 comparison
-    : tuple (comparator tuple)*
+    : tuple (comparator tuple)?
     ;
 
 comparator

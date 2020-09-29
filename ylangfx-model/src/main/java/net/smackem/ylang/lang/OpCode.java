@@ -33,6 +33,8 @@ public enum OpCode {
     ITER,       // pop a, push a.iterator()
     BR_NEXT,    // pop a, push a.next if a.next not null, otherwise branch to intArg
     MK_MAP,     // pop intArg arguments, push map(arguments)
+    MK_ENTRY,   // pop b, pop a, push mapEntry(a, b)
     MK_LIST,    // pop intArg arguments, push list(arguments)
     MK_POINT,   // pop b, pop a, push point(a, b)
+    EXIT,       // break execution
 }
