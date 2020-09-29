@@ -21,6 +21,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         int index = 0;
         for (final String ident : globals) {
             this.globals.put(ident, index);
+            index++;
         }
     }
 
