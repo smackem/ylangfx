@@ -1,14 +1,12 @@
 package net.smackem.ylang.lang;
 
-import net.smackem.ylang.runtime.BoolVal;
-import net.smackem.ylang.runtime.NilVal;
-import net.smackem.ylang.runtime.NumberVal;
-import net.smackem.ylang.runtime.StringVal;
+import net.smackem.ylang.runtime.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 class EmittingVisitor extends YLangBaseVisitor<Void> {
 
@@ -160,7 +158,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitAtomPrefix(YLangParser.AtomPrefixContext ctx) {
         if (ctx.Not() != null) {
-            this.instructions.add(new Instruction(OpCode.MOD));
+            this.instructions.add(new Instruction(OpCode.NOT));
         } else if (ctx.Minus() != null) {
             this.instructions.add(new Instruction(OpCode.NEG));
         } else if (ctx.At() != null) {
@@ -174,7 +172,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         if (ctx.Nil() != null) {
             this.instructions.add(new Instruction(OpCode.LD_VAL, NilVal.INSTANCE));
         } else if (ctx.number() != null) {
-            this.instructions.add(new Instruction(OpCode.LD_VAL, new NumberVal(Float.parseFloat(ctx.number().getText()))));
+            this.instructions.add(new Instruction(OpCode.LD_VAL, parseNumber(ctx.number().getText())));
         } else if (ctx.String() != null) {
             this.instructions.add(new Instruction(OpCode.LD_VAL, new StringVal(ctx.number().getText())));
         } else if (ctx.Ident() != null) {
@@ -188,6 +186,18 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             this.instructions.add(new Instruction(OpCode.LD_VAL, BoolVal.TRUE));
         } else if (ctx.False() != null) {
             this.instructions.add(new Instruction(OpCode.LD_VAL, BoolVal.FALSE));
+        } else if (ctx.kernel() != null) {
+            final List<NumberVal> numbers = ctx.kernel().number().stream()
+                    .map(n -> parseNumber(n.getText()))
+                    .collect(Collectors.toList());
+            this.instructions.add(new Instruction(OpCode.LD_VAL, new KernelVal(numbers)));
+        } else if (ctx.Color() != null) {
+            this.instructions.add(new Instruction(OpCode.LD_VAL, parseColor(ctx.Color().getText())));
+        } else if (ctx.list() != null) {
+            ctx.list().accept(this);
+            this.instructions.add(new Instruction(OpCode.MK_LIST, ctx.list().arguments().expr().size()));
+        } else if (ctx.map() != null) {
+            throw new UnsupportedOperationException();
         } else if (ctx.expr() != null) {
             ctx.expr().accept(this);
         }
@@ -203,5 +213,18 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
                 ctx.start.getLine(), ctx.start.getCharPositionInLine(), message);
         log.info(text);
         this.semanticErrors.add(text);
+    }
+
+    private static NumberVal parseNumber(String s) {
+        return new NumberVal(Float.parseFloat(s));
+    }
+
+    private static RgbVal parseColor(String s) {
+        final String[] tokens = s.substring(1).split("\\:");
+        final int rgb = Integer.parseInt(tokens[0], 16);
+        final int alpha = tokens.length > 1
+                ? Integer.parseInt(tokens[1], 16)
+                : 255;
+        return new RgbVal(rgb >> 16 & 0xff, rgb >> 8 & 0xff, rgb & 0xff, alpha);
     }
 }

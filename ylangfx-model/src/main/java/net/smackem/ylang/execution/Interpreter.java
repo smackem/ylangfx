@@ -154,6 +154,18 @@ public class Interpreter {
                     // nop
                 }
                 case EXIT -> pc = programSize - 1;
+                case MK_LIST -> {
+                    final LinkedList<Value> args = new LinkedList<>();
+                    for (int i = 0; i < instr.intArg(); i++) {
+                        args.addFirst(stack.pop());
+                    }
+                    stack.push(new ListVal(args));
+                }
+                case MK_POINT -> {
+                    final Value y = stack.pop();
+                    final Value x = stack.pop();
+                    stack.push(new PointVal(((NumberVal) x).value(), ((NumberVal) y).value()));
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
             pc++;

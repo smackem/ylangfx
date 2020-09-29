@@ -204,4 +204,39 @@ public class InterpreterTest {
         assertThat(stack.size()).isEqualTo(3);
         assertThat(retVal).isEqualTo(new PointVal(2, 2));
     }
+
+    @Test
+    public void list() throws StackException, MissingOverloadException {
+        // return [1,2,#112233]
+        final Program program = new Program(List.of(
+                new Instruction(OpCode.LD_VAL, new NumberVal(1)),
+                new Instruction(OpCode.LD_VAL, new NumberVal(2)),
+                new Instruction(OpCode.LD_VAL, new RgbVal(10, 20, 30, 255)),
+                new Instruction(OpCode.MK_LIST, 3)
+        ));
+        final Interpreter interpreter = new Interpreter(program, null);
+        final Value retVal = interpreter.execute();
+        final Stack stack = interpreter.context().stack();
+        assertThat(stack.size()).isEqualTo(0);
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(1),
+                new NumberVal(2),
+                new RgbVal(10, 20, 30, 255))
+        ));
+    }
+
+    @Test
+    public void point() throws StackException, MissingOverloadException {
+        // return [1,2,#112233]
+        final Program program = new Program(List.of(
+                new Instruction(OpCode.LD_VAL, new NumberVal(1)),
+                new Instruction(OpCode.LD_VAL, new NumberVal(2)),
+                new Instruction(OpCode.MK_POINT, 3)
+        ));
+        final Interpreter interpreter = new Interpreter(program, null);
+        final Value retVal = interpreter.execute();
+        final Stack stack = interpreter.context().stack();
+        assertThat(stack.size()).isEqualTo(0);
+        assertThat(retVal).isEqualTo(new PointVal(1, 2));
+    }
 }
