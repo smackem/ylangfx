@@ -30,7 +30,7 @@ public class CompilerTest {
     }
 
     @Test
-    public void compositeAtoms() throws StackException, MissingOverloadException {
+    public void compoundAtoms() throws StackException, MissingOverloadException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -47,6 +47,89 @@ public class CompilerTest {
                 new KernelVal(List.of(NumberVal.ZERO, NumberVal.ONE, NumberVal.MINUS_ONE, new NumberVal(2))),
                 new PointVal(120, 240)
         )));
+        System.out.println(program.toString());
+    }
+
+    @Test
+    public void ternaryExpr() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := 100 < 200 ? 1 : 0;
+                b := 100 > 200 ? 1 : 0;
+                return [a, b]
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                NumberVal.ONE,
+                NumberVal.ZERO
+        )));
+        System.out.println(program.toString());
+    }
+
+    @Test
+    public void ifStmt() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := nil
+                if 100 < 200 {
+                    a = 1
+                }
+                return a
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(NumberVal.ONE);
+        System.out.println(program.toString());
+    }
+
+    @Test
+    public void ifElseStmt() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := nil
+                if 100 > 200 {
+                    a = 1
+                } else {
+                    a = 0
+                }
+                return a
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(NumberVal.ZERO);
+        System.out.println(program.toString());
+    }
+
+    @Test
+    public void ifElseIfStmt() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := nil
+                if 1 == 2 {
+                    a = 2
+                } else if 1 == 3 {
+                    a = 3
+                } else if 1 == 4 {
+                    a = 4
+                } else if 1 == 1 {
+                    a = 1
+                } else {
+                    a = 0
+                }
+                return a
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(NumberVal.ONE);
         System.out.println(program.toString());
     }
 }

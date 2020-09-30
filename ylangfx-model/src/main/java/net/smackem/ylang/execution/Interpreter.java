@@ -153,7 +153,6 @@ public class Interpreter {
                 case LABEL-> {
                     // nop
                 }
-                case EXIT -> pc = programSize - 1;
                 case MK_LIST -> {
                     final LinkedList<Value> args = new LinkedList<>();
                     for (int i = 0; i < instr.intArg(); i++) {

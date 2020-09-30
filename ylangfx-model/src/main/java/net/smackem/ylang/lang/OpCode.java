@@ -35,6 +35,12 @@ public enum OpCode {
     MK_MAP,     // pop intArg arguments, push map(arguments)
     MK_ENTRY,   // pop b, pop a, push mapEntry(a, b)
     MK_LIST,    // pop intArg arguments, push list(arguments)
-    MK_POINT,   // pop b, pop a, push point(a, b)
-    EXIT,       // break execution
+    MK_POINT;   // pop b, pop a, push point(a, b)
+
+    public boolean isBranch() {
+        return switch (this) {
+            case BR, BR_ZERO, BR_NEXT -> true;
+            default -> false;
+        };
+    }
 }

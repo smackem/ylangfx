@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 class EmittingVisitor extends YLangBaseVisitor<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(EmittingVisitor.class);
-    private final List<Instruction> instructions = new ArrayList<>();
+    private static final String endLabel = "@end";
+    private final Emitter emitter = new Emitter();
     private final List<String> semanticErrors = new ArrayList<>();
     private final Map<String, Integer> globals = new HashMap<>();
+    private int labelNumber = 1;
 
     public EmittingVisitor(List<String> globals) {
         int index = 0;
@@ -31,8 +33,10 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     public Void visitProgram(YLangParser.ProgramContext ctx) {
         this.globals.entrySet().stream()
                 .sorted(Comparator.comparingInt(Map.Entry::getValue))
-                .forEach(entry -> this.instructions.add(new Instruction(OpCode.LD_VAL, NilVal.INSTANCE)));
-        return super.visitProgram(ctx);
+                .forEach(entry -> this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE));
+        super.visitProgram(ctx);
+        this.emitter.emit(OpCode.LABEL, endLabel);
+        return null;
     }
 
     @Override
@@ -44,7 +48,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             if (addr == null) {
                 logSemanticError(ctx, "unknown identifier " + ident);
             } else {
-                this.instructions.add(new Instruction(OpCode.ST_GLB, addr));
+                this.emitter.emit(OpCode.ST_GLB, addr);
             }
         }
         return null;
@@ -53,8 +57,51 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitReturnStmt(YLangParser.ReturnStmtContext ctx) {
         super.visitReturnStmt(ctx);
-        // TODO: replace with branch to end
-        this.instructions.add(new Instruction(OpCode.EXIT));
+        this.emitter.emit(OpCode.BR, endLabel);
+        return null;
+    }
+
+    @Override
+    public Void visitIfStmt(YLangParser.IfStmtContext ctx) {
+        final String ifLabel = nextLabel();
+        final String elseLabel = ctx.elseClause() != null ? nextLabel() : null;
+        visitConditionalBody(ifLabel, elseLabel, ctx.expr(), ctx.block());
+        for (final var elseIf : ctx.elseIfClause()) {
+            final String elseIfLabel = nextLabel();
+            visitConditionalBody(elseIfLabel, elseLabel, elseIf.expr(), elseIf.block());
+        }
+        if (ctx.elseClause() != null) {
+            ctx.elseClause().accept(this);
+            this.emitter.emit(OpCode.LABEL, elseLabel);
+        }
+        return null;
+    }
+
+    private void visitConditionalBody(String ifLabel, String elseLabel,
+                                      YLangParser.ExprContext expr,
+                                      YLangParser.BlockContext block) {
+        expr.accept(this);
+        this.emitter.emit(OpCode.BR_ZERO, ifLabel);
+        block.accept(this);
+        if (elseLabel != null) {
+            this.emitter.emit(OpCode.BR, elseLabel);
+        }
+        this.emitter.emit(OpCode.LABEL, ifLabel);
+    }
+
+    @Override
+    public Void visitExpr(YLangParser.ExprContext ctx) {
+        ctx.condition().accept(this);
+        if (ctx.term() != null) {
+            final String elseLabel = nextLabel();
+            final String endLabel = nextLabel();
+            emitter.emit(OpCode.BR_ZERO, elseLabel);
+            ctx.term().accept(this);
+            emitter.emit(OpCode.BR, endLabel);
+            emitter.emit(OpCode.LABEL, elseLabel);
+            ctx.expr().accept(this);
+            emitter.emit(OpCode.LABEL, endLabel);
+        }
         return null;
     }
 
@@ -63,9 +110,9 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         super.visitCondition(ctx);
         if (ctx.conditionOp() != null) {
             if (ctx.conditionOp().Or() != null) {
-                this.instructions.add(new Instruction(OpCode.OR));
+                this.emitter.emit(OpCode.OR);
             } else if (ctx.conditionOp().And() != null) {
-                this.instructions.add(new Instruction(OpCode.AND));
+                this.emitter.emit(OpCode.AND);
             }
         }
         return null;
@@ -78,19 +125,19 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         if (comparator != null) {
             ctx.tuple(1).accept(this);
             if (comparator.Eq() != null) {
-                this.instructions.add(new Instruction(OpCode.EQ));
+                this.emitter.emit(OpCode.EQ);
             } else if (comparator.Lt() != null) {
-                this.instructions.add(new Instruction(OpCode.LT));
+                this.emitter.emit(OpCode.LT);
             } else if (comparator.Le() != null) {
-                this.instructions.add(new Instruction(OpCode.LE));
+                this.emitter.emit(OpCode.LE);
             } else if (comparator.Gt() != null) {
-                this.instructions.add(new Instruction(OpCode.GT));
+                this.emitter.emit(OpCode.GT);
             } else if (comparator.Ge() != null) {
-                this.instructions.add(new Instruction(OpCode.GE));
+                this.emitter.emit(OpCode.GE);
             } else if (comparator.Ne() != null) {
-                this.instructions.add(new Instruction(OpCode.NEQ));
+                this.emitter.emit(OpCode.NEQ);
             } else if (comparator.In() != null) {
-                this.instructions.add(new Instruction(OpCode.IN));
+                this.emitter.emit(OpCode.IN);
             }
         }
         return null;
@@ -100,7 +147,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     public Void visitTuple(YLangParser.TupleContext ctx) {
         super.visitTuple(ctx);
         if (ctx.Pair() != null) {
-            this.instructions.add(new Instruction(OpCode.MK_POINT));
+            this.emitter.emit(OpCode.MK_POINT);
         }
         return null;
     }
@@ -112,11 +159,11 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         for (final var op : ctx.termOp()) {
             ctx.product(index).accept(this);
             if (op.Plus() != null) {
-                this.instructions.add(new Instruction(OpCode.ADD));
+                this.emitter.emit(OpCode.ADD);
             } else if (op.Minus() != null) {
-                this.instructions.add(new Instruction(OpCode.SUB));
+                this.emitter.emit(OpCode.SUB);
             } else if (op.Cmp() != null) {
-                this.instructions.add(new Instruction(OpCode.CMP));
+                this.emitter.emit(OpCode.CMP);
             } else if (op.Concat() != null) {
                 throw new UnsupportedOperationException();
             }
@@ -132,11 +179,11 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         for (final var op : ctx.productOp()) {
             ctx.molecule(index).accept(this);
             if (op.Times() != null) {
-                this.instructions.add(new Instruction(OpCode.MUL));
+                this.emitter.emit(OpCode.MUL);
             } else if (op.Div() != null) {
-                this.instructions.add(new Instruction(OpCode.DIV));
+                this.emitter.emit(OpCode.DIV);
             } else if (op.Mod() != null) {
-                this.instructions.add(new Instruction(OpCode.MOD));
+                this.emitter.emit(OpCode.MOD);
             }
             index++;
         }
@@ -158,9 +205,9 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitAtomPrefix(YLangParser.AtomPrefixContext ctx) {
         if (ctx.Not() != null) {
-            this.instructions.add(new Instruction(OpCode.NOT));
+            this.emitter.emit(OpCode.NOT);
         } else if (ctx.Minus() != null) {
-            this.instructions.add(new Instruction(OpCode.NEG));
+            this.emitter.emit(OpCode.NEG);
         } else if (ctx.At() != null) {
             throw new UnsupportedOperationException();
         }
@@ -170,32 +217,32 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitAtom(YLangParser.AtomContext ctx) {
         if (ctx.Nil() != null) {
-            this.instructions.add(new Instruction(OpCode.LD_VAL, NilVal.INSTANCE));
+            this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
         } else if (ctx.number() != null) {
-            this.instructions.add(new Instruction(OpCode.LD_VAL, parseNumber(ctx.number().getText())));
+            this.emitter.emit(OpCode.LD_VAL, parseNumber(ctx.number().getText()));
         } else if (ctx.String() != null) {
-            this.instructions.add(new Instruction(OpCode.LD_VAL, new StringVal(ctx.number().getText())));
+            this.emitter.emit(OpCode.LD_VAL, new StringVal(ctx.number().getText()));
         } else if (ctx.Ident() != null) {
             final Integer addr = this.globals.get(ctx.Ident().getText());
             if (addr == null) {
                 logSemanticError(ctx, "unknown identifier " + ctx.Ident());
             } else {
-                this.instructions.add(new Instruction(OpCode.LD_GLB, addr));
+                this.emitter.emit(OpCode.LD_GLB, addr);
             }
         } else if (ctx.True() != null) {
-            this.instructions.add(new Instruction(OpCode.LD_VAL, BoolVal.TRUE));
+            this.emitter.emit(OpCode.LD_VAL, BoolVal.TRUE);
         } else if (ctx.False() != null) {
-            this.instructions.add(new Instruction(OpCode.LD_VAL, BoolVal.FALSE));
+            this.emitter.emit(OpCode.LD_VAL, BoolVal.FALSE);
         } else if (ctx.kernel() != null) {
             final List<NumberVal> numbers = ctx.kernel().number().stream()
                     .map(n -> parseNumber(n.getText()))
                     .collect(Collectors.toList());
-            this.instructions.add(new Instruction(OpCode.LD_VAL, new KernelVal(numbers)));
+            this.emitter.emit(OpCode.LD_VAL, new KernelVal(numbers));
         } else if (ctx.Color() != null) {
-            this.instructions.add(new Instruction(OpCode.LD_VAL, parseColor(ctx.Color().getText())));
+            this.emitter.emit(OpCode.LD_VAL, parseColor(ctx.Color().getText()));
         } else if (ctx.list() != null) {
             ctx.list().accept(this);
-            this.instructions.add(new Instruction(OpCode.MK_LIST, ctx.list().arguments().expr().size()));
+            this.emitter.emit(OpCode.MK_LIST, ctx.list().arguments().expr().size());
         } else if (ctx.map() != null) {
             throw new UnsupportedOperationException();
         } else if (ctx.expr() != null) {
@@ -205,7 +252,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     public Program buildProgram() {
-        return new Program(this.instructions);
+        return this.emitter.buildProgram();
     }
 
     private void logSemanticError(ParserRuleContext ctx, String message) {
@@ -226,5 +273,11 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
                 ? Integer.parseInt(tokens[1], 16)
                 : 255;
         return new RgbVal(rgb >> 16 & 0xff, rgb >> 8 & 0xff, rgb & 0xff, alpha);
+    }
+
+    private String nextLabel() {
+        final String label = "@lbl" + this.labelNumber;
+        this.labelNumber++;
+        return label;
     }
 }
