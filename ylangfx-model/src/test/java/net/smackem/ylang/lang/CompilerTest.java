@@ -132,4 +132,44 @@ public class CompilerTest {
         assertThat(retVal).isEqualTo(NumberVal.ONE);
         System.out.println(program.toString());
     }
+
+    @Test
+    public void whileStmt() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := 0
+                b := 10
+                while a < 10 {
+                    b = b - 1
+                    a = a + 1
+                }
+                return [a, b]
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(10),
+                NumberVal.ZERO
+        )));
+        System.out.println(program.toString());
+    }
+
+    @Test
+    public void prematureReturn() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                while 1 < 10 {
+                    return 666;
+                }
+                return 0;
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(666));
+        System.out.println(program.toString());
+    }
 }

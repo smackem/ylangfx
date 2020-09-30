@@ -90,6 +90,19 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitWhileStmt(YLangParser.WhileStmtContext ctx) {
+        final String loopLabel = nextLabel();
+        final String breakLabel = nextLabel();
+        this.emitter.emit(OpCode.LABEL, loopLabel);
+        ctx.expr().accept(this);
+        this.emitter.emit(OpCode.BR_ZERO, breakLabel);
+        ctx.block().accept(this);
+        this.emitter.emit(OpCode.BR, loopLabel);
+        this.emitter.emit(OpCode.LABEL, breakLabel);
+        return null;
+    }
+
+    @Override
     public Void visitExpr(YLangParser.ExprContext ctx) {
         ctx.condition().accept(this);
         if (ctx.term() != null) {
@@ -267,7 +280,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     private static RgbVal parseColor(String s) {
-        final String[] tokens = s.substring(1).split("\\:");
+        final String[] tokens = s.substring(1).split(":");
         final int rgb = Integer.parseInt(tokens[0], 16);
         final int alpha = tokens.length > 1
                 ? Integer.parseInt(tokens[1], 16)
