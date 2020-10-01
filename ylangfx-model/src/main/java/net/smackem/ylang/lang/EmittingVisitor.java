@@ -103,6 +103,11 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitForStmt(YLangParser.ForStmtContext ctx) {
+        return super.visitForStmt(ctx);
+    }
+
+    @Override
     public Void visitExpr(YLangParser.ExprContext ctx) {
         ctx.condition().accept(this);
         if (ctx.term() != null) {

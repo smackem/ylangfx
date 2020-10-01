@@ -35,6 +35,18 @@ class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
         return super.visitAssignStmt(ctx);
     }
 
+    @Override
+    public Void visitForStmt(YLangParser.ForStmtContext ctx) {
+        final String ident = ctx.Ident().getText();
+        this.globals.add(ident);
+        this.globals.add(getIteratorIdent(ident));
+        return super.visitForStmt(ctx);
+    }
+
+    static String getIteratorIdent(String itemIdent) {
+        return "<iter>" + itemIdent;
+    }
+
     private void logSemanticError(ParserRuleContext ctx, String message) {
         final String text = String.format("line %d, char %d: %s",
                 ctx.start.getLine(), ctx.start.getCharPositionInLine(), message);
