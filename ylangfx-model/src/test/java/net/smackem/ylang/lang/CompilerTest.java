@@ -24,9 +24,9 @@ public class CompilerTest {
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
+        System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new NumberVal(3));
-        System.out.println(program.toString());
     }
 
     @Test
@@ -41,13 +41,13 @@ public class CompilerTest {
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
+        System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new RgbVal(0xff, 0xcc, 0x88, 0x40),
                 new KernelVal(List.of(NumberVal.ZERO, NumberVal.ONE, NumberVal.MINUS_ONE, new NumberVal(2))),
                 new PointVal(120, 240)
         )));
-        System.out.println(program.toString());
     }
 
     @Test
@@ -61,12 +61,12 @@ public class CompilerTest {
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
+        System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 NumberVal.ONE,
                 NumberVal.ZERO
         )));
-        System.out.println(program.toString());
     }
 
     @Test
@@ -82,9 +82,9 @@ public class CompilerTest {
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
+        System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(NumberVal.ONE);
-        System.out.println(program.toString());
     }
 
     @Test
@@ -102,9 +102,9 @@ public class CompilerTest {
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
+        System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(NumberVal.ZERO);
-        System.out.println(program.toString());
     }
 
     @Test
@@ -128,9 +128,9 @@ public class CompilerTest {
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
+        System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(NumberVal.ONE);
-        System.out.println(program.toString());
     }
 
     @Test
@@ -148,12 +148,12 @@ public class CompilerTest {
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
+        System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(10),
                 NumberVal.ZERO
         )));
-        System.out.println(program.toString());
     }
 
     @Test
@@ -168,8 +168,26 @@ public class CompilerTest {
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
+        System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new NumberVal(666));
+    }
+
+    @Test
+    public void forStmt() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                n := 0
+                for x in |1 2 3 4| {
+                    n = n + x
+                }
+                return n
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
         System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(10));
     }
 }

@@ -104,7 +104,22 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
 
     @Override
     public Void visitForStmt(YLangParser.ForStmtContext ctx) {
-        return super.visitForStmt(ctx);
+        final String ident = ctx.Ident().getText();
+        final int itemAddr = this.globals.get(ident);
+        final int iteratorAddr = this.globals.get(DeclExtractingVisitor.getIteratorIdent(ident));
+        ctx.expr().accept(this);                 // push iterable
+        this.emitter.emit(OpCode.ITER);                 // push iterator
+        this.emitter.emit(OpCode.ST_GLB, iteratorAddr); // store iterator
+        final String loopLabel = nextLabel();
+        final String breakLabel = nextLabel();
+        this.emitter.emit(OpCode.LABEL, loopLabel);
+        this.emitter.emit(OpCode.LD_GLB, iteratorAddr); // iterator.next
+        this.emitter.emit(OpCode.BR_NEXT, breakLabel);
+        this.emitter.emit(OpCode.ST_GLB, itemAddr);     // store item
+        ctx.block().accept(this);
+        this.emitter.emit(OpCode.BR, loopLabel);
+        this.emitter.emit(OpCode.LABEL, breakLabel);
+        return null;
     }
 
     @Override

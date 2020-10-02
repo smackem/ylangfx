@@ -30,10 +30,22 @@ public final class Program {
 
     @Override
     public String toString() {
+        final int width;
+        if (this.instructions.size() >= 100_000) {
+            width = 6;
+        } else if (this.instructions.size() >= 10_000) {
+            width = 5;
+        } else if (this.instructions.size() >= 1_000) {
+            width = 4;
+        } else {
+            width = 3;
+        }
         final StringBuilder sb = new StringBuilder();
+        final String format = "%" + width + "d %s\n";
+        int index = 0;
         for (final Instruction instr : this.instructions) {
-            sb.append(instr.toString());
-            sb.append("\n");
+            sb.append(format.formatted(index, instr));
+            index++;
         }
         return sb.toString();
     }
@@ -51,11 +63,5 @@ public final class Program {
     @Override
     public int hashCode() {
         return instructions.hashCode();
-    }
-
-    public static class ParseException extends Exception {
-        private ParseException(String message, Throwable cause) {
-            super(message, cause);
-        }
     }
 }
