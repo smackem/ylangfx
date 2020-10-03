@@ -190,4 +190,29 @@ public class CompilerTest {
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new NumberVal(10));
     }
+
+    @Test
+    public void multipleForStmts() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                n := 0
+                for x in |1 2 3 4| {
+                    n = n + x
+                }
+                m := 1
+                for x1 in [1, 2, 3, 4] {
+                    m = m + x1
+                }
+                return [n, m]
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(10),
+                new NumberVal(11)
+        )));
+    }
 }

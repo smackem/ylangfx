@@ -26,7 +26,8 @@ assignStmt
     ;
 
 invocationStmt
-    : atom atomSuffix* invocationSuffix
+    : Ident invocationSuffix
+    | atom atomSuffix*
     ;
 
 ifStmt
@@ -131,11 +132,10 @@ atomPrefix
 atomSuffix
     : memberSuffix
     | indexSuffix
-    | invocationSuffix
     ;
 
 memberSuffix
-    : Dot Ident
+    : Dot Ident invocationSuffix?
     ;
 
 indexSuffix

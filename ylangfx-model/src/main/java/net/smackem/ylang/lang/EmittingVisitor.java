@@ -17,7 +17,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     private final Map<String, Integer> globals = new HashMap<>();
     private int labelNumber = 1;
 
-    public EmittingVisitor(List<String> globals) {
+    public EmittingVisitor(Collection<String> globals) {
         int index = 0;
         for (final String ident : globals) {
             this.globals.put(ident, index);
