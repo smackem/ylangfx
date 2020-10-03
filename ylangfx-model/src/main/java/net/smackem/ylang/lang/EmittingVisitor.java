@@ -226,11 +226,33 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitMolecule(YLangParser.MoleculeContext ctx) {
         ctx.atom().accept(this);
-        if (ctx.atomSuffix().isEmpty() == false) {
-            throw new UnsupportedOperationException();
+        for (final var atomSuffix : ctx.atomSuffix()) {
+            atomSuffix.accept(this);
         }
         if (ctx.atomPrefix() != null) {
             ctx.atomPrefix().accept(this);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
+        super.visitIndexSuffix(ctx);
+        this.emitter.emit(OpCode.IDX);
+        return null;
+    }
+
+    @Override
+    public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
+        if (ctx.invocationSuffix() != null) {
+            final int argCount = ctx.invocationSuffix().arguments() != null
+                    ? ctx.invocationSuffix().arguments().expr().size()
+                    : 0;
+            ctx.invocationSuffix().accept(this);
+            // method receiver is first argument -> argCount + 1
+            this.emitter.emit(OpCode.INVOKE, argCount + 1, ctx.Ident().getText());
+        } else {
+            this.emitter.emit(OpCode.INVOKE_P, ctx.Ident().getText());
         }
         return null;
     }
@@ -253,8 +275,6 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
         } else if (ctx.number() != null) {
             this.emitter.emit(OpCode.LD_VAL, parseNumber(ctx.number().getText()));
-        } else if (ctx.String() != null) {
-            this.emitter.emit(OpCode.LD_VAL, new StringVal(ctx.number().getText()));
         } else if (ctx.Ident() != null) {
             final Integer addr = this.globals.get(ctx.Ident().getText());
             if (addr == null) {
@@ -262,6 +282,8 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             } else {
                 this.emitter.emit(OpCode.LD_GLB, addr);
             }
+        } else if (ctx.String() != null) {
+            this.emitter.emit(OpCode.LD_VAL, new StringVal(ctx.number().getText()));
         } else if (ctx.True() != null) {
             this.emitter.emit(OpCode.LD_VAL, BoolVal.TRUE);
         } else if (ctx.False() != null) {
@@ -280,7 +302,19 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             throw new UnsupportedOperationException();
         } else if (ctx.expr() != null) {
             ctx.expr().accept(this);
+        } else if (ctx.functionInvocation() != null) {
+            ctx.functionInvocation().accept(this);
         }
+        return null;
+    }
+
+    @Override
+    public Void visitFunctionInvocation(YLangParser.FunctionInvocationContext ctx) {
+        final int argCount = ctx.invocationSuffix().arguments() != null
+                ? ctx.invocationSuffix().arguments().expr().size()
+                : 0;
+        ctx.invocationSuffix().accept(this);
+        this.emitter.emit(OpCode.INVOKE, argCount, ctx.Ident().getText());
         return null;
     }
 

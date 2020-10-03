@@ -215,4 +215,42 @@ public class CompilerTest {
                 new NumberVal(11)
         )));
     }
+
+    @Test
+    public void indexedAtom() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                l := [1, 2, 3, 4]
+                k := |1 2 3 4|
+                return [l[0], k[1;1]]
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(1),
+                new NumberVal(4)
+        )));
+    }
+
+    @Test
+    public void invocations() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                c := #a0b0c0
+                return [c.r, c.g(), b(c)]
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(0xa0),
+                new NumberVal(0xb0),
+                new NumberVal(0xc0)
+        )));
+    }
 }

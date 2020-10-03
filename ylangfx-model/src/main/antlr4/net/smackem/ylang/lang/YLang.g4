@@ -158,6 +158,11 @@ atom
     | map
     | list
     | '(' expr ')'
+    | functionInvocation
+    ;
+
+functionInvocation
+    : Ident invocationSuffix
     ;
 
 kernel
