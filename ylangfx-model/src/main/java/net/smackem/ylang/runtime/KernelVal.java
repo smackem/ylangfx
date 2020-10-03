@@ -36,6 +36,10 @@ public class KernelVal extends Value implements Iterable<Value> {
         return this.values[index];
     }
 
+    public void set(int index, NumberVal n) {
+        this.values[index] = n;
+    }
+
     public int width() {
         return this.width;
     }

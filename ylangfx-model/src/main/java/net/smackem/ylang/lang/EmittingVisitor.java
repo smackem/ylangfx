@@ -1,5 +1,6 @@
 package net.smackem.ylang.lang;
 
+import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.runtime.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     private final List<String> semanticErrors = new ArrayList<>();
     private final Map<String, Integer> globals = new HashMap<>();
     private int labelNumber = 1;
+    private boolean lvalueAtom = false;
+    private YLangParser.ExprContext rvalueExpr;
 
     public EmittingVisitor(Collection<String> globals) {
         int index = 0;
@@ -41,8 +44,8 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
 
     @Override
     public Void visitAssignStmt(YLangParser.AssignStmtContext ctx) {
-        super.visitAssignStmt(ctx);
         if (ctx.atom() == null) { // assign to ident, not to lvalue-expr
+            ctx.expr().accept(this);
             final String ident = ctx.Ident().getText();
             final Integer addr = this.globals.get(ident);
             if (addr == null) {
@@ -50,6 +53,17 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             } else {
                 this.emitter.emit(OpCode.ST_GLB, addr);
             }
+        } else {
+            int index = 0;
+            ctx.atom().accept(this);
+            this.rvalueExpr = ctx.expr();
+            for (final var atomSuffix : ctx.atomSuffix()) {
+                this.lvalueAtom = index == ctx.atomSuffix().size() - 1;
+                atomSuffix.accept(this);
+                this.lvalueAtom = false;
+                index++;
+            }
+            this.rvalueExpr = null;
         }
         return null;
     }
@@ -119,6 +133,24 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         ctx.block().accept(this);
         this.emitter.emit(OpCode.BR, loopLabel);
         this.emitter.emit(OpCode.LABEL, breakLabel);
+        return null;
+    }
+
+    @Override
+    public Void visitInvocationStmt(YLangParser.InvocationStmtContext ctx) {
+        if (ctx.Ident() != null) {
+            final int argCount = ctx.invocationSuffix().arguments() != null
+                    ? ctx.invocationSuffix().arguments().expr().size()
+                    : 0;
+            ctx.invocationSuffix().accept(this);
+            this.emitter.emit(OpCode.INVOKE, argCount, ctx.Ident().getText());
+        } else {
+            ctx.atom().accept(this);
+            for (final var atomSuffix : ctx.atomSuffix()) {
+                atomSuffix.accept(this);
+            }
+            this.emitter.emit(OpCode.POP); // discard result
+        }
         return null;
     }
 
@@ -238,13 +270,23 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
         super.visitIndexSuffix(ctx);
-        this.emitter.emit(OpCode.IDX);
+        if (this.lvalueAtom) {
+            this.rvalueExpr.accept(this);
+            this.emitter.emit(OpCode.INVOKE, 3, FunctionRegistry.FUNCTION_NAME_SET_AT);
+            this.emitter.emit(OpCode.POP); // like all functions, setAt returns a value -> discard it
+        } else {
+            this.emitter.emit(OpCode.IDX);
+        }
         return null;
     }
 
     @Override
     public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
         if (ctx.invocationSuffix() != null) {
+            if (this.lvalueAtom) {
+                this.semanticErrors.add("cannot assign to invocation");
+                return null;
+            }
             final int argCount = ctx.invocationSuffix().arguments() != null
                     ? ctx.invocationSuffix().arguments().expr().size()
                     : 0;
@@ -252,6 +294,9 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             // method receiver is first argument -> argCount + 1
             this.emitter.emit(OpCode.INVOKE, argCount + 1, ctx.Ident().getText());
         } else {
+            if (this.lvalueAtom) {
+                throw new UnsupportedOperationException("not yet implemented");
+            }
             this.emitter.emit(OpCode.INVOKE_P, ctx.Ident().getText());
         }
         return null;

@@ -16,7 +16,10 @@ public enum FunctionRegistry {
 
     private final Map<String, FunctionGroup> repository = new HashMap<>();
 
+    public static final String FUNCTION_NAME_SET_AT = "setAt";
+
     FunctionRegistry() {
+        CommonFunctions.register(this);
         RgbFunctions.register(this);
     }
 

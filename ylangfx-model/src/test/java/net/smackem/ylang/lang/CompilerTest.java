@@ -241,7 +241,8 @@ public class CompilerTest {
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
                 c := #a0b0c0
-                return [c.r, c.g(), b(c)]
+                d := [c][0].r
+                return [c.r, c.g(), b(c), d]
                 """, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
@@ -250,7 +251,28 @@ public class CompilerTest {
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(0xa0),
                 new NumberVal(0xb0),
-                new NumberVal(0xc0)
+                new NumberVal(0xc0),
+                new NumberVal(0xa0)
+        )));
+    }
+
+    @Test
+    public void indexAssignment() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                c := [1, 2, 3]
+                c[0] = 4; c[1] = 5
+                return c
+                """, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(4),
+                new NumberVal(5),
+                new NumberVal(3)
         )));
     }
 }

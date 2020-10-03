@@ -3,6 +3,7 @@ package net.smackem.ylang.execution.functions;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.runtime.ValueType;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,13 @@ final class FunctionGroup {
     private final Map<List<ValueType>, FunctionOverload> overloads = new HashMap<>();
 
     public FunctionGroup(String name, FunctionOverload... overloads) {
+        this.name = name;
+        for (final FunctionOverload overload : overloads) {
+            put(overload);
+        }
+    }
+
+    public FunctionGroup(String name, Collection<FunctionOverload> overloads) {
         this.name = name;
         for (final FunctionOverload overload : overloads) {
             put(overload);
