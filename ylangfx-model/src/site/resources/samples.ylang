@@ -1,8 +1,9 @@
 
-out := image(img.bounds)
+inp := $in
+out := image($in.bounds)
 
-for p in img.bounds {
-    out[p] = img[p]
+for p in $in.bounds {
+    out[p] = $in[p]
 }
 
 return out

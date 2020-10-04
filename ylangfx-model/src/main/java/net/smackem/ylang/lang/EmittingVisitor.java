@@ -272,6 +272,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     public Void visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
         super.visitIndexSuffix(ctx);
         if (this.lvalueAtom) {
+            this.lvalueAtom = false;
             this.rvalueExpr.accept(this);
             this.emitter.emit(OpCode.INVOKE, 3, this.functionTable.indexAssignmentFunction());
             this.emitter.emit(OpCode.POP); // like all functions, setAt returns a value -> discard it
@@ -356,6 +357,8 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             ctx.expr().accept(this);
         } else if (ctx.functionInvocation() != null) {
             ctx.functionInvocation().accept(this);
+        } else if (ctx.EnvironmentArg() != null) {
+            this.emitter.emit(OpCode.LD_ENV, ctx.EnvironmentArg().getText().substring(1));
         }
         return null;
     }

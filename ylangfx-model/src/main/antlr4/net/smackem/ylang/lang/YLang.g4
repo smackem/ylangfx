@@ -27,7 +27,7 @@ assignStmt
 
 invocationStmt
     : Ident invocationSuffix
-    | atom atomSuffix*
+    | atom atomSuffix+
     ;
 
 ifStmt
@@ -154,11 +154,12 @@ atom
     | True
     | False
     | Nil
+    | EnvironmentArg
     | kernel
     | map
     | list
-    | '(' expr ')'
     | functionInvocation
+    | '(' expr ')'
     ;
 
 functionInvocation
@@ -213,6 +214,10 @@ Nil     : 'nil';
 
 number
     : ('+' | '-')? Number
+    ;
+
+EnvironmentArg
+    : '$' Ident
     ;
 
 Ident

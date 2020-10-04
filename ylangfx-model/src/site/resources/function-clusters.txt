@@ -9,12 +9,12 @@ hsv
 --------- image
 image
 convolute
-blt
-fetchRed
-fetchGreen
-fetchBlue
-fetchAlpha
-clip
+bltFrom
+subImage
+redKernel
+greenKernel
+blueKernel
+alphaKernel
 interpolate
 plot
 

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class Interpreter {
     private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
@@ -34,10 +35,13 @@ public class Interpreter {
         final Stack stack = this.ctx.stack();
         while (pc < programSize) {
             final Instruction instr = instructions.get(pc);
-            log.debug("@{}: {}, stack.size={}", String.format("%4d", pc), instr.opCode(), stack.size());
+            if (log.isDebugEnabled()) {
+                log.debug("@{}: {}, stack.size={}", String.format("%4d", pc), instr.opCode(), stack.size());
+            }
             switch (instr.opCode()) {
                 case LD_VAL -> stack.push(instr.valueArg());
                 case LD_GLB -> stack.push(stack.get(instr.intArg()));
+                case LD_ENV -> stack.push(Objects.equals(instr.strArg(), "in") ? ctx.inputImage() : NilVal.INSTANCE);
                 case ST_GLB -> stack.set(instr.intArg(), stack.pop());
                 case LD_LOC -> stack.push(stack.get(instr.intArg() + stackFrameIndex));
                 case ST_LOC -> stack.set(instr.intArg() + stackFrameIndex, stack.pop());

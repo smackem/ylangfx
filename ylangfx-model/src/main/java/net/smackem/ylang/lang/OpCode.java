@@ -4,6 +4,7 @@ public enum OpCode {
     LD_VAL,     // push valueArg
     LD_LOC,     // push local intArg
     LD_GLB,     // push global intArg
+    LD_ENV,     // push environment[strArg] (e.g. input image)
     ST_LOC,     // pop a, store a to local intArg
     ST_GLB,     // pop a, store a to global intArg
     ADD,        // pop b, pop a, push a + b

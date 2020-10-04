@@ -243,16 +243,18 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
+                a := b(#a0b0c0)
                 c := #a0b0c0
                 d := [c][0].r
                 e := #ffffff:80.over(#000000)
-                return [c.r, c.g(), b(c), d, e]
+                return [a, c.r, c.g(), b(c), d, e]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(0xc0),
                 new NumberVal(0xa0),
                 new NumberVal(0xb0),
                 new NumberVal(0xc0),
@@ -279,5 +281,33 @@ public class IntegrationTest {
                 new NumberVal(5),
                 new NumberVal(3)
         )));
+    }
+
+    @Test
+    public void image() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                inp := $in
+                out := image(inp.bounds())
+                for p in inp.bounds {
+                    out[p] = -inp[p]
+                }
+                return out
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final ImageVal inputImage = new ImageVal(16, 16);
+        final Value retVal = new Interpreter(program, inputImage).execute();
+        assertThat(retVal).isInstanceOf(ImageVal.class);
+        final ImageVal outputImage = (ImageVal) retVal;
+        assertThat(outputImage.width()).isEqualTo(inputImage.width());
+        assertThat(outputImage.height()).isEqualTo(inputImage.height());
+        for (int y = 0; y < outputImage.height(); y++) {
+            for (int x = 0; x < outputImage.width(); x++) {
+                assertThat(outputImage.getPixel(x, y)).isEqualTo(inputImage.getPixel(x, y).invert());
+            }
+        }
     }
 }
