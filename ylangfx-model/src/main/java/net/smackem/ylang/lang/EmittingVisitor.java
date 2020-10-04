@@ -1,6 +1,5 @@
 package net.smackem.ylang.lang;
 
-import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.runtime.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(EmittingVisitor.class);
     private static final String endLabel = "@end";
+    private final FunctionTable functionTable;
     private final Emitter emitter = new Emitter();
     private final List<String> semanticErrors = new ArrayList<>();
     private final Map<String, Integer> globals = new HashMap<>();
@@ -20,7 +20,8 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     private boolean lvalueAtom = false;
     private YLangParser.ExprContext rvalueExpr;
 
-    public EmittingVisitor(Collection<String> globals) {
+    public EmittingVisitor(Collection<String> globals, FunctionTable functionTable) {
+        this.functionTable = functionTable;
         int index = 0;
         for (final String ident : globals) {
             this.globals.put(ident, index);
@@ -272,7 +273,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         super.visitIndexSuffix(ctx);
         if (this.lvalueAtom) {
             this.rvalueExpr.accept(this);
-            this.emitter.emit(OpCode.INVOKE, 3, FunctionRegistry.FUNCTION_NAME_SET_AT);
+            this.emitter.emit(OpCode.INVOKE, 3, this.functionTable.indexAssignmentFunction());
             this.emitter.emit(OpCode.POP); // like all functions, setAt returns a value -> discard it
         } else {
             this.emitter.emit(OpCode.IDX);
@@ -282,6 +283,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
 
     @Override
     public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
+        final String ident = ctx.Ident().getText();
         if (ctx.invocationSuffix() != null) {
             if (this.lvalueAtom) {
                 this.semanticErrors.add("cannot assign to invocation");
@@ -292,12 +294,17 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
                     : 0;
             ctx.invocationSuffix().accept(this);
             // method receiver is first argument -> argCount + 1
-            this.emitter.emit(OpCode.INVOKE, argCount + 1, ctx.Ident().getText());
+            this.emitter.emit(OpCode.INVOKE, argCount + 1, ident);
         } else {
             if (this.lvalueAtom) {
-                throw new UnsupportedOperationException("not yet implemented");
+                throw new UnsupportedOperationException("assignment of map values is not yet implemented");
             }
-            this.emitter.emit(OpCode.INVOKE_P, ctx.Ident().getText());
+            if (this.functionTable.contains(ident)) {
+                this.emitter.emit(OpCode.INVOKE, 1, ident);
+            } else {
+                this.emitter.emit(OpCode.LD_VAL, ident); // emit x.property as x["property"]
+                this.emitter.emit(OpCode.IDX);
+            }
         }
         return null;
     }

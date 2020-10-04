@@ -10,7 +10,7 @@ import java.util.Collection;
 
 public class Compiler {
 
-    public Program compile(String source, Collection<String> outErrors) {
+    public Program compile(String source, FunctionTable functionTable, Collection<String> outErrors) {
         final CharStream input = CharStreams.fromString(source);
         final YLangLexer lexer = new YLangLexer(input);
         final ErrorListener errorListener = new ErrorListener();
@@ -27,7 +27,7 @@ public class Compiler {
         if (outErrors.addAll(declExtractor.semanticErrors())) {
             return null;
         }
-        final EmittingVisitor emitter = new EmittingVisitor(declExtractor.globals());
+        final EmittingVisitor emitter = new EmittingVisitor(declExtractor.globals(), functionTable);
         tree.accept(emitter);
         if (outErrors.addAll(emitter.semanticErrors())) {
             return null;

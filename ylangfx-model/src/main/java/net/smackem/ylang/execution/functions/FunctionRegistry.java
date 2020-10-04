@@ -1,8 +1,7 @@
 package net.smackem.ylang.execution.functions;
 
 import net.smackem.ylang.execution.MissingOverloadException;
-import net.smackem.ylang.runtime.NumberVal;
-import net.smackem.ylang.runtime.RgbVal;
+import net.smackem.ylang.lang.FunctionTable;
 import net.smackem.ylang.runtime.Value;
 import net.smackem.ylang.runtime.ValueType;
 
@@ -11,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public enum FunctionRegistry {
+public enum FunctionRegistry implements FunctionTable {
     INSTANCE;
 
     private final Map<String, FunctionGroup> repository = new HashMap<>();
 
-    public static final String FUNCTION_NAME_SET_AT = "setAt";
+    static final String FUNCTION_NAME_SET_AT = "setAt";
 
     FunctionRegistry() {
         CommonFunctions.register(this);
@@ -25,6 +24,16 @@ public enum FunctionRegistry {
 
     void put(FunctionGroup functionGroup) {
         this.repository.put(functionGroup.name(), functionGroup);
+    }
+
+    @Override
+    public String indexAssignmentFunction() {
+        return FUNCTION_NAME_SET_AT;
+    }
+
+    @Override
+    public boolean contains(String name) {
+        return this.repository.containsKey(name);
     }
 
     public Value invoke(String name, List<Value> values) throws MissingOverloadException {

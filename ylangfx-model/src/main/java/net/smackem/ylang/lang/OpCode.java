@@ -29,7 +29,6 @@ public enum OpCode {
     IN,         // pop b, pop a, push a in b
     CMP,        // pop b, pop a, push a compareTo b (< 0, 0, > 0)
     INVOKE,     // pop intArg arguments, call built-in function strArg with popped arguments
-    INVOKE_P,   // pop a, if a is map: push a.strArg, else: call built-in function strArg(a)
     POP,        // pop a, discard
     ITER,       // pop a, push a.iterator()
     BR_NEXT,    // pop a, push a.next if a.next not null, otherwise branch to intArg

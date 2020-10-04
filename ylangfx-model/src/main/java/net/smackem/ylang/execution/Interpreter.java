@@ -133,12 +133,6 @@ public class Interpreter {
                     final Value result = FunctionRegistry.INSTANCE.invoke(instr.strArg(), args);
                     stack.push(result);
                 }
-                case INVOKE_P -> {
-                    final Value v = stack.pop();
-                    // if v instanceof MapValue: push v[strArg]
-                    final Value result = FunctionRegistry.INSTANCE.invoke(instr.strArg(), List.of(v));
-                    stack.push(result);
-                }
                 case ITER -> {
                     final Value iterable = stack.pop();
                     if (iterable instanceof Iterable == false) {

@@ -1,8 +1,11 @@
-package net.smackem.ylang.lang;
+package net.smackem.ylang;
 
 import net.smackem.ylang.execution.Interpreter;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.execution.StackException;
+import net.smackem.ylang.execution.functions.FunctionRegistry;
+import net.smackem.ylang.lang.Compiler;
+import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
@@ -11,7 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CompilerTest {
+public class IntegrationTest {
     @Test
     public void assignments() throws StackException, MissingOverloadException {
         final Compiler compiler = new Compiler();
@@ -21,7 +24,7 @@ public class CompilerTest {
                 b := 2
                 c := a + b
                 return c
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -38,7 +41,7 @@ public class CompilerTest {
                 b := |0 1 -1 2|
                 c := 120;240
                 return [a, b, c]
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -58,7 +61,7 @@ public class CompilerTest {
                 a := 100 < 200 ? 1 : 0;
                 b := 100 > 200 ? 1 : 0;
                 return [a, b]
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -79,7 +82,7 @@ public class CompilerTest {
                     a = 1
                 }
                 return a
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -99,7 +102,7 @@ public class CompilerTest {
                     a = 0
                 }
                 return a
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -125,7 +128,7 @@ public class CompilerTest {
                     a = 0
                 }
                 return a
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -145,7 +148,7 @@ public class CompilerTest {
                     a = a + 1
                 }
                 return [a, b]
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -165,7 +168,7 @@ public class CompilerTest {
                     return 666;
                 }
                 return 0;
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -183,7 +186,7 @@ public class CompilerTest {
                     n = n + x
                 }
                 return n
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -205,7 +208,7 @@ public class CompilerTest {
                     m = m + x1
                 }
                 return [n, m]
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -224,7 +227,7 @@ public class CompilerTest {
                 l := [1, 2, 3, 4]
                 k := |1 2 3 4|
                 return [l[0], k[1;1]]
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -242,8 +245,9 @@ public class CompilerTest {
         final Program program = compiler.compile("""
                 c := #a0b0c0
                 d := [c][0].r
-                return [c.r, c.g(), b(c), d]
-                """, errors);
+                e := #ffffff:80.over(#000000)
+                return [c.r, c.g(), b(c), d, e]
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
@@ -252,7 +256,8 @@ public class CompilerTest {
                 new NumberVal(0xa0),
                 new NumberVal(0xb0),
                 new NumberVal(0xc0),
-                new NumberVal(0xa0)
+                new NumberVal(0xa0),
+                new RgbVal(128, 128, 128, 255)
         )));
     }
 
@@ -264,7 +269,7 @@ public class CompilerTest {
                 c := [1, 2, 3]
                 c[0] = 4; c[1] = 5
                 return c
-                """, errors);
+                """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
