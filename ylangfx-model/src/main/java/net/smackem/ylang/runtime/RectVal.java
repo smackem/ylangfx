@@ -3,7 +3,7 @@ package net.smackem.ylang.runtime;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class RectVal extends Value implements Iterable<Value> {
+public class RectVal extends GeometryVal {
     private final float x, y, width, height;
 
     public static final RectVal EMPTY = new RectVal(0f, 0f, 0f, 0f);
@@ -40,7 +40,8 @@ public class RectVal extends Value implements Iterable<Value> {
         return this.y + this.height;
     }
 
-    public RectVal translate(PointVal pt) {
+    @Override
+    public GeometryVal translate(PointVal pt) {
         return new RectVal(this.x + pt.x(), this.y + pt.y(), this.width, this.height);
     }
 

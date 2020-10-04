@@ -269,7 +269,7 @@ public class IntegrationTest {
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
                 c := [1, 2, 3]
-                c[0] = 4; c[1] = 5
+                c[0] = 4; c[1] = #ffffff
                 return c
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
@@ -278,13 +278,13 @@ public class IntegrationTest {
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(4),
-                new NumberVal(5),
+                new RgbVal(255, 255, 255, 255),
                 new NumberVal(3)
         )));
     }
 
     @Test
-    public void image() throws StackException, MissingOverloadException {
+    public void invertImage() throws StackException, MissingOverloadException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -298,7 +298,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final ImageVal inputImage = new ImageVal(16, 16);
+        final ImageVal inputImage = new ImageVal(2048, 2048);
         final Value retVal = new Interpreter(program, inputImage).execute();
         assertThat(retVal).isInstanceOf(ImageVal.class);
         final ImageVal outputImage = (ImageVal) retVal;
@@ -309,5 +309,44 @@ public class IntegrationTest {
                 assertThat(outputImage.getPixel(x, y)).isEqualTo(inputImage.getPixel(x, y).invert());
             }
         }
+    }
+
+    @Test
+    public void points() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                pt := 100;200
+                return [pt.x, pt.y]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(100),
+                new NumberVal(200)
+        )));
+    }
+
+    @Test
+    public void rectangles() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                rc1 := rect(100;200, 100, 50)
+                rc2 := rect(0;10, 20;30)
+                return [rc1, rc2, rc1.right, rc2.bottom]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new RectVal(100, 200, 100, 50),
+                new RectVal(0, 10, 20, 20),
+                new NumberVal(200),
+                new NumberVal(30)
+        )));
     }
 }

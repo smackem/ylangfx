@@ -5,6 +5,7 @@ import net.smackem.ylang.lang.FunctionTable;
 import net.smackem.ylang.runtime.Value;
 import net.smackem.ylang.runtime.ValueType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,7 @@ public enum FunctionRegistry implements FunctionTable {
         CommonFunctions.register(this);
         RgbFunctions.register(this);
         ImageFunctions.register(this);
+        GeometryFunctions.register(this);
     }
 
     void put(FunctionGroup functionGroup) {
@@ -42,9 +44,10 @@ public enum FunctionRegistry implements FunctionTable {
         if (fg == null) {
             throw new MissingOverloadException("no function with this name found: " + name);
         }
-        final List<ValueType> parameters = values.stream()
-                .map(Value::type)
-                .collect(Collectors.toList());
+        final List<ValueType> parameters = new ArrayList<>(values.size());
+        for (final Value v : values) {
+            parameters.add(v.type());
+        }
         return fg.get(parameters).invoke(values);
     }
 }
