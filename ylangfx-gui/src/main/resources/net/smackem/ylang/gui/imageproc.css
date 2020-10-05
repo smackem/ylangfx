@@ -11,7 +11,7 @@
 
 #codeEditor {
     -fx-font-family: 'Cascadia Code',monospace;
-    -fx-font-size: 13pt;
+    -fx-font-size: 12pt;
 }
 
 #logTextArea {

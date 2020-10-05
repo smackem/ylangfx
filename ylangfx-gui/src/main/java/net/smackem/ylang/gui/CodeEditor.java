@@ -29,17 +29,17 @@ public class CodeEditor extends CodeArea {
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
     private static final String COLOR_PATTERN = "#[0-9a-fA-F]+(:[0-9a-fA-F]{2})?\\b";
     private static final String PAREN_PATTERN = "\\(|\\)";
-    private static final String AT_PATTERN = "@";
+    private static final String AT_PATTERN = "\\$[A-Za-z0-9_]+\\b";
     private static final String FNCALL_PATTERN = "(\\b(?!fn)(?:[A-Za-z0-9_]+))\\(";
     private static final String NUMBER_PATTERN = "\\b\\d+(\\.\\d*)?\\b";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
     private static final String COMMENT_PATTERN = "//[^\n]*";
 
     private static final Pattern PATTERN = Pattern.compile(
-            "(?<KEYWORD>" + KEYWORD_PATTERN + ")"
+            "(?<AT>" + AT_PATTERN + ")"
+            + "|(?<KEYWORD>" + KEYWORD_PATTERN + ")"
             + "|(?<COLOR>" + COLOR_PATTERN + ")"
             + "|(?<PAREN>" + PAREN_PATTERN + ")"
-            + "|(?<AT>" + AT_PATTERN + ")"
             + "|(?<FNCALL>" + FNCALL_PATTERN + ")"
             + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
             + "|(?<STRING>" + STRING_PATTERN + ")"

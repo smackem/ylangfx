@@ -38,15 +38,6 @@ public class ImageVal extends Value {
         return new ImageVal(width, height, rgbPixels);
     }
 
-    public int[] toArgbPixels() {
-        final int[] buffer = new int[this.width * this.height];
-        final int pixelCount = buffer.length;
-        for (int i = 0; i < pixelCount; i++) {
-            buffer[i] = toIntArgb(this.pixels[i]);
-        }
-        return buffer;
-    }
-
     public int width() {
         return this.width;
     }
@@ -74,6 +65,15 @@ public class ImageVal extends Value {
         }
         final int index = y * this.width + x;
         this.pixels[index] = rgb;
+    }
+
+    public int[] toArgbPixels() {
+        final int[] buffer = new int[this.width * this.height];
+        final int pixelCount = buffer.length;
+        for (int i = 0; i < pixelCount; i++) {
+            buffer[i] = toIntArgb(this.pixels[i]);
+        }
+        return buffer;
     }
 
     private static RgbVal[] emptyPixels(int width, int height) {
