@@ -33,9 +33,18 @@ public class ImageVal extends Value {
         final RgbVal[] rgbPixels = new RgbVal[pixels.length];
         for (int i = 0; i < pixels.length; i++) {
             final int pixel = pixels[i];
-            rgbPixels[i] = new RgbVal(pixel >> 24 & 0xff, pixel >> 16 & 0xff, pixel >> 8 & 0xff, pixel & 0xff);
+            rgbPixels[i] = new RgbVal(pixel >> 16 & 0xff, pixel >> 8 & 0xff, pixel & 0xff, pixel >> 24 & 0xff);
         }
         return new ImageVal(width, height, rgbPixels);
+    }
+
+    public int[] toArgbPixels() {
+        final int[] buffer = new int[this.width * this.height];
+        final int pixelCount = buffer.length;
+        for (int i = 0; i < pixelCount; i++) {
+            buffer[i] = toIntArgb(this.pixels[i]);
+        }
+        return buffer;
     }
 
     public int width() {
@@ -80,10 +89,10 @@ public class ImageVal extends Value {
     }
 
     private static int toIntArgb(RgbVal rgb) {
-        return (int) RgbVal.clamp(rgb.r()) << 24
-               | (int) RgbVal.clamp(rgb.g()) << 16
-               | (int) RgbVal.clamp(rgb.b()) << 8
-               | (int) RgbVal.clamp(rgb.a());
+        return (int) RgbVal.clamp(rgb.a()) << 24
+               | (int) RgbVal.clamp(rgb.r()) << 16
+               | (int) RgbVal.clamp(rgb.g()) << 8
+               | (int) RgbVal.clamp(rgb.b());
     }
 
     @Override

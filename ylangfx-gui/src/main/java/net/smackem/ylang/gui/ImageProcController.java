@@ -3,6 +3,8 @@ package net.smackem.ylang.gui;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
@@ -13,16 +15,23 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.image.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
+import net.smackem.ylang.execution.Interpreter;
+import net.smackem.ylang.execution.MissingOverloadException;
+import net.smackem.ylang.execution.StackException;
+import net.smackem.ylang.execution.functions.FunctionRegistry;
+import net.smackem.ylang.lang.Compiler;
+import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.model.ProcessImageResult;
 import net.smackem.ylang.model.RemoteImageProcService;
+import net.smackem.ylang.runtime.ImageVal;
+import net.smackem.ylang.runtime.Value;
 
 import javax.imageio.ImageIO;
 
@@ -117,6 +126,34 @@ public class ImageProcController {
 
     @FXML
     private void processImage(ActionEvent actionEvent) {
+        processImageYLang2();
+    }
+
+    private void processImageYLang2() {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile(this.codeEditor.getText(), FunctionRegistry.INSTANCE, errors);
+        if (errors.isEmpty() == false) {
+            this.message.setValue(String.join("\n", errors));
+        }
+        if (program == null) {
+            return;
+        }
+        final Interpreter interpreter = new Interpreter(program, convertFromFX(this.sourceImage.get()));
+        final Value result;
+        try {
+            result = interpreter.execute();
+        } catch (StackException | MissingOverloadException e) {
+            this.message.setValue(e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+        if (result instanceof ImageVal) {
+            this.targetImage.set(convertToFX((ImageVal) result));
+        }
+    }
+
+    private void processImageRemote() {
         this.isRunning.setValue(true);
         final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
         final String sourceCode = this.codeEditor.getText();
@@ -135,6 +172,25 @@ public class ImageProcController {
             this.tabPane.getSelectionModel().select(targetTab);
             this.isRunning.setValue(false);
         });
+    }
+
+    private static ImageVal convertFromFX(Image image) {
+        final PixelReader pixelReader = image.getPixelReader();
+        final int width = (int) image.getWidth();
+        final int height = (int) image.getHeight();
+        final int[] buffer = new int[width * height];
+        pixelReader.getPixels(0, 0, width, height, PixelFormat.getIntArgbInstance(), buffer, 0, width);
+        return ImageVal.fromArgbPixels(width, height, buffer);
+    }
+
+    private static Image convertToFX(ImageVal image) {
+        final int width = image.width();
+        final int height = image.height();
+        final WritableImage wImage = new WritableImage(width, height);
+        final PixelWriter pixelWriter = wImage.getPixelWriter();
+        final int[] buffer = image.toArgbPixels();
+        pixelWriter.setPixels(0, 0, width, height, PixelFormat.getIntArgbInstance(), buffer, 0, width);
+        return wImage;
     }
 
     @FXML

@@ -17,6 +17,8 @@
     <orderEntry type="library" name="Maven: org.openjfx:javafx-base:linux:14" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-fxml:linux:14" level="project" />
     <orderEntry type="library" name="Maven: org.openjfx:javafx-swing:linux:14" level="project" />
+    <orderEntry type="module" module-name="ylangfx-model" />
+    <orderEntry type="library" name="Maven: org.antlr:antlr4-runtime:4.7.2" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:28.2-jre" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:failureaccess:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava" level="project" />
