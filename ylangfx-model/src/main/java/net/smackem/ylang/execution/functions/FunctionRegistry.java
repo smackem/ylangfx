@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public enum FunctionRegistry implements FunctionTable {
     INSTANCE;
@@ -19,10 +18,11 @@ public enum FunctionRegistry implements FunctionTable {
     static final String FUNCTION_NAME_SET_AT = "setAt";
 
     FunctionRegistry() {
-        CommonFunctions.register(this);
+        SpecialFunctions.register(this);
         RgbFunctions.register(this);
         ImageFunctions.register(this);
         GeometryFunctions.register(this);
+        MathFunctions.register(this);
     }
 
     void put(FunctionGroup functionGroup) {

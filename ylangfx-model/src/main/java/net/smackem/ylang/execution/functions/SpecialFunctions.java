@@ -5,25 +5,25 @@ import net.smackem.ylang.runtime.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CommonFunctions {
-    private CommonFunctions() {}
+public class SpecialFunctions {
+    private SpecialFunctions() {}
 
     static void register(FunctionRegistry registry) {
         final List<FunctionOverload> setAtOverloads = new ArrayList<>();
         for (final ValueType valueType : ValueType.values()) {
             setAtOverloads.add(FunctionOverload.function(
                     List.of(ValueType.LIST, ValueType.NUMBER, valueType),
-                    CommonFunctions::setListAtIndex));
+                    SpecialFunctions::setListAtIndex));
         }
         setAtOverloads.add(FunctionOverload.function(
                 List.of(ValueType.KERNEL, ValueType.NUMBER, ValueType.NUMBER),
-                CommonFunctions::setKernelAtIndex));
+                SpecialFunctions::setKernelAtIndex));
         setAtOverloads.add(FunctionOverload.function(
                 List.of(ValueType.KERNEL, ValueType.POINT, ValueType.NUMBER),
-                CommonFunctions::setKernelAtPoint));
+                SpecialFunctions::setKernelAtPoint));
         setAtOverloads.add(FunctionOverload.function(
                 List.of(ValueType.IMAGE, ValueType.POINT, ValueType.RGB),
-                CommonFunctions::setImageAtPoint));
+                SpecialFunctions::setImageAtPoint));
         registry.put(new FunctionGroup(FunctionRegistry.FUNCTION_NAME_SET_AT, setAtOverloads));
     }
 
