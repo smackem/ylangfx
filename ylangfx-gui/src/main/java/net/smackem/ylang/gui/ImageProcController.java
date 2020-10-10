@@ -1,26 +1,18 @@
 package net.smackem.ylang.gui;
 
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Future;
-
-import javafx.application.Platform;
-import javafx.beans.property.*;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Orientation;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import net.smackem.ylang.execution.Interpreter;
 import net.smackem.ylang.execution.MissingOverloadException;
@@ -28,12 +20,14 @@ import net.smackem.ylang.execution.StackException;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Program;
-import net.smackem.ylang.model.ProcessImageResult;
-import net.smackem.ylang.model.RemoteImageProcService;
 import net.smackem.ylang.runtime.ImageVal;
 import net.smackem.ylang.runtime.Value;
 
 import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImageProcController {
 
@@ -48,33 +42,28 @@ public class ImageProcController {
 
     @FXML
     private Button runButton;
-
     @FXML
     private TextArea logTextArea;
-
     @FXML
     private Tab logTab;
-
     @FXML
     private Tab targetTab;
-
     @FXML
     private Tab sourceTab;
-
     @FXML
     private TabPane tabPane;
-
     @FXML
     private ImageView sourceImageView;
-
     @FXML
     private ImageView targetImageView;
-
     @FXML
     private CodeEditor codeEditor;
-
     @FXML
     private Label messageTextArea;
+    @FXML
+    private SplitPane splitPane;
+    @FXML
+    private ToggleButton splitToggle;
 
     @FXML
     private void initialize() {
@@ -148,6 +137,7 @@ public class ImageProcController {
             e.printStackTrace();
             return;
         }
+        this.message.setValue(null);
         if (result instanceof ImageVal) {
             this.targetImage.set(convertToFX((ImageVal) result));
         }
@@ -225,5 +215,12 @@ public class ImageProcController {
         } else if (KEY_COMBINATION_SAVEAS.match(keyEvent)) {
             saveImageAs(new ActionEvent());
         }
+    }
+
+    @FXML
+    private void toggleHorizontalSplit(ActionEvent actionEvent) {
+        this.splitPane.setOrientation(this.splitToggle.isSelected()
+                ? Orientation.HORIZONTAL
+                : Orientation.VERTICAL);
     }
 }

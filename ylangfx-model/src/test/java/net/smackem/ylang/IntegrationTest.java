@@ -284,6 +284,28 @@ public class IntegrationTest {
     }
 
     @Test
+    public void compoundIndexAssignment() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                k := |1 2 3 4|
+                p := 0;0
+                k[p.x;p.y] = 100
+                return k
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new KernelVal(List.of(
+                new NumberVal(100),
+                new NumberVal(2),
+                new NumberVal(3),
+                new NumberVal(4)
+        )));
+    }
+
+    @Test
     public void invertImage() throws StackException, MissingOverloadException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
@@ -298,7 +320,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final ImageVal inputImage = new ImageVal(2048, 2048);
+        final ImageVal inputImage = new ImageVal(64, 64);
         final Value retVal = new Interpreter(program, inputImage).execute();
         assertThat(retVal).isInstanceOf(ImageVal.class);
         final ImageVal outputImage = (ImageVal) retVal;

@@ -17,7 +17,6 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     private final List<String> semanticErrors = new ArrayList<>();
     private final Map<String, Integer> globals = new HashMap<>();
     private int labelNumber = 1;
-    private boolean lvalueAtom = false;
     private YLangParser.ExprContext rvalueExpr;
 
     public EmittingVisitor(Collection<String> globals, FunctionTable functionTable) {
@@ -59,14 +58,37 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             ctx.atom().accept(this);
             this.rvalueExpr = ctx.expr();
             for (final var atomSuffix : ctx.atomSuffix()) {
-                this.lvalueAtom = index == ctx.atomSuffix().size() - 1;
-                atomSuffix.accept(this);
-                this.lvalueAtom = false;
+                atomSuffix.accept(index == ctx.atomSuffix().size() - 1
+                        ? getLValueAtomVisitor()
+                        : this);
                 index++;
             }
             this.rvalueExpr = null;
         }
         return null;
+    }
+
+    private YLangVisitor<Void> getLValueAtomVisitor() {
+        return new YLangBaseVisitor<Void>() {
+            @Override
+            public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
+                if (ctx.invocationSuffix() != null) {
+                    semanticErrors.add("cannot assign to invocation");
+                    return null;
+                } else {
+                    throw new UnsupportedOperationException("assignment of map values is not yet implemented");
+                }
+            }
+
+            @Override
+            public Void visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
+                EmittingVisitor.super.visitIndexSuffix(ctx);
+                rvalueExpr.accept(EmittingVisitor.this);
+                emitter.emit(OpCode.INVOKE, 3, functionTable.indexAssignmentFunction());
+                emitter.emit(OpCode.POP); // like all functions, setAt returns a value -> discard it
+                return null;
+            }
+        };
     }
 
     @Override
@@ -271,14 +293,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
         super.visitIndexSuffix(ctx);
-        if (this.lvalueAtom) {
-            this.lvalueAtom = false;
-            this.rvalueExpr.accept(this);
-            this.emitter.emit(OpCode.INVOKE, 3, this.functionTable.indexAssignmentFunction());
-            this.emitter.emit(OpCode.POP); // like all functions, setAt returns a value -> discard it
-        } else {
-            this.emitter.emit(OpCode.IDX);
-        }
+        this.emitter.emit(OpCode.IDX);
         return null;
     }
 
@@ -286,10 +301,6 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
         final String ident = ctx.Ident().getText();
         if (ctx.invocationSuffix() != null) {
-            if (this.lvalueAtom) {
-                this.semanticErrors.add("cannot assign to invocation");
-                return null;
-            }
             final int argCount = ctx.invocationSuffix().arguments() != null
                     ? ctx.invocationSuffix().arguments().expr().size()
                     : 0;
@@ -297,9 +308,6 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             // method receiver is first argument -> argCount + 1
             this.emitter.emit(OpCode.INVOKE, argCount + 1, ident);
         } else {
-            if (this.lvalueAtom) {
-                throw new UnsupportedOperationException("assignment of map values is not yet implemented");
-            }
             if (this.functionTable.contains(ident)) {
                 this.emitter.emit(OpCode.INVOKE, 1, ident);
             } else {

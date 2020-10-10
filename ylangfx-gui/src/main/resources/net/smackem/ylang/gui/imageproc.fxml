@@ -16,6 +16,7 @@
 <?import javafx.scene.control.SplitPane?>
 
 <?import net.smackem.ylang.gui.CodeEditor?>
+<?import javafx.scene.control.ToggleButton?>
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="net.smackem.ylang.gui.ImageProcController"
@@ -30,10 +31,11 @@
          <Button text="Run" onAction="#processImage" fx:id="runButton" />
          <Button text="Take" onAction="#takeImage" />
          <Button text="Save As..." onAction="#saveImageAs" />
+         <ToggleButton fx:id="splitToggle" text="Horizontal" onAction="#toggleHorizontalSplit" />
       </HBox>
    </top>
    <center>
-      <SplitPane orientation="VERTICAL">
+      <SplitPane orientation="VERTICAL" fx:id="splitPane">
          <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" SplitPane.resizableWithParent="true">
             <Tab fx:id="sourceTab" text="Source">
                <ScrollPane>
