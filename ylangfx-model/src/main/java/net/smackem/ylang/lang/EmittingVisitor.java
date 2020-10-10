@@ -69,7 +69,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     private YLangVisitor<Void> getLValueAtomVisitor() {
-        return new YLangBaseVisitor<Void>() {
+        return new YLangBaseVisitor<>() {
             @Override
             public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
                 if (ctx.invocationSuffix() != null) {
@@ -232,11 +232,23 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitTuple(YLangParser.TupleContext ctx) {
-        super.visitTuple(ctx);
-        if (ctx.Pair() != null) {
-            this.emitter.emit(OpCode.MK_POINT);
+    public Void visitPoint(YLangParser.PointContext ctx) {
+        super.visitPoint(ctx);
+        this.emitter.emit(OpCode.MK_POINT);
+        return null;
+    }
+
+    @Override
+    public Void visitRange(YLangParser.RangeContext ctx) {
+        if (ctx.term().size() == 2) {
+            ctx.term(0).accept(this);
+            this.emitter.emit(OpCode.LD_VAL, NumberVal.ONE);
+            ctx.term(1).accept(this);
+        } else {
+            // visit all three terms
+            super.visitRange(ctx);
         }
+        this.emitter.emit(OpCode.MK_RANGE);
         return null;
     }
 
@@ -397,7 +409,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     private static RgbVal parseColor(String s) {
-        final String[] tokens = s.substring(1).split(":");
+        final String[] tokens = s.substring(1).split("@");
         final int rgb = Integer.parseInt(tokens[0], 16);
         final int alpha = tokens.length > 1
                 ? Integer.parseInt(tokens[1], 16)

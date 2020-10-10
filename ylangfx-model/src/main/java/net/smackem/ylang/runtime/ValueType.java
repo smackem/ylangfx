@@ -15,9 +15,10 @@ public enum ValueType {
     BOOLEAN(11),
     STRING(12),
     NIL(13),
+    RANGE(14),
     INFRASTRUCTURE(-1);
 
-    public static final int MAX_INDEX = 14; // array size to hold all indices
+    public static final int MAX_INDEX = 15; // array size to hold all indices
 
     private final int index;
 

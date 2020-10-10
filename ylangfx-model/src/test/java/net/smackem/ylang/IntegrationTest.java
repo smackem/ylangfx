@@ -37,7 +37,7 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
-                a := #ffcc88:40
+                a := #ffcc88@40
                 b := |0 1 -1 2|
                 c := 120;240
                 return [a, b, c]
@@ -246,7 +246,7 @@ public class IntegrationTest {
                 a := b(#a0b0c0)
                 c := #a0b0c0
                 d := [c][0].r
-                e := #ffffff:80.over(#000000)
+                e := #ffffff@80.over(#000000)
                 return [a, c.r, c.g(), b(c), d, e]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
@@ -369,6 +369,35 @@ public class IntegrationTest {
                 new RectVal(0, 10, 20, 20),
                 new NumberVal(200),
                 new NumberVal(30)
+        )));
+    }
+
+    @Test
+    public void ranges() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                contains1 := 5 in 1 .. 10
+                contains2 := 5 in 10 .. -1 .. -100
+                n1 := 0
+                for i in 0 .. 4 {
+                    n1 = n1 + i
+                }
+                n2 := 0
+                for i2 in 4 .. -1 .. 0 {
+                    n2 = n2 + i2
+                }
+                return [contains1, contains2, n1, n2]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                BoolVal.of(true),
+                BoolVal.of(true),
+                new NumberVal(6),
+                new NumberVal(10)
         )));
     }
 }

@@ -10,10 +10,18 @@ public class InOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.POINT, ValueType.IMAGE, InOperatorImpl::pointInImage);
         implement(ValueType.NUMBER, ValueType.KERNEL, InOperatorImpl::numberInKernel);
         implementRight(ValueType.LIST, InOperatorImpl::anyInList);
+        implement(ValueType.NUMBER, ValueType.RANGE, InOperatorImpl::numberInRange);
+        // pointInCircle
         // circleInRect
         // rectInCircle
         // polygonInRect
         // polygonInCircle
+    }
+
+    private static Value numberInRange(Context ctx, Value l, Value r) {
+        final var n = (NumberVal) l;
+        final var range = (RangeVal) r;
+        return BoolVal.of(range.contains(n.value()));
     }
 
     private static Value pointInRect(Context ctx, Value l, Value r) {

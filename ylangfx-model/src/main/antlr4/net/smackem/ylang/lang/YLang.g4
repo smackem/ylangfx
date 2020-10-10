@@ -52,11 +52,6 @@ arguments
 
 forStmt
     : 'for' Ident 'in' expr block
-    | 'for' Ident 'in' range block
-    ;
-
-range
-    : number '..' number ('..' number)?
     ;
 
 whileStmt
@@ -95,7 +90,17 @@ comparator
     ;
 
 tuple
-    : term (Pair term)?
+    : point
+    | range
+    | term
+    ;
+
+point
+    :  term Pair term
+    ;
+
+range
+    : term FromTo term (FromTo term)?
     ;
 
 term
@@ -139,7 +144,7 @@ memberSuffix
     ;
 
 indexSuffix
-    : '[' (expr | range) ']'
+    : '[' expr ']'
     ;
 
 invocationSuffix
@@ -211,6 +216,7 @@ At      : '@';
 True    : 'true';
 False   : 'false';
 Nil     : 'nil';
+FromTo  : '..';
 
 number
     : ('+' | '-')? Number
@@ -229,7 +235,7 @@ Number
     ;
 
 Color
-    : '#' HexLiteral+ (':' HexLiteral HexLiteral)?
+    : '#' HexLiteral+ ('@' HexLiteral HexLiteral)?
     ;
 
 HexLiteral

@@ -169,6 +169,15 @@ public class Interpreter {
                     final Value x = stack.pop();
                     stack.push(new PointVal(((NumberVal) x).value(), ((NumberVal) y).value()));
                 }
+                case MK_RANGE -> {
+                    final Value upper = stack.pop();
+                    final Value step = stack.pop();
+                    final Value lower = stack.pop();
+                    stack.push(new RangeVal(
+                            ((NumberVal) lower).value(),
+                            ((NumberVal) upper).value(),
+                            ((NumberVal) step).value()));
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
             pc++;

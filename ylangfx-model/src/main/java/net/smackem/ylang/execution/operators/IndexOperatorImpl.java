@@ -10,6 +10,7 @@ public class IndexOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.LIST, ValueType.NUMBER, IndexOperatorImpl::listAtNumber);
         implement(ValueType.KERNEL, ValueType.NUMBER, IndexOperatorImpl::kernelAtNumber);
         implement(ValueType.KERNEL, ValueType.POINT, IndexOperatorImpl::kernelAtPoint);
+        // listAtRange
     }
 
     private static Value imageAtPoint(Context ctx, Value l, Value r) {

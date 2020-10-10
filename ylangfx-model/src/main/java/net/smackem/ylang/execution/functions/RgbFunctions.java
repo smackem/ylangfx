@@ -58,7 +58,11 @@ class RgbFunctions {
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::alpha01)));
         registry.put(new FunctionGroup("intensity",
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity)));
+        registry.put(new FunctionGroup("i",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity)));
         registry.put(new FunctionGroup("intensity01",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity01)));
+        registry.put(new FunctionGroup("i01",
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity01)));
         registry.put(new FunctionGroup("over",
                 FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
