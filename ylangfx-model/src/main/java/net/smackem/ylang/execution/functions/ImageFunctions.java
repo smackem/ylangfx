@@ -20,6 +20,17 @@ public class ImageFunctions {
                 FunctionOverload.function(
                         List.of(ValueType.IMAGE),
                         ImageFunctions::bounds)));
+        registry.put(new FunctionGroup("convolute",
+                FunctionOverload.function(
+                        List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
+                        ImageFunctions::convolute)));
+    }
+
+    private static Value convolute(List<Value> args) {
+        final ImageVal image = (ImageVal) args.get(0);
+        final PointVal pt = (PointVal) args.get(1);
+        final KernelVal kernel = (KernelVal) args.get(2);
+        return image.convolute((int) pt.x(), (int) pt.y(), kernel);
     }
 
     private static Value bounds(List<Value> args) {

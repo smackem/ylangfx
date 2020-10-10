@@ -17,6 +17,7 @@ blueKernel
 alphaKernel
 interpolate
 plot
+clip
 
 --------- math
 sin

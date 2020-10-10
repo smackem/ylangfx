@@ -76,6 +76,42 @@ public class ImageVal extends Value {
         return buffer;
     }
 
+    public RgbVal convolute(int x, int y, KernelVal kernel) {
+        final int kernelWidth = kernel.width();
+        final int kernelHeight = kernel.height();
+        float kernelSum = 0;
+        float r = 0;
+        float g = 0;
+        float b = 0;
+        float a = 255;
+        int kernelIndex = 0;
+
+        for (int kernelY = 0; kernelY < kernelHeight; kernelY++) {
+            for (int kernelX = 0; kernelX < kernelWidth; kernelX++) {
+                final int sourceY = y - (kernelHeight / 2) + kernelY;
+                final int sourceX = x - (kernelWidth / 2) + kernelX;
+                if (sourceX >= 0 && sourceX < this.width && sourceY >= 0 && sourceY < this.height) {
+                    final float value = kernel.get(kernelIndex).value();
+                    final RgbVal px = getPixel(sourceX, sourceY);
+                    r += value * px.r();
+                    g += value * px.g();
+                    b += value * px.b();
+                    kernelSum += value;
+
+                    if (sourceX == x && sourceY == y) {
+                        a = px.a();
+                    }
+                }
+                kernelIndex++;
+            }
+        }
+        if (kernelSum == 0) {
+            return new RgbVal(r, g, b, a);
+        }
+
+        return new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
+    }
+
     private static RgbVal[] emptyPixels(int width, int height) {
         if (width <= 0) {
             throw new IllegalArgumentException("image width must be > 0");

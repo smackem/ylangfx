@@ -7,3 +7,23 @@ for p in $in.bounds {
 }
 
 return out
+
+// ===============================
+
+out := image($in.bounds)
+kernel := |1  1  1
+           1 -8  1
+           1  1  1|
+kernel2 := |0 1 2 1 0
+            1 2 4 2 1
+            2 4 8 4 2
+            1 2 4 2 1
+            0 1 2 1 0|
+for p in $in.bounds {
+    out[p] = $in.convolute(p, kernel)
+}
+out2 := image(out.bounds)
+for p2 in out.bounds {
+    out2[p2] = -out.convolute(p2, kernel2)
+}
+return out2
