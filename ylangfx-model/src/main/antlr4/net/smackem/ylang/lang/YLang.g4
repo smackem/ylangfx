@@ -11,6 +11,7 @@ statement
     | forStmt
     | whileStmt
     | logStmt
+    | swapStmt
     | returnStmt
     ) ';'?
     ;
@@ -60,6 +61,10 @@ whileStmt
 
 logStmt
     : 'log' '(' arguments ')'
+    ;
+
+swapStmt
+    : Ident Swap Ident
     ;
 
 expr
@@ -217,6 +222,7 @@ True    : 'true';
 False   : 'false';
 Nil     : 'nil';
 FromTo  : '..';
+Swap    : '<=>';
 
 number
     : ('+' | '-')? Number

@@ -18,6 +18,7 @@ alphaKernel
 interpolate
 plot
 clip
+default
 
 --------- math
 sin

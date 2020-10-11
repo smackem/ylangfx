@@ -11,17 +11,10 @@ import java.util.Collection;
 public class Compiler {
 
     public Program compile(String source, FunctionTable functionTable, Collection<String> outErrors) {
-        final CharStream input = CharStreams.fromString(source);
-        final YLangLexer lexer = new YLangLexer(input);
-        final ErrorListener errorListener = new ErrorListener();
-        lexer.addErrorListener(errorListener);
-        final CommonTokenStream tokens = new CommonTokenStream(lexer);
-        final YLangParser parser = new YLangParser(tokens);
-        parser.addErrorListener(errorListener);
-        if (outErrors.addAll(errorListener.errors)) {
+        final YLangParser.ProgramContext tree = compileToAst(source, outErrors);
+        if (tree == null) {
             return null;
         }
-        final YLangParser.ProgramContext tree = parser.program();
         final DeclExtractingVisitor declExtractor = new DeclExtractingVisitor();
         tree.accept(declExtractor);
         if (outErrors.addAll(declExtractor.semanticErrors())) {
@@ -33,6 +26,20 @@ public class Compiler {
             return null;
         }
         return emitter.buildProgram();
+    }
+
+    YLangParser.ProgramContext compileToAst(String source, Collection<String> outErrors) {
+        final CharStream input = CharStreams.fromString(source);
+        final YLangLexer lexer = new YLangLexer(input);
+        final ErrorListener errorListener = new ErrorListener();
+        lexer.addErrorListener(errorListener);
+        final CommonTokenStream tokens = new CommonTokenStream(lexer);
+        final YLangParser parser = new YLangParser(tokens);
+        parser.addErrorListener(errorListener);
+        if (outErrors.addAll(errorListener.errors)) {
+            return null;
+        }
+        return parser.program();
     }
 
     private static class ErrorListener implements ANTLRErrorListener {
@@ -54,4 +61,5 @@ public class Compiler {
         @Override
         public void reportContextSensitivity(Parser parser, DFA dfa, int i, int i1, int i2, ATNConfigSet atnConfigSet) {
         }
-    }}
+    }
+}

@@ -17,7 +17,6 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     private final List<String> semanticErrors = new ArrayList<>();
     private final Map<String, Integer> globals = new HashMap<>();
     private int labelNumber = 1;
-    private YLangParser.ExprContext rvalueExpr;
 
     public EmittingVisitor(Collection<String> globals, FunctionTable functionTable) {
         this.functionTable = functionTable;
@@ -56,19 +55,17 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         } else {
             int index = 0;
             ctx.atom().accept(this);
-            this.rvalueExpr = ctx.expr();
             for (final var atomSuffix : ctx.atomSuffix()) {
                 atomSuffix.accept(index == ctx.atomSuffix().size() - 1
-                        ? getLValueAtomVisitor()
+                        ? getLValueAtomVisitor(ctx.expr())
                         : this);
                 index++;
             }
-            this.rvalueExpr = null;
         }
         return null;
     }
 
-    private YLangVisitor<Void> getLValueAtomVisitor() {
+    private YLangVisitor<Void> getLValueAtomVisitor(YLangParser.ExprContext rvalueExpr) {
         return new YLangBaseVisitor<>() {
             @Override
             public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
@@ -172,8 +169,27 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             for (final var atomSuffix : ctx.atomSuffix()) {
                 atomSuffix.accept(this);
             }
-            this.emitter.emit(OpCode.POP); // discard result
         }
+        this.emitter.emit(OpCode.POP); // discard result
+        return null;
+    }
+
+    @Override
+    public Void visitSwapStmt(YLangParser.SwapStmtContext ctx) {
+        final Integer addr1 = this.globals.get(ctx.Ident(0).getText());
+        if (addr1 == null) {
+            logSemanticError(ctx, "unknown identifier " + ctx.Ident(0));
+            return null;
+        }
+        final Integer addr2 = this.globals.get(ctx.Ident(1).getText());
+        if (addr2 == null) {
+            logSemanticError(ctx, "unknown identifier " + ctx.Ident(1));
+            return null;
+        }
+        this.emitter.emit(OpCode.LD_GLB, addr1);
+        this.emitter.emit(OpCode.LD_GLB, addr2);
+        this.emitter.emit(OpCode.ST_GLB, addr1);
+        this.emitter.emit(OpCode.ST_GLB, addr2);
         return null;
     }
 

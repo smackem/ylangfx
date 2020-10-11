@@ -264,6 +264,22 @@ public class IntegrationTest {
     }
 
     @Test
+    public void invocationStmts() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                #a0b0c0.b();
+                [#aabbcc][0].r()
+                return nil
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(NilVal.INSTANCE);
+    }
+
+    @Test
     public void indexAssignment() throws StackException, MissingOverloadException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
@@ -398,6 +414,26 @@ public class IntegrationTest {
                 BoolVal.of(true),
                 new NumberVal(6),
                 new NumberVal(10)
+        )));
+    }
+
+    @Test
+    public void swap() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := 1
+                b := 2
+                a <=> b
+                return [a, b]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(2),
+                new NumberVal(1)
         )));
     }
 }

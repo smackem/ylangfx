@@ -11,6 +11,13 @@ class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
     private static final Logger log = LoggerFactory.getLogger(DeclExtractingVisitor.class);
     private final Set<String> globals = new HashSet<>();
     private final List<String> semanticErrors = new ArrayList<>();
+    private final Deque<DeclScope> scopes = new ArrayDeque<>();
+    int stackDepth;
+    int maxStackDepth;
+
+    DeclExtractingVisitor() {
+        this.scopes.push(new DeclScope());
+    }
 
     public Set<String> globals() {
         return Collections.unmodifiableSet(this.globals);
@@ -21,25 +28,31 @@ class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitBlock(YLangParser.BlockContext ctx) {
+        enterScope();
+        super.visitBlock(ctx);
+        leaveScope();
+        return null;
+    }
+
+    @Override
     public Void visitAssignStmt(YLangParser.AssignStmtContext ctx) {
         if (ctx.Decleq() != null) {
             final String ident = ctx.Ident().getText();
-            if (this.globals.add(ident) == false) {
-                logSemanticError(ctx, "duplicate global variable name '" + ident + "'");
-            }
+            addVariable(ctx, ident);
         }
         return super.visitAssignStmt(ctx);
     }
 
     @Override
     public Void visitForStmt(YLangParser.ForStmtContext ctx) {
+        enterScope();
         final String ident = ctx.Ident().getText();
-        if (this.globals.add(ident) == false) {
-            logSemanticError(ctx, "duplicate global variable name '" + ident + "'");
-        } else {
-            this.globals.add(getIteratorIdent(ident));
-        }
-        return super.visitForStmt(ctx);
+        addVariable(ctx, ident);
+        addVariable(ctx, getIteratorIdent(ident));
+        super.visitForStmt(ctx);
+        leaveScope();
+        return null;
     }
 
     static String getIteratorIdent(String itemIdent) {
@@ -51,5 +64,33 @@ class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
                 ctx.start.getLine(), ctx.start.getCharPositionInLine(), message);
         log.info(text);
         this.semanticErrors.add(text);
+    }
+
+    private DeclScope currentScope() {
+        return this.scopes.peek();
+    }
+
+    private void enterScope() {
+        this.scopes.push(new DeclScope());
+    }
+
+    private void leaveScope() {
+        final DeclScope scope = this.scopes.pop();
+        this.stackDepth -= scope.variableIdents.size();
+    }
+
+    private void addVariable(ParserRuleContext ctx, String ident) {
+        this.globals.add(ident);
+        if (currentScope().variableIdents.add(ident) == false) {
+            logSemanticError(ctx, "duplicate variable name '" + ident + "'");
+        }
+        this.stackDepth++;
+        if (this.stackDepth > this.maxStackDepth) {
+            this.maxStackDepth = this.stackDepth;
+        }
+    }
+
+    private static class DeclScope {
+        final Set<String> variableIdents = new HashSet<>();
     }
 }
