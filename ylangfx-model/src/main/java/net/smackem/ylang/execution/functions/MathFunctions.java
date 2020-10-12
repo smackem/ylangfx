@@ -1,8 +1,6 @@
 package net.smackem.ylang.execution.functions;
 
-import net.smackem.ylang.runtime.NumberVal;
-import net.smackem.ylang.runtime.Value;
-import net.smackem.ylang.runtime.ValueType;
+import net.smackem.ylang.runtime.*;
 
 import java.util.List;
 
@@ -69,7 +67,24 @@ public class MathFunctions {
         registry.put(new FunctionGroup("hypot",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
-                        MathFunctions::hypot)));
+                        MathFunctions::hypot),
+                FunctionOverload.function(
+                        List.of(ValueType.RGB, ValueType.RGB),
+                        MathFunctions::hypotRgb),
+                FunctionOverload.function(
+                        List.of(ValueType.POINT),
+                        MathFunctions::hypotPoint)));
+    }
+
+    private static Value hypotPoint(List<Value> args) {
+        final PointVal pt = (PointVal) args.get(0);
+        return new NumberVal((float) Math.hypot(pt.x(), pt.y()));
+    }
+
+    private static Value hypotRgb(List<Value> args) {
+        final RgbVal a = (RgbVal) args.get(0);
+        final RgbVal b = (RgbVal) args.get(1);
+        return new RgbVal((float) Math.hypot(a.r(), b.r()), (float) Math.hypot(a.g(), b.g()), (float) Math.hypot(a.b(), b.b()), a.a());
     }
 
     private static Value hypot(List<Value> args) {

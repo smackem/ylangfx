@@ -8,6 +8,7 @@ public class ImageVal extends Value {
     private final int height;
     private final RgbVal[] pixels;
     private IntRect clipRect;
+    private RgbVal defaultPixel;
 
     private ImageVal(int width, int height, RgbVal[] pixels) {
         super(ValueType.IMAGE);
@@ -54,7 +55,27 @@ public class ImageVal extends Value {
         this.clipRect = value;
     }
 
+    /**
+     * @return the {@link Value} to return in {{@link #getPixel(int, int)}} for coordinates that are out of bounds.
+     */
+    public RgbVal getDefaultPixel() {
+        return this.defaultPixel;
+    }
+
+    /**
+     * sets the {@link Value} to return in {{@link #getPixel(int, int)}} for coordinates that are out of bounds.
+     */
+    public void setDefaultPixel(RgbVal value) {
+        this.defaultPixel = value;
+    }
+
     public RgbVal getPixel(int x, int y) {
+        if (y < 0 || y >= this.height || x < 0 || x >= this.width) {
+            if (this.defaultPixel != null) {
+                return this.defaultPixel;
+            }
+            throw new IllegalArgumentException("coordinates out of range");
+        }
         final int index = y * this.width + x;
         return this.pixels[index];
     }
