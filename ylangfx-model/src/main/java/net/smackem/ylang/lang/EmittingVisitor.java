@@ -15,16 +15,13 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     private final FunctionTable functionTable;
     private final Emitter emitter = new Emitter();
     private final List<String> semanticErrors = new ArrayList<>();
-    private final Map<String, Integer> globals = new HashMap<>();
+    private final AllocationTable allocationTable;
+    private final LinkedList<Scope> scopes = new LinkedList<>();
     private int labelNumber = 1;
 
-    public EmittingVisitor(Collection<String> globals, FunctionTable functionTable) {
+    public EmittingVisitor(int allocationSlots, FunctionTable functionTable) {
         this.functionTable = functionTable;
-        int index = 0;
-        for (final String ident : globals) {
-            this.globals.put(ident, index);
-            index++;
-        }
+        this.allocationTable = new AllocationTable(allocationSlots);
     }
 
     public List<String> semanticErrors() {
@@ -33,11 +30,13 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
 
     @Override
     public Void visitProgram(YLangParser.ProgramContext ctx) {
-        this.globals.entrySet().stream()
-                .sorted(Comparator.comparingInt(Map.Entry::getValue))
-                .forEach(entry -> this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE));
+        for (int i = 0; i < this.allocationTable.slots.length; i++) {
+            this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
+        }
+        pushScope();
         super.visitProgram(ctx);
         this.emitter.emit(OpCode.LABEL, endLabel);
+        popScope();
         return null;
     }
 
@@ -46,7 +45,9 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         if (ctx.atom() == null) { // assign to ident, not to lvalue-expr
             ctx.expr().accept(this);
             final String ident = ctx.Ident().getText();
-            final Integer addr = this.globals.get(ident);
+            final Integer addr = ctx.Decleq() != null
+                    ? putIdent(ident)
+                    : lookupIdent(ident);
             if (addr == null) {
                 logSemanticError(ctx, "unknown identifier " + ident);
             } else {
@@ -139,8 +140,9 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     @Override
     public Void visitForStmt(YLangParser.ForStmtContext ctx) {
         final String ident = ctx.Ident().getText();
-        final int itemAddr = this.globals.get(ident);
-        final int iteratorAddr = this.globals.get(DeclExtractingVisitor.getIteratorIdent(ident));
+        pushScope();
+        final int itemAddr = putIdent(ident);
+        final int iteratorAddr = putIdent(DeclExtractingVisitor.getIteratorIdent(ident));
         ctx.expr().accept(this);                 // push iterable
         this.emitter.emit(OpCode.ITER);                 // push iterator
         this.emitter.emit(OpCode.ST_GLB, iteratorAddr); // store iterator
@@ -153,6 +155,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         ctx.block().accept(this);
         this.emitter.emit(OpCode.BR, loopLabel);
         this.emitter.emit(OpCode.LABEL, breakLabel);
+        popScope();
         return null;
     }
 
@@ -176,12 +179,12 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
 
     @Override
     public Void visitSwapStmt(YLangParser.SwapStmtContext ctx) {
-        final Integer addr1 = this.globals.get(ctx.Ident(0).getText());
+        final Integer addr1 = lookupIdent(ctx.Ident(0).getText());
         if (addr1 == null) {
             logSemanticError(ctx, "unknown identifier " + ctx.Ident(0));
             return null;
         }
-        final Integer addr2 = this.globals.get(ctx.Ident(1).getText());
+        final Integer addr2 = lookupIdent(ctx.Ident(1).getText());
         if (addr2 == null) {
             logSemanticError(ctx, "unknown identifier " + ctx.Ident(1));
             return null;
@@ -190,6 +193,14 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         this.emitter.emit(OpCode.LD_GLB, addr2);
         this.emitter.emit(OpCode.ST_GLB, addr1);
         this.emitter.emit(OpCode.ST_GLB, addr2);
+        return null;
+    }
+
+    @Override
+    public Void visitBlock(YLangParser.BlockContext ctx) {
+        pushScope();
+        super.visitBlock(ctx);
+        popScope();
         return null;
     }
 
@@ -365,7 +376,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         } else if (ctx.number() != null) {
             this.emitter.emit(OpCode.LD_VAL, parseNumber(ctx.number().getText()));
         } else if (ctx.Ident() != null) {
-            final Integer addr = this.globals.get(ctx.Ident().getText());
+            final Integer addr = lookupIdent(ctx.Ident().getText());
             if (addr == null) {
                 logSemanticError(ctx, "unknown identifier " + ctx.Ident());
             } else {
@@ -437,5 +448,62 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         final String label = "@lbl" + this.labelNumber;
         this.labelNumber++;
         return label;
+    }
+
+    private Scope currentScope() {
+        return this.scopes.peek();
+    }
+
+    private void pushScope() {
+        this.scopes.addFirst(new Scope());
+    }
+
+    private void popScope() {
+        final Scope poppedScope = this.scopes.removeFirst();
+        this.allocationTable.free(poppedScope.variableAddresses.size());
+    }
+
+    private Integer putIdent(String ident) {
+        final int addr = this.allocationTable.alloc(ident);
+        currentScope().variableAddresses.put(ident, addr);
+        return addr;
+    }
+
+    private Integer lookupIdent(String ident) {
+        for (final Scope scope : this.scopes) {
+            final Integer addr = scope.variableAddresses.get(ident);
+            if (addr != null) {
+                return addr;
+            }
+        }
+        return null;
+    }
+
+    private static class AllocationTable {
+        final String[] slots;
+        int tail = 0;
+
+        AllocationTable(int slots) {
+            this.slots = new String[slots];
+        }
+
+        int alloc(String ident) {
+            if (this.tail >= this.slots.length) {
+                throw new IllegalStateException("cannot allocate: allocation table is full");
+            }
+            this.slots[this.tail] = ident;
+            return this.tail++;
+        }
+
+        void free(int slots) {
+            if (this.tail <= 0 && slots > 0) {
+                throw new IllegalStateException("cannot free: allocation table is empty");
+            }
+            this.tail -= slots;
+        }
+    }
+
+    private static class Scope {
+        final Map<String, Integer> variableAddresses = new HashMap<>();
     }
 }

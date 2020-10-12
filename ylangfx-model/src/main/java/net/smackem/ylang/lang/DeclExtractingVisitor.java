@@ -12,8 +12,8 @@ class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
     private final Set<String> globals = new HashSet<>();
     private final List<String> semanticErrors = new ArrayList<>();
     private final Deque<DeclScope> scopes = new ArrayDeque<>();
-    int stackDepth;
-    int maxStackDepth;
+    private int stackDepth;
+    private int maxStackDepth;
 
     DeclExtractingVisitor() {
         this.scopes.push(new DeclScope());
@@ -21,6 +21,10 @@ class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
 
     public Set<String> globals() {
         return Collections.unmodifiableSet(this.globals);
+    }
+
+    public int maxStackDepth() {
+        return this.maxStackDepth;
     }
 
     public List<String> semanticErrors() {
