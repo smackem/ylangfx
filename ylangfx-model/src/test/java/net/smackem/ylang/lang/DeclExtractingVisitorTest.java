@@ -23,7 +23,7 @@ public class DeclExtractingVisitorTest {
         assertThat(errors).isEmpty();
         final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
         ast.accept(visitor);
-        assertThat(visitor.maxStackDepth()).isEqualTo(3);
+        assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class DeclExtractingVisitorTest {
         assertThat(errors).isEmpty();
         final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
         ast.accept(visitor);
-        assertThat(visitor.maxStackDepth()).isEqualTo(3);
+        assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class DeclExtractingVisitorTest {
         assertThat(errors).isEmpty();
         final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
         ast.accept(visitor);
-        assertThat(visitor.maxStackDepth()).isEqualTo(3);
+        assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class DeclExtractingVisitorTest {
         assertThat(errors).isEmpty();
         final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
         ast.accept(visitor);
-        assertThat(visitor.maxStackDepth()).isEqualTo(5);
+        assertThat(visitor.uniqueVariableCount()).isEqualTo(5);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class DeclExtractingVisitorTest {
         assertThat(errors).isEmpty();
         final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
         ast.accept(visitor);
-        assertThat(visitor.maxStackDepth()).isEqualTo(8);
+        assertThat(visitor.uniqueVariableCount()).isEqualTo(8);
     }
 
     @Test

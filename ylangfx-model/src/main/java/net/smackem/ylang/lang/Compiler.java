@@ -20,7 +20,7 @@ public class Compiler {
         if (outErrors.addAll(declExtractor.semanticErrors())) {
             return null;
         }
-        final EmittingVisitor emitter = new EmittingVisitor(declExtractor.maxStackDepth(), functionTable);
+        final EmittingVisitor emitter = new EmittingVisitor(declExtractor.uniqueVariableCount(), functionTable);
         tree.accept(emitter);
         if (outErrors.addAll(emitter.semanticErrors())) {
             return null;

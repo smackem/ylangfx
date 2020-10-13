@@ -436,4 +436,111 @@ public class IntegrationTest {
                 new NumberVal(1)
         )));
     }
+
+    @Test
+    public void throwsOnIdentDuplicate() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := 1
+                a := 2
+                return a
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).hasSize(1).allMatch(e -> e.contains("duplicate"));
+        assertThat(program).isNull();
+    }
+
+    @Test
+    public void throwsOnIdentDuplicateNested() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                if true {
+                    a := 1
+                    a := 2
+                }
+                return a
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).hasSize(1).allMatch(e -> e.contains("duplicate"));
+        assertThat(program).isNull();
+    }
+
+    @Test
+    public void identOverrides() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := 1
+                if true {
+                    a := 2
+                }
+                return a
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(NumberVal.ONE);
+    }
+
+    @Test
+    public void assignIdentNested() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := 1
+                if true {
+                    a = 0
+                }
+                return a
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(NumberVal.ZERO);
+    }
+
+    @Test
+    public void complexIdentNesting() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := 1
+                if true {
+                    b := 2
+                    if false {
+                        b := 3
+                    }
+                    c := 4
+                    a = c
+                }
+                return a
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(4));
+    }
+
+    @Test
+    public void nestedForLoopsWithSameIteratorIdent() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := 0
+                for i in 0 .. 3 {
+                    for i in 0 .. 2 {
+                        a = a + 1
+                    }
+                }
+                return a
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(6));
+    }
 }

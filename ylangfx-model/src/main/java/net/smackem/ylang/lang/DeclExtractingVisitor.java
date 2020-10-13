@@ -9,22 +9,17 @@ import java.util.*;
 class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
 
     private static final Logger log = LoggerFactory.getLogger(DeclExtractingVisitor.class);
-    private final Set<String> globals = new HashSet<>();
     private final List<String> semanticErrors = new ArrayList<>();
     private final Deque<DeclScope> scopes = new ArrayDeque<>();
     private int stackDepth;
-    private int maxStackDepth;
+    private int uniqueVariableCount;
 
     DeclExtractingVisitor() {
         this.scopes.push(new DeclScope());
     }
 
-    public Set<String> globals() {
-        return Collections.unmodifiableSet(this.globals);
-    }
-
-    public int maxStackDepth() {
-        return this.maxStackDepth;
+    public int uniqueVariableCount() {
+        return this.uniqueVariableCount;
     }
 
     public List<String> semanticErrors() {
@@ -84,13 +79,12 @@ class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
     }
 
     private void addVariable(ParserRuleContext ctx, String ident) {
-        this.globals.add(ident);
         if (currentScope().variableIdents.add(ident) == false) {
             logSemanticError(ctx, "duplicate variable name '" + ident + "'");
         }
         this.stackDepth++;
-        if (this.stackDepth > this.maxStackDepth) {
-            this.maxStackDepth = this.stackDepth;
+        if (this.stackDepth > this.uniqueVariableCount) {
+            this.uniqueVariableCount = this.stackDepth;
         }
     }
 
