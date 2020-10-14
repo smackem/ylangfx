@@ -1,9 +1,6 @@
 package net.smackem.ylang.execution.functions;
 
-import net.smackem.ylang.runtime.NumberVal;
-import net.smackem.ylang.runtime.RgbVal;
-import net.smackem.ylang.runtime.Value;
-import net.smackem.ylang.runtime.ValueType;
+import net.smackem.ylang.runtime.*;
 
 import java.util.List;
 
@@ -17,7 +14,10 @@ class RgbFunctions {
                         RgbFunctions::rgb),
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
-                        RgbFunctions::grey)));
+                        RgbFunctions::grey),
+                FunctionOverload.method(
+                        List.of(ValueType.HSV),
+                        RgbFunctions::rgbFromHsv)));
         registry.put(new FunctionGroup("rgb01",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
@@ -67,6 +67,43 @@ class RgbFunctions {
         registry.put(new FunctionGroup("over",
                 FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
                         RgbFunctions::over)));
+        registry.put(new FunctionGroup("hsv",
+                FunctionOverload.function(
+                        List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
+                        RgbFunctions::hsv),
+                FunctionOverload.method(
+                        List.of(ValueType.RGB),
+                        RgbFunctions::hsvFromRgb)));
+        registry.put(new FunctionGroup("h",
+                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::hue)));
+        registry.put(new FunctionGroup("s",
+                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::saturation)));
+        registry.put(new FunctionGroup("v",
+                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::value)));
+    }
+
+    private static Value hue(List<Value> args) {
+        return new NumberVal(((HsvVal) args.get(0)).hue());
+    }
+
+    private static Value saturation(List<Value> args) {
+        return new NumberVal(((HsvVal) args.get(0)).saturation());
+    }
+
+    private static Value value(List<Value> args) {
+        return new NumberVal(((HsvVal) args.get(0)).value());
+    }
+
+    private static Value hsvFromRgb(List<Value> args) {
+        return HsvVal.fromRgb((RgbVal) args.get(0));
+    }
+
+    private static Value hsv(List<Value> args) {
+        return new HsvVal(((NumberVal) args.get(0)).value(), ((NumberVal) args.get(1)).value(), ((NumberVal) args.get(2)).value());
+    }
+
+    private static Value rgbFromHsv(List<Value> args) {
+        return ((HsvVal) args.get(0)).toRgb();
     }
 
     private static Value over(List<Value> args) {

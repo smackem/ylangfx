@@ -543,4 +543,25 @@ public class IntegrationTest {
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new NumberVal(6));
     }
+
+    @Test
+    public void declarationOrder() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                if true {
+                    b := a // a not declared
+                    a := 1
+                }
+                return [a, b]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).hasSize(1);
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(2),
+                new NumberVal(1)
+        )));
+    }
 }
