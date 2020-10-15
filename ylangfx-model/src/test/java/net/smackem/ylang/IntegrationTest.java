@@ -560,4 +560,33 @@ public class IntegrationTest {
                 .allMatch(err -> err.contains("unknown identifier"));
         assertThat(program).isNull();
     }
+
+    @Test
+    public void minMax() throws StackException, MissingOverloadException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := min(100, 120)
+                b := max(100, 120)
+                list := [1, -10, 404.5, 123]
+                c := list.min()
+                d := list.max()
+                kernel := |-1 -2 0 100|
+                e := kernel.min
+                f := kernel.max
+                return [a, b, c, d, e, f]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(100),
+                new NumberVal(120),
+                new NumberVal(-10),
+                new NumberVal(404.5f),
+                new NumberVal(-2),
+                new NumberVal(100)
+        )));
+    }
 }

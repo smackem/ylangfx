@@ -61,6 +61,24 @@ public class KernelVal extends Value implements Iterable<Value> {
         return false;
     }
 
+    /**
+     * @return the minimum kernel element or {@code null} if kernel is empty
+     */
+    public NumberVal min() {
+        return Arrays.stream(this.values)
+                .min(Comparator.comparing(NumberVal::value))
+                .orElse(null);
+    }
+
+    /**
+     * @return the maximum kernel element or {@code null} if kernel is empty
+     */
+    public NumberVal max() {
+        return Arrays.stream(this.values)
+                .max(Comparator.comparing(NumberVal::value))
+                .orElse(null);
+    }
+
     @SuppressWarnings("NullableProblems")
     @Override
     public Iterator<Value> iterator() {

@@ -81,7 +81,7 @@ public class ImageVal extends Value {
             if (this.defaultPixel != null) {
                 return this.defaultPixel;
             }
-            throw new IllegalArgumentException("coordinates out of range");
+            throw new IllegalArgumentException("coordinates out of range " + x + "," + y);
         }
         final int index = y * this.width + x;
         return this.pixels[index];
@@ -90,6 +90,9 @@ public class ImageVal extends Value {
     public void setPixel(int x, int y, RgbVal rgb) {
         if (this.clipRect != null && this.clipRect.contains(x, y) == false) {
             return;
+        }
+        if (y < 0 || y >= this.height || x < 0 || x >= this.width) {
+            throw new IllegalArgumentException("coordinates out of range " + x + "," + y);
         }
         final int index = y * this.width + x;
         this.pixels[index] = rgb;
