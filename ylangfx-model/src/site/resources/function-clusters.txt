@@ -5,10 +5,11 @@ rgba
 rgba01
 over
 hsv
+with...()
 
 --------- image
 image
-convolute
+convolve
 bltFrom
 subImage
 redKernel
@@ -49,6 +50,8 @@ kernel
 gauss
 sort
 sum
+add
+remove
 
 --------- geometry
 rect

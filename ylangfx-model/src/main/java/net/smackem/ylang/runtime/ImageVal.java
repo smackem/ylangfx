@@ -24,6 +24,13 @@ public class ImageVal extends Value {
         this(width, height, emptyPixels(width, height));
     }
 
+    @SuppressWarnings("CopyConstructorMissesField")
+    public ImageVal(ImageVal original) {
+        this(original.width, original.height, clonePixels(original.pixels));
+        this.clipRect = original.clipRect;
+        this.defaultPixel = original.defaultPixel;
+    }
+
     public static ImageVal fromArgbPixels(int width, int height, int[] pixels) {
         if (width <= 0) {
             throw new IllegalArgumentException("image width must be > 0");
@@ -97,7 +104,7 @@ public class ImageVal extends Value {
         return buffer;
     }
 
-    public RgbVal convolute(int x, int y, KernelVal kernel) {
+    public RgbVal convolve(int x, int y, KernelVal kernel) {
         final int kernelWidth = kernel.width();
         final int kernelHeight = kernel.height();
         float kernelSum = 0;
@@ -133,6 +140,13 @@ public class ImageVal extends Value {
         return new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
     }
 
+    public void plot(GeometryVal geometry, RgbVal rgb) {
+        for (final Value v : geometry) {
+            final PointVal pt = (PointVal) v;
+            this.setPixel((int) pt.x(), (int) pt.y(), rgb);
+        }
+    }
+
     private static RgbVal[] emptyPixels(int width, int height) {
         if (width <= 0) {
             throw new IllegalArgumentException("image width must be > 0");
@@ -143,6 +157,12 @@ public class ImageVal extends Value {
         final RgbVal[] pixels = new RgbVal[width * height];
         Arrays.fill(pixels, RgbVal.EMPTY);
         return pixels;
+    }
+
+    private static RgbVal[] clonePixels(RgbVal[] pixels) {
+        final RgbVal[] clone = new RgbVal[pixels.length];
+        System.arraycopy(pixels, 0, clone, 0, pixels.length);
+        return clone;
     }
 
     private static int toIntArgb(RgbVal rgb) {

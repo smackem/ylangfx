@@ -23,6 +23,7 @@ public enum FunctionRegistry implements FunctionTable {
         ImageFunctions.register(this);
         GeometryFunctions.register(this);
         MathFunctions.register(this);
+        UtilFunctions.register(this);
     }
 
     void put(FunctionGroup functionGroup) {

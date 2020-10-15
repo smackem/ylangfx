@@ -31,29 +31,39 @@ class RgbFunctions {
                         RgbFunctions::rgba),
                 FunctionOverload.function(
                         List.of(ValueType.RGB, ValueType.NUMBER),
-                        RgbFunctions::newAlpha)));
+                        RgbFunctions::withAlpha),
+                FunctionOverload.function(
+                        List.of(ValueType.HSV, ValueType.NUMBER),
+                        RgbFunctions::rgbFromHsvWithAlpha)));
         registry.put(new FunctionGroup("rgba01",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
                         RgbFunctions::rgba01),
                 FunctionOverload.function(
                         List.of(ValueType.RGB, ValueType.NUMBER),
-                        RgbFunctions::newAlpha01)));
+                        RgbFunctions::withAlpha01),
+                FunctionOverload.function(
+                        List.of(ValueType.HSV, ValueType.NUMBER),
+                        RgbFunctions::rgbFromHsvWithAlpha01)));
         // rgb methods
         registry.put(new FunctionGroup("r",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::red)));
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::red),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER), RgbFunctions::withRed)));
         registry.put(new FunctionGroup("r01",
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::red01)));
         registry.put(new FunctionGroup("g",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::green)));
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::green),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER), RgbFunctions::withGreen)));
         registry.put(new FunctionGroup("g01",
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::green01)));
         registry.put(new FunctionGroup("b",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::blue)));
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::blue),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER), RgbFunctions::withBlue)));
         registry.put(new FunctionGroup("b01",
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::blue01)));
         registry.put(new FunctionGroup("a",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::alpha)));
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::alpha),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER), RgbFunctions::withAlpha)));
         registry.put(new FunctionGroup("a01",
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::alpha01)));
         registry.put(new FunctionGroup("intensity",
@@ -75,11 +85,75 @@ class RgbFunctions {
                         List.of(ValueType.RGB),
                         RgbFunctions::hsvFromRgb)));
         registry.put(new FunctionGroup("h",
-                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::hue)));
+                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::hue),
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::withHue)));
         registry.put(new FunctionGroup("s",
-                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::saturation)));
+                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::saturation),
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::withSaturation)));
         registry.put(new FunctionGroup("v",
-                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::value)));
+                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::value),
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::withValue)));
+        registry.put(new FunctionGroup("addHue",
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addHue)));
+        registry.put(new FunctionGroup("addSaturation",
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addSaturation)));
+        registry.put(new FunctionGroup("addValue",
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addValue)));
+    }
+
+    private static Value withHue(List<Value> args) {
+        final HsvVal hsv = (HsvVal) args.get(0);
+        return new HsvVal(((NumberVal) args.get(1)).value(), hsv.saturation(), hsv.value());
+    }
+
+    private static Value withSaturation(List<Value> args) {
+        final HsvVal hsv = (HsvVal) args.get(0);
+        return new HsvVal(hsv.hue(), ((NumberVal) args.get(1)).value(), hsv.value());
+    }
+
+    private static Value withValue(List<Value> args) {
+        final HsvVal hsv = (HsvVal) args.get(0);
+        return new HsvVal(hsv.hue(), hsv.saturation(), ((NumberVal) args.get(1)).value());
+    }
+
+    private static Value addHue(List<Value> args) {
+        final HsvVal hsv = (HsvVal) args.get(0);
+        return new HsvVal((hsv.hue() + ((NumberVal) args.get(1)).value()) % 360, hsv.saturation(), hsv.value());
+    }
+
+    private static Value addSaturation(List<Value> args) {
+        final HsvVal hsv = (HsvVal) args.get(0);
+        return new HsvVal(hsv.hue(), hsv.saturation() + ((NumberVal) args.get(1)).value(), hsv.value());
+    }
+
+    private static Value addValue(List<Value> args) {
+        final HsvVal hsv = (HsvVal) args.get(0);
+        return new HsvVal(hsv.hue(), hsv.saturation(), hsv.value() + ((NumberVal) args.get(1)).value());
+    }
+
+    private static Value withRed(List<Value> args) {
+        final RgbVal rgb = ((RgbVal) args.get(0));
+        return new RgbVal(((NumberVal) args.get(1)).value(), rgb.g(), rgb.b(), rgb.a());
+    }
+
+    private static Value withGreen(List<Value> args) {
+        final RgbVal rgb = ((RgbVal) args.get(0));
+        return new RgbVal(rgb.r(), ((NumberVal) args.get(1)).value(), rgb.b(), rgb.a());
+    }
+
+    private static Value withBlue(List<Value> args) {
+        final RgbVal rgb = ((RgbVal) args.get(0));
+        return new RgbVal(rgb.r(), rgb.g(), ((NumberVal) args.get(1)).value(), rgb.a());
+    }
+
+    private static Value rgbFromHsvWithAlpha01(List<Value> args) {
+        final RgbVal rgb = ((HsvVal) args.get(0)).toRgb();
+        return new RgbVal(rgb.r(), rgb.g(), rgb.b(), ((NumberVal) args.get(1)).value() * 255);
+    }
+
+    private static Value rgbFromHsvWithAlpha(List<Value> args) {
+        final RgbVal rgb = ((HsvVal) args.get(0)).toRgb();
+        return new RgbVal(rgb.r(), rgb.g(), rgb.b(), ((NumberVal) args.get(1)).value());
     }
 
     private static Value hue(List<Value> args) {
@@ -150,7 +224,7 @@ class RgbFunctions {
         return new NumberVal(((RgbVal) args.get(0)).intensity01());
     }
 
-    private static Value newAlpha01(List<Value> args) {
+    private static Value withAlpha01(List<Value> args) {
         final RgbVal rgb = (RgbVal) args.get(0);
         return new RgbVal(
                 rgb.r(),
@@ -159,7 +233,7 @@ class RgbFunctions {
                 ((NumberVal) args.get(1)).value() * 255f);
     }
 
-    private static Value newAlpha(List<Value> args) {
+    private static Value withAlpha(List<Value> args) {
         final RgbVal rgb = (RgbVal) args.get(0);
         return new RgbVal(
                 rgb.r(),

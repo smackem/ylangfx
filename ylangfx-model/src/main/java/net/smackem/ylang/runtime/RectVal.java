@@ -16,6 +16,14 @@ public class RectVal extends GeometryVal {
         this.height = height;
     }
 
+    public static RectVal fromIntRect(IntRect rc) {
+        return new RectVal(rc.left(), rc.top(), rc.right() - rc.left(), rc.bottom() - rc.top());
+    }
+
+    public IntRect round() {
+        return new IntRect((int) (this.x + 0.5f), (int) (this.y + 0.5f), (int) (right() + 0.5f), (int) (bottom() + 0.5f));
+    }
+
     public float x() {
         return this.x;
     }
@@ -38,6 +46,10 @@ public class RectVal extends GeometryVal {
 
     public float bottom() {
         return this.y + this.height;
+    }
+
+    public RectVal inflate(float dx, float dy) {
+        return new RectVal(this.x - dx, this.y - dy, this.width + dx * 2, this.height + dx * 2);
     }
 
     @Override

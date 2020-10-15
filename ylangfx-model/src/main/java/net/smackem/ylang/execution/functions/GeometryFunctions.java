@@ -45,6 +45,52 @@ public class GeometryFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.RECT),
                         GeometryFunctions::rectBottom)));
+        registry.put(new FunctionGroup("inflate",
+                FunctionOverload.method(
+                        List.of(ValueType.RECT, ValueType.NUMBER, ValueType.NUMBER),
+                        GeometryFunctions::rectInflate)));
+        registry.put(new FunctionGroup("line",
+                FunctionOverload.function(
+                        List.of(ValueType.POINT, ValueType.POINT),
+                        GeometryFunctions::line)));
+        registry.put(new FunctionGroup("p1",
+                FunctionOverload.method(
+                        List.of(ValueType.LINE),
+                        GeometryFunctions::linePoint1)));
+        registry.put(new FunctionGroup("p2",
+                FunctionOverload.method(
+                        List.of(ValueType.LINE),
+                        GeometryFunctions::linePoint2)));
+        registry.put(new FunctionGroup("length",
+                FunctionOverload.method(
+                        List.of(ValueType.LINE),
+                        GeometryFunctions::lineLength)));
+    }
+
+    private static Value rectInflate(List<Value> args) {
+        final RectVal rect = (RectVal) args.get(0);
+        return rect.inflate(((NumberVal) args.get(1)).value(), ((NumberVal) args.get(2)).value());
+    }
+
+    private static Value lineLength(List<Value> args) {
+        final LineVal line = ((LineVal) args.get(0));
+        return new NumberVal(line.length());
+    }
+
+    private static Value linePoint1(List<Value> args) {
+        final LineVal line = ((LineVal) args.get(0));
+        return new PointVal(line.x1(), line.y1());
+    }
+
+    private static Value linePoint2(List<Value> args) {
+        final LineVal line = ((LineVal) args.get(0));
+        return new PointVal(line.x2(), line.y2());
+    }
+
+    private static Value line(List<Value> args) {
+        final PointVal p1 = (PointVal) args.get(0);
+        final PointVal p2 = (PointVal) args.get(1);
+        return new LineVal(p1.x(), p1.y(), p2.x(), p2.y());
     }
 
     private static Value rectBottom(List<Value> args) {
