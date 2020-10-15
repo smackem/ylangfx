@@ -553,15 +553,11 @@ public class IntegrationTest {
                     b := a // a not declared
                     a := 1
                 }
-                return [a, b]
+                return [a, b] // a not declared, b not declared
                 """, FunctionRegistry.INSTANCE, errors);
-        assertThat(errors).hasSize(1);
-        assertThat(program).isNotNull();
-        System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
-        assertThat(retVal).isEqualTo(new ListVal(List.of(
-                new NumberVal(2),
-                new NumberVal(1)
-        )));
+        assertThat(errors)
+                .hasSize(3)
+                .allMatch(err -> err.contains("unknown identifier"));
+        assertThat(program).isNull();
     }
 }

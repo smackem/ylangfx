@@ -132,7 +132,7 @@ public class ImageProcController {
         final Value result;
         try {
             result = interpreter.execute();
-        } catch (StackException | MissingOverloadException e) {
+        } catch (Exception e) {
             this.message.setValue(e.getMessage());
             e.printStackTrace();
             return;
