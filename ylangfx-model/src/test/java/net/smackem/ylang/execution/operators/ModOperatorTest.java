@@ -10,8 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ModOperatorTest {
     @Test
     public void numberModNumber() throws MissingOverloadException {
-        assertThat(BinaryOperator.MOD.invoke(Context.EMPTY,
-                new NumberVal(17), new NumberVal(10)))
+        assertThat(BinaryOperator.MOD.invoke(new NumberVal(17), new NumberVal(10)))
                 .isEqualTo(new NumberVal(7));
     }
 }

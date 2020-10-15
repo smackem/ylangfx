@@ -15,7 +15,7 @@ public enum UnaryOperator {
         this.impl = impl;
     }
 
-    public Value invoke(Context ctx, Value v) throws MissingOverloadException {
-        return this.impl.invoke(ctx, v);
+    public Value invoke(Value v) throws MissingOverloadException {
+        return this.impl.invoke(v);
     }
 }

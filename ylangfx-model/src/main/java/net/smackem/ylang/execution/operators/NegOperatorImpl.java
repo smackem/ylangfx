@@ -10,15 +10,15 @@ public class NegOperatorImpl extends UnaryOperatorImpl {
         implement(ValueType.RGB, NegOperatorImpl::negRgb);
     }
 
-    private static Value negNumber(Context context, Value value) {
+    private static Value negNumber(Value value) {
         return new NumberVal(-((NumberVal) value).value());
     }
 
-    private static Value negPoint(Context context, Value value) {
+    private static Value negPoint(Value value) {
         return ((PointVal) value).negate();
     }
 
-    private static Value negRgb(Context context, Value value) {
+    private static Value negRgb(Value value) {
         return ((RgbVal) value).invert();
     }
 }

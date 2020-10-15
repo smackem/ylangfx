@@ -13,22 +13,22 @@ public class IndexOperatorImpl extends BinaryOperatorImpl {
         // listAtRange
     }
 
-    private static Value imageAtPoint(Context ctx, Value l, Value r) {
+    private static Value imageAtPoint(Value l, Value r) {
         final var pt = (PointVal) r;
         return ((ImageVal) l).getPixel((int)(pt.x() + 0.5f), (int)(pt.y() + 0.5f));
     }
 
-    private static Value listAtNumber(Context ctx, Value l, Value r) {
+    private static Value listAtNumber(Value l, Value r) {
         final var list = (ListVal) l;
         return list.get((int)((NumberVal) r).value());
     }
 
-    private static Value kernelAtNumber(Context ctx, Value l, Value r) {
+    private static Value kernelAtNumber(Value l, Value r) {
         final var kernel = (KernelVal) l;
         return kernel.get((int)((NumberVal) r).value());
     }
 
-    private static Value kernelAtPoint(Context ctx, Value l, Value r) {
+    private static Value kernelAtPoint(Value l, Value r) {
         final var kernel = (KernelVal) l;
         final var pt = (PointVal) r;
         return kernel.get((int) pt.x(), (int) pt.y());

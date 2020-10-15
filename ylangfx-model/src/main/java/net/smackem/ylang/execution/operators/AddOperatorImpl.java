@@ -13,25 +13,25 @@ class AddOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.RGB, ValueType.RGB, AddOperatorImpl::rgbPlusRgb);
     }
 
-    private static Value numberPlusNumber(Context ctx, Value l, Value r) {
+    private static Value numberPlusNumber(Value l, Value r) {
         final float ln = ((NumberVal) l).value();
         final float rn = ((NumberVal) r).value();
         return new NumberVal(ln + rn);
     }
 
-    private static Value pointPlusNumber(Context ctx, Value l, Value r) {
+    private static Value pointPlusNumber(Value l, Value r) {
         return ((PointVal) l).offset(((NumberVal) r).value());
     }
 
-    private static Value pointPlusPoint(Context ctx, Value l, Value r) {
+    private static Value pointPlusPoint(Value l, Value r) {
         return ((PointVal) l).translate((PointVal) r);
     }
 
-    private static Value rgbPlusNumber(Context ctx, Value l, Value r) {
+    private static Value rgbPlusNumber(Value l, Value r) {
         return ((RgbVal) l).add(((NumberVal) r).value());
     }
 
-    private static Value rgbPlusRgb(Context ctx, Value l, Value r) {
+    private static Value rgbPlusRgb(Value l, Value r) {
         return ((RgbVal) l).add((RgbVal) r);
     }
 }

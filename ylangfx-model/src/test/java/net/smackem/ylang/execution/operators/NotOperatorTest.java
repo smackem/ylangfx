@@ -12,27 +12,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class NotOperatorTest {
     @Test
     public void notNumber() throws MissingOverloadException {
-        assertThat(UnaryOperator.NOT.invoke(Context.EMPTY, NumberVal.ONE))
+        assertThat(UnaryOperator.NOT.invoke(NumberVal.ONE))
                 .isEqualTo(BoolVal.FALSE);
-        assertThat(UnaryOperator.NOT.invoke(Context.EMPTY, NumberVal.MINUS_ONE))
+        assertThat(UnaryOperator.NOT.invoke(NumberVal.MINUS_ONE))
                 .isEqualTo(BoolVal.FALSE);
-        assertThat(UnaryOperator.NOT.invoke(Context.EMPTY, NumberVal.ZERO))
+        assertThat(UnaryOperator.NOT.invoke(NumberVal.ZERO))
                 .isEqualTo(BoolVal.TRUE);
     }
 
     @Test
     public void notBool() throws MissingOverloadException {
-        assertThat(UnaryOperator.NOT.invoke(Context.EMPTY, BoolVal.TRUE))
+        assertThat(UnaryOperator.NOT.invoke(BoolVal.TRUE))
                 .isEqualTo(BoolVal.FALSE);
-        assertThat(UnaryOperator.NOT.invoke(Context.EMPTY, BoolVal.FALSE))
+        assertThat(UnaryOperator.NOT.invoke(BoolVal.FALSE))
                 .isEqualTo(BoolVal.TRUE);
     }
 
     @Test
     public void notString() throws MissingOverloadException {
-        assertThat(UnaryOperator.NOT.invoke(Context.EMPTY, new StringVal("abc")))
+        assertThat(UnaryOperator.NOT.invoke(new StringVal("abc")))
                 .isEqualTo(BoolVal.FALSE);
-        assertThat(UnaryOperator.NOT.invoke(Context.EMPTY, StringVal.EMPTY))
+        assertThat(UnaryOperator.NOT.invoke(StringVal.EMPTY))
                 .isEqualTo(BoolVal.TRUE);
     }
 }

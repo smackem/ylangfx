@@ -18,30 +18,30 @@ public class InOperatorImpl extends BinaryOperatorImpl {
         // polygonInCircle
     }
 
-    private static Value numberInRange(Context ctx, Value l, Value r) {
+    private static Value numberInRange(Value l, Value r) {
         final var n = (NumberVal) l;
         final var range = (RangeVal) r;
         return BoolVal.of(range.contains(n.value()));
     }
 
-    private static Value pointInRect(Context ctx, Value l, Value r) {
+    private static Value pointInRect(Value l, Value r) {
         return BoolVal.of(((RectVal) r).contains((PointVal) l));
     }
 
-    private static Value pointInImage(Context ctx, Value l, Value r) {
+    private static Value pointInImage(Value l, Value r) {
         final var image = (ImageVal) r;
         final var pt = (PointVal) l;
         return BoolVal.of(pt.x() >= 0 && pt.x() < image.width() &&
                           pt.y() >= 0 && pt.y() < image.height());
     }
 
-    private static Value numberInKernel(Context ctx, Value l, Value r) {
+    private static Value numberInKernel(Value l, Value r) {
         final var n = (NumberVal) l;
         final var kernel = (KernelVal) r;
         return BoolVal.of(kernel.contains(n));
     }
 
-    private static Value anyInList(Context ctx, Value l, Value r) {
+    private static Value anyInList(Value l, Value r) {
         final var list = (ListVal) r;
         return BoolVal.of(list.contains(l));
     }

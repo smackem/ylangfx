@@ -1,6 +1,5 @@
 package net.smackem.ylang.execution.operators;
 
-import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.runtime.Value;
 
@@ -20,7 +19,7 @@ public enum BinaryOperator {
         this.impl = impl;
     }
 
-    public Value invoke(Context ctx, Value l, Value r) throws MissingOverloadException {
-        return this.impl.invoke(ctx, l, r);
+    public Value invoke(Value l, Value r) throws MissingOverloadException {
+        return this.impl.invoke(l, r);
     }
 }

@@ -55,70 +55,70 @@ public class Interpreter {
                 }
                 case GE -> {
                     final Value r = stack.pop();
-                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
+                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(stack.pop(), r);
                     stack.push(BoolVal.of(cmp.value() >= 0));
                 }
                 case GT -> {
                     final Value r = stack.pop();
-                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
+                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(stack.pop(), r);
                     stack.push(BoolVal.of(cmp.value() > 0));
                 }
                 case LE -> {
                     final Value r = stack.pop();
-                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
+                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(stack.pop(), r);
                     stack.push(BoolVal.of(cmp.value() <= 0));
                 }
                 case LT -> {
                     final Value r = stack.pop();
-                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r);
+                    final NumberVal cmp = (NumberVal) BinaryOperator.CMP.invoke(stack.pop(), r);
                     stack.push(BoolVal.of(cmp.value() < 0));
                 }
                 case OR -> {
-                    final BoolVal r = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
-                    final BoolVal l = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    final BoolVal r = (BoolVal) UnaryOperator.BOOL.invoke(stack.pop());
+                    final BoolVal l = (BoolVal) UnaryOperator.BOOL.invoke(stack.pop());
                     stack.push(BoolVal.of(l.value() || r.value()));
                 }
                 case AND -> {
-                    final BoolVal r = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
-                    final BoolVal l = (BoolVal) UnaryOperator.BOOL.invoke(this.ctx, stack.pop());
+                    final BoolVal r = (BoolVal) UnaryOperator.BOOL.invoke(stack.pop());
+                    final BoolVal l = (BoolVal) UnaryOperator.BOOL.invoke(stack.pop());
                     stack.push(BoolVal.of(l.value() && r.value()));
                 }
                 case ADD -> {
                     final Value r = stack.pop();
-                    stack.push(BinaryOperator.ADD.invoke(this.ctx, stack.pop(), r));
+                    stack.push(BinaryOperator.ADD.invoke(stack.pop(), r));
                 }
                 case DIV -> {
                     final Value r = stack.pop();
-                    stack.push(BinaryOperator.DIV.invoke(this.ctx, stack.pop(), r));
+                    stack.push(BinaryOperator.DIV.invoke(stack.pop(), r));
                 }
                 case MOD -> {
                     final Value r = stack.pop();
-                    stack.push(BinaryOperator.MOD.invoke(this.ctx, stack.pop(), r));
+                    stack.push(BinaryOperator.MOD.invoke(stack.pop(), r));
                 }
                 case MUL -> {
                     final Value r = stack.pop();
-                    stack.push(BinaryOperator.MUL.invoke(this.ctx, stack.pop(), r));
+                    stack.push(BinaryOperator.MUL.invoke(stack.pop(), r));
                 }
                 case SUB -> {
                     final Value r = stack.pop();
-                    stack.push(BinaryOperator.SUB.invoke(this.ctx, stack.pop(), r));
+                    stack.push(BinaryOperator.SUB.invoke(stack.pop(), r));
                 }
                 case IDX -> {
                     final Value r = stack.pop();
-                    stack.push(BinaryOperator.INDEX.invoke(this.ctx, stack.pop(), r));
+                    stack.push(BinaryOperator.INDEX.invoke(stack.pop(), r));
                 }
                 case IN -> {
                     final Value r = stack.pop();
-                    stack.push(BinaryOperator.IN.invoke(this.ctx, stack.pop(), r));
+                    stack.push(BinaryOperator.IN.invoke(stack.pop(), r));
                 }
                 case CMP -> {
                     final Value r = stack.pop();
-                    stack.push(BinaryOperator.CMP.invoke(this.ctx, stack.pop(), r));
+                    stack.push(BinaryOperator.CMP.invoke(stack.pop(), r));
                 }
-                case NOT -> stack.push(UnaryOperator.NOT.invoke(this.ctx, stack.pop()));
-                case NEG -> stack.push(UnaryOperator.NEG.invoke(this.ctx, stack.pop()));
+                case NOT -> stack.push(UnaryOperator.NOT.invoke(stack.pop()));
+                case NEG -> stack.push(UnaryOperator.NEG.invoke(stack.pop()));
                 case BR_ZERO -> {
-                    if (((BoolVal) UnaryOperator.NOT.invoke(this.ctx, stack.pop())).value()) {
+                    if (((BoolVal) UnaryOperator.NOT.invoke(stack.pop())).value()) {
                         pc = instr.intArg() - 1;
                     }
                 }

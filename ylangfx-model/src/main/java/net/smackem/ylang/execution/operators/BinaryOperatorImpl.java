@@ -1,6 +1,5 @@
 package net.smackem.ylang.execution.operators;
 
-import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.runtime.Value;
 import net.smackem.ylang.runtime.ValueType;
@@ -44,21 +43,21 @@ abstract class BinaryOperatorImpl {
         }
     }
 
-    public Value invoke(Context ctx, Value l, Value r) throws MissingOverloadException {
+    public Value invoke(Value l, Value r) throws MissingOverloadException {
         final var func = this.functions[l.type().index()][r.type().index()];
         if (func == null) {
             throw new MissingOverloadException(String.format("%s is not implemented for %s and %s",
                     getClass().getName(), l.type(), r.type()));
         }
-        return func.invoke(ctx, l, r);
+        return func.invoke(l, r);
     }
 
     @FunctionalInterface
     public interface Func {
-        Value invoke(Context ctx, Value left, Value right);
+        Value invoke(Value left, Value right);
 
         default Func swap() {
-            return (ctx, l, r) -> this.invoke(ctx, r, l);
+            return (l, r) -> this.invoke(r, l);
         }
     }
 }

@@ -11,7 +11,7 @@ public class ModOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.NUMBER, ValueType.NUMBER, ModOperatorImpl::numberModNumber);
     }
 
-    private static Value numberModNumber(Context ctx, Value l, Value r) {
+    private static Value numberModNumber(Value l, Value r) {
         return new NumberVal(((NumberVal) l).value() % ((NumberVal) r).value());
     }
 }

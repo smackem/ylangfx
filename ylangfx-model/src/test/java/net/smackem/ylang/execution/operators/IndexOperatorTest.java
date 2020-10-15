@@ -20,17 +20,17 @@ public class IndexOperatorTest {
                 new NumberVal(100),
                 new NumberVal(200),
                 new NumberVal(300)));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, list, new NumberVal(0)))
+        assertThat(BinaryOperator.INDEX.invoke(list, new NumberVal(0)))
                 .isEqualTo(new NumberVal(100));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, list, new NumberVal(0.5f)))
+        assertThat(BinaryOperator.INDEX.invoke(list, new NumberVal(0.5f)))
                 .isEqualTo(new NumberVal(100));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, list, new NumberVal(1.3f)))
+        assertThat(BinaryOperator.INDEX.invoke(list, new NumberVal(1.3f)))
                 .isEqualTo(new NumberVal(200));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, list, new NumberVal(2.3f)))
+        assertThat(BinaryOperator.INDEX.invoke(list, new NumberVal(2.3f)))
                 .isEqualTo(new NumberVal(300));
-        assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(Context.EMPTY, list, new NumberVal(3.3f)))
+        assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(list, new NumberVal(3.3f)))
                 .isInstanceOf(IndexOutOfBoundsException.class);
-        assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(Context.EMPTY, list, new NumberVal(-1.1f)))
+        assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(list, new NumberVal(-1.1f)))
                 .isInstanceOf(IndexOutOfBoundsException.class);
     }
 
@@ -41,15 +41,15 @@ public class IndexOperatorTest {
                 new NumberVal(2),
                 new NumberVal(-2),
                 new NumberVal(-1)));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new NumberVal(0)))
+        assertThat(BinaryOperator.INDEX.invoke(kernel, new NumberVal(0)))
                 .isEqualTo(new NumberVal(1));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new NumberVal(1)))
+        assertThat(BinaryOperator.INDEX.invoke(kernel, new NumberVal(1)))
                 .isEqualTo(new NumberVal(2));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new NumberVal(2)))
+        assertThat(BinaryOperator.INDEX.invoke(kernel, new NumberVal(2)))
                 .isEqualTo(new NumberVal(-2));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new NumberVal(3)))
+        assertThat(BinaryOperator.INDEX.invoke(kernel, new NumberVal(3)))
                 .isEqualTo(new NumberVal(-1));
-        assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new NumberVal(5.3f)))
+        assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(kernel, new NumberVal(5.3f)))
                 .isInstanceOf(IndexOutOfBoundsException.class);
     }
 
@@ -60,15 +60,15 @@ public class IndexOperatorTest {
                 new NumberVal(2),
                 new NumberVal(-2),
                 new NumberVal(-1)));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new PointVal(0, 0)))
+        assertThat(BinaryOperator.INDEX.invoke(kernel, new PointVal(0, 0)))
                 .isEqualTo(new NumberVal(1));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new PointVal(1, 0)))
+        assertThat(BinaryOperator.INDEX.invoke(kernel, new PointVal(1, 0)))
                 .isEqualTo(new NumberVal(2));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new PointVal(0, 1)))
+        assertThat(BinaryOperator.INDEX.invoke(kernel, new PointVal(0, 1)))
                 .isEqualTo(new NumberVal(-2));
-        assertThat(BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new PointVal(1, 1)))
+        assertThat(BinaryOperator.INDEX.invoke(kernel, new PointVal(1, 1)))
                 .isEqualTo(new NumberVal(-1));
-        assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(Context.EMPTY, kernel, new PointVal(2, 0)))
+        assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(kernel, new PointVal(2, 0)))
                 .isInstanceOf(IndexOutOfBoundsException.class);
     }
 }

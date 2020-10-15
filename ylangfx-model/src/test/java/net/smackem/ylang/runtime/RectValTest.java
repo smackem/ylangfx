@@ -13,7 +13,7 @@ public class RectValTest {
         final RectVal rect = new RectVal(0, 0, 10, 10);
         int count = 0;
         for (final var pt : rect) {
-            assertThat(BinaryOperator.IN.invoke(Context.EMPTY, pt, rect))
+            assertThat(BinaryOperator.IN.invoke(pt, rect))
                     .isEqualTo(BoolVal.TRUE);
             count++;
         }

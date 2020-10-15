@@ -15,17 +15,17 @@ abstract class UnaryOperatorImpl {
         this.functions[valueType.index()] = op;
     }
 
-    public Value invoke(Context ctx, Value v) throws MissingOverloadException {
+    public Value invoke(Value v) throws MissingOverloadException {
         final var func = this.functions[v.type().index()];
         if (func == null) {
             throw new MissingOverloadException(String.format("%s is not implemented for %s",
                     getClass().getName(), v.type()));
         }
-        return func.invoke(ctx, v);
+        return func.invoke(v);
     }
 
     @FunctionalInterface
     public interface Func {
-        Value invoke(Context ctx, Value v);
+        Value invoke(Value v);
     }
 }

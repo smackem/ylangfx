@@ -11,7 +11,7 @@ public class CmpOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.NUMBER, ValueType.NUMBER, CmpOperatorImpl::numberCmpNumber);
     }
 
-    private static Value numberCmpNumber(Context ctx, Value l, Value r) {
+    private static Value numberCmpNumber(Value l, Value r) {
         final int result = Float.compare(((NumberVal) l).value(), ((NumberVal) r).value());
         if (result < 0) {
             return NumberVal.MINUS_ONE;

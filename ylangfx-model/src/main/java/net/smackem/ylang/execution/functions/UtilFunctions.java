@@ -54,7 +54,7 @@ public class UtilFunctions {
                 if (max == null) {
                     max = v;
                 } else {
-                    final NumberVal n = (NumberVal) BinaryOperator.CMP.invoke(Context.EMPTY, max, v);
+                    final NumberVal n = (NumberVal) BinaryOperator.CMP.invoke(max, v);
                     if (n.value() < 0) {
                         max = v;
                     }
@@ -84,7 +84,7 @@ public class UtilFunctions {
                 if (min == null) {
                     min = v;
                 } else {
-                    final NumberVal n = (NumberVal) BinaryOperator.CMP.invoke(Context.EMPTY, min, v);
+                    final NumberVal n = (NumberVal) BinaryOperator.CMP.invoke(min, v);
                     if (n.value() > 0) {
                         min = v;
                     }
