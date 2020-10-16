@@ -13,4 +13,11 @@ public class IteratorVal extends Value {
     public Value next() {
         return it.hasNext() ? it.next() : null;
     }
+
+    @Override
+    public String toString() {
+        return "IteratorVal{" +
+                "it=" + it +
+                '}';
+    }
 }

@@ -1,6 +1,7 @@
 package net.smackem.ylang.runtime;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 public class RangeVal extends Value implements Iterable<Value> {
     private final float lowerInclusive;
@@ -24,6 +25,35 @@ public class RangeVal extends Value implements Iterable<Value> {
     public boolean contains(float f) {
         return this.step > 0 && f >= this.lowerInclusive && f < this.upperExclusive ||
                this.step < 0 && f <= this.lowerInclusive && f > this.upperExclusive;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RangeVal values = (RangeVal) o;
+        return Float.compare(values.lowerInclusive, lowerInclusive) == 0 &&
+                Float.compare(values.upperExclusive, upperExclusive) == 0 &&
+                Float.compare(values.step, step) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lowerInclusive, upperExclusive, step);
+    }
+
+    @Override
+    public String toString() {
+        return "RangeVal{" +
+                "lowerInclusive=" + lowerInclusive +
+                ", upperExclusive=" + upperExclusive +
+                ", step=" + step +
+                '}';
+    }
+
+    @Override
+    public String toLangString() {
+        return String.format(RuntimeParameters.LOCALE, "%f..%f..%f", this.lowerInclusive, this.step, this.upperExclusive);
     }
 
     @SuppressWarnings("NullableProblems")

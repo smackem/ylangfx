@@ -39,4 +39,9 @@ public class StringVal extends Value {
                "value='" + value + '\'' +
                '}';
     }
+
+    @Override
+    public String toLangString() {
+        return "\"" + this.value + "\"";
+    }
 }

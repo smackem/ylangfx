@@ -1,6 +1,7 @@
 package net.smackem.ylang.runtime;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class KernelVal extends Value implements Iterable<Value> {
     private final int width;
@@ -133,5 +134,12 @@ public class KernelVal extends Value implements Iterable<Value> {
                ", height=" + height +
                ", values=" + Arrays.toString(values) +
                '}';
+    }
+
+    @Override
+    public String toLangString() {
+        return Arrays.stream(this.values)
+                .map(NumberVal::toLangString)
+                .collect(Collectors.joining(" ", "|", "|"));
     }
 }

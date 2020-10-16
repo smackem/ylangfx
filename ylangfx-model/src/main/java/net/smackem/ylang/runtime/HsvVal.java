@@ -1,5 +1,6 @@
 package net.smackem.ylang.runtime;
 
+import java.util.Locale;
 import java.util.Objects;
 
 public class HsvVal extends Value {
@@ -162,5 +163,10 @@ public class HsvVal extends Value {
                 ", saturation=" + saturation +
                 ", value=" + value +
                 '}';
+    }
+
+    @Override
+    public String toLangString() {
+        return String.format(RuntimeParameters.LOCALE, "hsv(%f, %f, %f)", this.hue, this.saturation, this.value);
     }
 }

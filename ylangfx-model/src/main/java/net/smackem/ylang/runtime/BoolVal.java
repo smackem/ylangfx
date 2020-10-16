@@ -42,4 +42,9 @@ public class BoolVal extends Value {
                "value=" + value +
                '}';
     }
+
+    @Override
+    public String toLangString() {
+        return String.valueOf(this.value);
+    }
 }

@@ -1,6 +1,7 @@
 package net.smackem.ylang.runtime;
 
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Objects;
 
 public class LineVal extends GeometryVal {
@@ -74,6 +75,11 @@ public class LineVal extends GeometryVal {
                 ", x2=" + x2 +
                 ", y2=" + y2 +
                 '}';
+    }
+
+    @Override
+    public String toLangString() {
+        return String.format(Locale.ROOT, "line(%f;%f, %f;%f)", this.x1, this.y1, this.x2, this.y2);
     }
 
     private class PointIterator implements Iterator<Value> {

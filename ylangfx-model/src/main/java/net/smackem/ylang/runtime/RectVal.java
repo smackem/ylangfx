@@ -52,6 +52,11 @@ public class RectVal extends GeometryVal {
         return new RectVal(this.x - dx, this.y - dy, this.width + dx * 2, this.height + dx * 2);
     }
 
+    public boolean contains(PointVal pt) {
+        return pt.x() >= this.x && pt.x() < this.right() &&
+                pt.y() >= this.y && pt.y() < this.bottom();
+    }
+
     @Override
     public GeometryVal translate(PointVal pt) {
         return new RectVal(this.x + pt.x(), this.y + pt.y(), this.width, this.height);
@@ -83,9 +88,9 @@ public class RectVal extends GeometryVal {
         return new PointIterator();
     }
 
-    public boolean contains(PointVal pt) {
-        return pt.x() >= this.x && pt.x() < this.right() &&
-               pt.y() >= this.y && pt.y() < this.bottom();
+    @Override
+    public String toLangString() {
+        return String.format(RuntimeParameters.LOCALE, "rect(%f;%f, %f, %f)", this.x, this.y, this.width, this.height);
     }
 
     private class PointIterator implements Iterator<Value> {

@@ -137,4 +137,9 @@ public class RgbVal extends Value {
                ", a=" + a +
                '}';
     }
+
+    @Override
+    public String toLangString() {
+        return String.format(RuntimeParameters.LOCALE, "rgba(%f, %f, %f, %f)", this.r, this.g, this.b, this.a);
+    }
 }

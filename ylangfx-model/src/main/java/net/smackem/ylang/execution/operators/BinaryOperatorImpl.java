@@ -21,26 +21,16 @@ abstract class BinaryOperatorImpl {
 
     void implementLeft(ValueType left, Func op) {
         if (this.commutative) {
-            implementRight(left, op.swap());
+            implementRightInternal(left, op.swap());
         }
-        final int leftIndex = left.index();
-        for (final var right : ValueType.values()) {
-            if (right.index() >= 0) {
-                this.functions[leftIndex][right.index()] = op;
-            }
-        }
+        implementLeftInternal(left, op);
     }
 
     void implementRight(ValueType right, Func op) {
         if (this.commutative) {
-            implementLeft(right, op.swap());
+            implementLeftInternal(right, op.swap());
         }
-        final int rightIndex = right.index();
-        for (final var left : ValueType.values()) {
-            if (left.index() >= 0) {
-                this.functions[left.index()][rightIndex] = op;
-            }
-        }
+        implementRightInternal(right, op);
     }
 
     public Value invoke(Value l, Value r) throws MissingOverloadException {
@@ -50,6 +40,24 @@ abstract class BinaryOperatorImpl {
                     getClass().getName(), l.type(), r.type()));
         }
         return func.invoke(l, r);
+    }
+
+    private void implementLeftInternal(ValueType left, Func op) {
+        final int leftIndex = left.index();
+        for (final var right : ValueType.values()) {
+            if (right.index() >= 0) {
+                this.functions[leftIndex][right.index()] = op;
+            }
+        }
+    }
+
+    private void implementRightInternal(ValueType right, Func op) {
+        final int rightIndex = right.index();
+        for (final var left : ValueType.values()) {
+            if (left.index() >= 0) {
+                this.functions[left.index()][rightIndex] = op;
+            }
+        }
     }
 
     @FunctionalInterface

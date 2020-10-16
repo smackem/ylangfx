@@ -1,5 +1,7 @@
 package net.smackem.ylang.runtime;
 
+import java.util.Locale;
+
 public final class NumberVal extends Value {
     private final float value;
 
@@ -38,5 +40,10 @@ public final class NumberVal extends Value {
         return "NumberVal{" +
                "value=" + value +
                '}';
+    }
+
+    @Override
+    public String toLangString() {
+        return String.format(RuntimeParameters.LOCALE, "%f", this.value);
     }
 }

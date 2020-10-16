@@ -11,6 +11,7 @@ class AddOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.POINT, ValueType.POINT, AddOperatorImpl::pointPlusPoint);
         implement(ValueType.RGB, ValueType.NUMBER, AddOperatorImpl::rgbPlusNumber);
         implement(ValueType.RGB, ValueType.RGB, AddOperatorImpl::rgbPlusRgb);
+        implementLeft(ValueType.STRING, AddOperatorImpl::stringPlusAny);
     }
 
     private static Value numberPlusNumber(Value l, Value r) {
@@ -33,5 +34,9 @@ class AddOperatorImpl extends BinaryOperatorImpl {
 
     private static Value rgbPlusRgb(Value l, Value r) {
         return ((RgbVal) l).add((RgbVal) r);
+    }
+
+    private static Value stringPlusAny(Value l, Value r) {
+        return new StringVal(((StringVal) l).value() + r.toLangString());
     }
 }

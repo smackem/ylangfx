@@ -65,4 +65,9 @@ public final class PointVal extends Value {
                ", y=" + y +
                '}';
     }
+
+    @Override
+    public String toLangString() {
+        return String.format(RuntimeParameters.LOCALE, "%f;%f", this.x, this.y);
+    }
 }

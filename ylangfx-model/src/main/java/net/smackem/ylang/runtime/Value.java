@@ -10,4 +10,8 @@ public abstract class Value {
     public final ValueType type() {
         return this.type;
     }
+
+    public String toLangString() {
+        return toString();
+    }
 }

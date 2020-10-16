@@ -1,9 +1,7 @@
 package net.smackem.ylang.runtime;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ListVal extends Value implements Iterable<Value> {
     private final List<Value> values;
@@ -67,5 +65,12 @@ public class ListVal extends Value implements Iterable<Value> {
         return "ListVal{" +
                "values=" + values +
                '}';
+    }
+
+    @Override
+    public String toLangString() {
+        return this.values.stream()
+                .map(Value::toLangString)
+                .collect(Collectors.joining(",", "[", "]"));
     }
 }
