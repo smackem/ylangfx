@@ -6,13 +6,14 @@ import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InterpreterTest {
     @Test
-    public void addition() throws StackException, MissingOverloadException {
+    public void addition() throws StackException, MissingOverloadException, IOException {
         // return 1 + 2
         final Program program = new Program(List.of(
                 new Instruction(OpCode.LD_VAL, new NumberVal(1)),
@@ -27,7 +28,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void simpleArithmetics() throws StackException, MissingOverloadException {
+    public void simpleArithmetics() throws StackException, MissingOverloadException, IOException {
         // return (1 + 2 - 4) * 123.5
         final Program program = new Program(List.of(
                 new Instruction(OpCode.LD_VAL, new NumberVal(1)),
@@ -46,7 +47,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void loadAndStore() throws StackException, MissingOverloadException {
+    public void loadAndStore() throws StackException, MissingOverloadException, IOException {
         // a = 1
         // b = 2
         // return a + b
@@ -71,7 +72,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void relationalOps() throws StackException, MissingOverloadException {
+    public void relationalOps() throws StackException, MissingOverloadException, IOException {
         // return 100 > 50 and 3 = 10 or 1 <= 2
         final Program program = new Program(List.of(
                 new Instruction(OpCode.LD_VAL, new NumberVal(100)),
@@ -94,7 +95,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void simpleConditional() throws StackException, MissingOverloadException {
+    public void simpleConditional() throws StackException, MissingOverloadException, IOException {
         //return 100 > 50 ? true : false
         final Program program = new Program(List.of(
                 new Instruction(OpCode.LD_VAL, new NumberVal(100)),
@@ -112,7 +113,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void simpleLoop() throws StackException, MissingOverloadException {
+    public void simpleLoop() throws StackException, MissingOverloadException, IOException {
         // a = 0
         // i = 10
         // while (i != 0) { a = a + 1; i = i - 1; }
@@ -149,7 +150,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void invoke() throws StackException, MissingOverloadException {
+    public void invoke() throws StackException, MissingOverloadException, IOException {
         // a = rgb(255, 128, 64)
         // return a.r
         final Program program = new Program(List.of(
@@ -172,7 +173,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void iterate() throws StackException, MissingOverloadException {
+    public void iterate() throws StackException, MissingOverloadException, IOException {
         // pt = 0;0
         // r = rect(0, 0, 2, 2)
         // for p in a { pt = pt + p }
@@ -206,7 +207,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void list() throws StackException, MissingOverloadException {
+    public void list() throws StackException, MissingOverloadException, IOException {
         // return [1,2,#112233]
         final Program program = new Program(List.of(
                 new Instruction(OpCode.LD_VAL, new NumberVal(1)),
@@ -226,7 +227,7 @@ public class InterpreterTest {
     }
 
     @Test
-    public void point() throws StackException, MissingOverloadException {
+    public void point() throws StackException, MissingOverloadException, IOException {
         // return [1,2,#112233]
         final Program program = new Program(List.of(
                 new Instruction(OpCode.LD_VAL, new NumberVal(1)),

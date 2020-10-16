@@ -9,9 +9,12 @@ import net.smackem.ylang.runtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Interpreter {
     private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
@@ -20,14 +23,28 @@ public class Interpreter {
 
     public Interpreter(Program program, ImageVal inputImage) {
         this.program = program;
-        this.ctx = new Context(inputImage);
+        this.ctx = new Context(inputImage, new Writer() {
+            @SuppressWarnings("NullableProblems")
+            @Override
+            public void write(char[] buf, int off, int len) throws IOException {
+                log.info(new String(buf, off, len));
+            }
+
+            @Override
+            public void flush() throws IOException {
+            }
+
+            @Override
+            public void close() throws IOException {
+            }
+        });
     }
 
     Context context() {
         return this.ctx;
     }
 
-    public Value execute() throws StackException, MissingOverloadException {
+    public Value execute() throws StackException, MissingOverloadException, IOException {
         int pc = 0;
         int stackFrameIndex = 0;
         final List<Instruction> instructions = this.program.instructions();
@@ -178,10 +195,27 @@ public class Interpreter {
                             ((NumberVal) upper).value(),
                             ((NumberVal) step).value()));
                 }
+                case LOG -> {
+                    final String str = popValuesAsString(stack, instr.intArg());
+                    this.ctx.logWriter().write(str);
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
             pc++;
         }
         return stack.pop();
+    }
+
+    private static String popValuesAsString(Stack stack, int count) throws StackException {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            final Value v = stack.pop();
+            String s = v.toLangString();
+            if (v instanceof StringVal) {
+                s = s.substring(1, s.length() - 1);
+            }
+            sb.insert(0, s);
+        }
+        return sb.toString();
     }
 }

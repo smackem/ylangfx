@@ -197,6 +197,13 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitLogStmt(YLangParser.LogStmtContext ctx) {
+        super.visitLogStmt(ctx);
+        this.emitter.emit(OpCode.LOG, ctx.arguments().expr().size());
+        return null;
+    }
+
+    @Override
     public Void visitBlock(YLangParser.BlockContext ctx) {
         pushScope();
         super.visitBlock(ctx);
@@ -383,7 +390,8 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
                 this.emitter.emit(OpCode.LD_GLB, addr);
             }
         } else if (ctx.String() != null) {
-            this.emitter.emit(OpCode.LD_VAL, new StringVal(ctx.number().getText()));
+            final String s = ctx.String().getText();
+            this.emitter.emit(OpCode.LD_VAL, new StringVal(s.substring(1, s.length() - 1)));
         } else if (ctx.True() != null) {
             this.emitter.emit(OpCode.LD_VAL, BoolVal.TRUE);
         } else if (ctx.False() != null) {

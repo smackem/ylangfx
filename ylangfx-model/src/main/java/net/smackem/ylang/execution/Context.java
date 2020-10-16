@@ -2,14 +2,16 @@ package net.smackem.ylang.execution;
 
 import net.smackem.ylang.runtime.ImageVal;
 
+import java.io.Writer;
+
 public final class Context {
     private final Stack stack = new Stack();
     private final ImageVal inputImage;
+    private final Writer logWriter;
 
-    public static final Context EMPTY = new Context(null);
-
-    Context(ImageVal inputImage) {
+    Context(ImageVal inputImage, Writer logWriter) {
         this.inputImage = inputImage;
+        this.logWriter = logWriter;
     }
 
     Stack stack() {
@@ -18,5 +20,9 @@ public final class Context {
 
     public ImageVal inputImage() {
         return this.inputImage;
+    }
+
+    public Writer logWriter() {
+        return this.logWriter;
     }
 }

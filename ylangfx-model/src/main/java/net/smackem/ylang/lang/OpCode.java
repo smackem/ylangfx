@@ -37,7 +37,8 @@ public enum OpCode {
     MK_ENTRY,   // pop b, pop a, push mapEntry(a, b)
     MK_LIST,    // pop intArg arguments, push list(arguments)
     MK_POINT,   // pop b, pop a, push point(a, b)
-    MK_RANGE;   // pop upper, pop step, pop lower, push range(lower, upper, step)
+    MK_RANGE,   // pop upper, pop step, pop lower, push range(lower, upper, step)
+    LOG;        // pop intArg arguments, write to log
 
     public boolean isBranch() {
         return switch (this) {

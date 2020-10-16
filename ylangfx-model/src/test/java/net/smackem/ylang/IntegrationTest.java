@@ -9,6 +9,7 @@ import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class IntegrationTest {
     @Test
-    public void assignments() throws StackException, MissingOverloadException {
+    public void assignments() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -33,7 +34,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void compoundAtoms() throws StackException, MissingOverloadException {
+    public void compoundAtoms() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -54,7 +55,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void ternaryExpr() throws StackException, MissingOverloadException {
+    public void ternaryExpr() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -73,7 +74,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void ifStmt() throws StackException, MissingOverloadException {
+    public void ifStmt() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -91,7 +92,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void ifElseStmt() throws StackException, MissingOverloadException {
+    public void ifElseStmt() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -111,7 +112,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void ifElseIfStmt() throws StackException, MissingOverloadException {
+    public void ifElseIfStmt() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -137,7 +138,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void whileStmt() throws StackException, MissingOverloadException {
+    public void whileStmt() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -160,7 +161,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void prematureReturn() throws StackException, MissingOverloadException {
+    public void prematureReturn() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -177,7 +178,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void forStmt() throws StackException, MissingOverloadException {
+    public void forStmt() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -195,7 +196,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void multipleForStmts() throws StackException, MissingOverloadException {
+    public void multipleForStmts() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -220,7 +221,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void indexedAtom() throws StackException, MissingOverloadException {
+    public void indexedAtom() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -239,7 +240,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void invocations() throws StackException, MissingOverloadException {
+    public void invocations() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -264,7 +265,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void invocationStmts() throws StackException, MissingOverloadException {
+    public void invocationStmts() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -280,7 +281,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void indexAssignment() throws StackException, MissingOverloadException {
+    public void indexAssignment() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -300,7 +301,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void compoundIndexAssignment() throws StackException, MissingOverloadException {
+    public void compoundIndexAssignment() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -322,7 +323,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void invertImage() throws StackException, MissingOverloadException {
+    public void invertImage() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -350,7 +351,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void points() throws StackException, MissingOverloadException {
+    public void points() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -368,7 +369,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void rectangles() throws StackException, MissingOverloadException {
+    public void rectangles() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -389,7 +390,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void ranges() throws StackException, MissingOverloadException {
+    public void ranges() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -418,7 +419,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void swap() throws StackException, MissingOverloadException {
+    public void swap() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -438,7 +439,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void throwsOnIdentDuplicate() throws StackException, MissingOverloadException {
+    public void throwsOnIdentDuplicate() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -451,7 +452,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void throwsOnIdentDuplicateNested() throws StackException, MissingOverloadException {
+    public void throwsOnIdentDuplicateNested() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -466,7 +467,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void identOverrides() throws StackException, MissingOverloadException {
+    public void identOverrides() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -484,7 +485,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void assignIdentNested() throws StackException, MissingOverloadException {
+    public void assignIdentNested() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -502,7 +503,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void complexIdentNesting() throws StackException, MissingOverloadException {
+    public void complexIdentNesting() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -525,7 +526,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void nestedForLoopsWithSameIteratorIdent() throws StackException, MissingOverloadException {
+    public void nestedForLoopsWithSameIteratorIdent() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -545,7 +546,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void declarationOrder() throws StackException, MissingOverloadException {
+    public void declarationOrder() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -562,7 +563,7 @@ public class IntegrationTest {
     }
 
     @Test
-    public void minMax() throws StackException, MissingOverloadException {
+    public void minMax() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
@@ -588,5 +589,19 @@ public class IntegrationTest {
                 new NumberVal(-2),
                 new NumberVal(100)
         )));
+    }
+
+    @Test
+    public void log() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                log("a: ", 1, " b: ", 2, " c: ", 3)
+                return nil
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        new Interpreter(program, null).execute();
     }
 }
