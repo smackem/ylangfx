@@ -619,7 +619,8 @@ public class IntegrationTest {
                 c := a :: b
                 d := list(2)
                 e := list(2, 0)
-                return [a, b, popped, first, size, c, d, e]
+                f := [4, 6, #0a0b0c] 
+                return [a, b, popped, first, size, c, d, e, c.sum, f.sum]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
@@ -633,7 +634,9 @@ public class IntegrationTest {
                 new NumberVal(3),
                 new ListVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3), new NumberVal(2))),
                 new ListVal(List.of(NilVal.INSTANCE, NilVal.INSTANCE)),
-                new ListVal(List.of(NumberVal.ZERO, NumberVal.ZERO))
+                new ListVal(List.of(NumberVal.ZERO, NumberVal.ZERO)),
+                new NumberVal(8),
+                new RgbVal(0xa + 10, 0xb + 10, 0xc + 10, 255)
         )));
     }
 
@@ -642,30 +645,20 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
-                a := []
-                a.push(1).push(2).push(3)
-                b := list(a)
-                popped := b.pop()
-                first := b.removeAt(0)
-                size := a.size()
-                c := a :: b
-                d := list(2)
-                e := list(2, 0)
-                return [a, b, popped, first, size, c, d, e]
+                a := |1 2 3 4|
+                a[0] = 100
+                return [a, a.size, a.width, a.height, a.sum]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
-                new ListVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3))),
-                new ListVal(List.of(new NumberVal(2))),
-                new NumberVal(3),
-                new NumberVal(1),
-                new NumberVal(3),
-                new ListVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3), new NumberVal(2))),
-                new ListVal(List.of(NilVal.INSTANCE, NilVal.INSTANCE)),
-                new ListVal(List.of(NumberVal.ZERO, NumberVal.ZERO))
+                new KernelVal(List.of(new NumberVal(100), new NumberVal(2), new NumberVal(3), new NumberVal(4))),
+                new NumberVal(4),
+                new NumberVal(2),
+                new NumberVal(2),
+                new NumberVal(109)
         )));
     }
 }
