@@ -15,6 +15,10 @@ public class ListVal extends Value implements Iterable<Value> {
         this(values, true);
     }
 
+    public ListVal(ListVal original) {
+        this(original.values, true);
+    }
+
     public int size() {
         return this.values.size();
     }
@@ -35,6 +39,18 @@ public class ListVal extends Value implements Iterable<Value> {
 
     public boolean contains(Value v) {
         return this.values.contains(v);
+    }
+
+    public void add(Value v) {
+        this.values.add(v);
+    }
+
+    public Value removeLast() {
+        return this.values.remove(this.values.size() - 1);
+    }
+
+    public Value removeAt(int index) {
+        return this.values.remove(index);
     }
 
     @SuppressWarnings("NullableProblems")

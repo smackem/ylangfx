@@ -38,6 +38,9 @@ public class ImageVal extends Value {
         if (height <= 0) {
             throw new IllegalArgumentException("image height must be > 0");
         }
+        if (width * height != pixels.length) {
+            throw new IllegalArgumentException("width and height do not match number of pixels");
+        }
         final RgbVal[] rgbPixels = new RgbVal[pixels.length];
         for (int i = 0; i < pixels.length; i++) {
             final int pixel = pixels[i];

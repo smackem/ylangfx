@@ -604,4 +604,68 @@ public class IntegrationTest {
         System.out.println(program.toString());
         new Interpreter(program, null).execute();
     }
+
+    @Test
+    public void lists() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := []
+                a.push(1).push(2).push(3)
+                b := list(a)
+                popped := b.pop()
+                first := b.removeAt(0)
+                size := a.size()
+                c := a :: b
+                d := list(2)
+                e := list(2, 0)
+                return [a, b, popped, first, size, c, d, e]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new ListVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3))),
+                new ListVal(List.of(new NumberVal(2))),
+                new NumberVal(3),
+                new NumberVal(1),
+                new NumberVal(3),
+                new ListVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3), new NumberVal(2))),
+                new ListVal(List.of(NilVal.INSTANCE, NilVal.INSTANCE)),
+                new ListVal(List.of(NumberVal.ZERO, NumberVal.ZERO))
+        )));
+    }
+
+    @Test
+    public void kernels() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := []
+                a.push(1).push(2).push(3)
+                b := list(a)
+                popped := b.pop()
+                first := b.removeAt(0)
+                size := a.size()
+                c := a :: b
+                d := list(2)
+                e := list(2, 0)
+                return [a, b, popped, first, size, c, d, e]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new ListVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3))),
+                new ListVal(List.of(new NumberVal(2))),
+                new NumberVal(3),
+                new NumberVal(1),
+                new NumberVal(3),
+                new ListVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3), new NumberVal(2))),
+                new ListVal(List.of(NilVal.INSTANCE, NilVal.INSTANCE)),
+                new ListVal(List.of(NumberVal.ZERO, NumberVal.ZERO))
+        )));
+    }
 }

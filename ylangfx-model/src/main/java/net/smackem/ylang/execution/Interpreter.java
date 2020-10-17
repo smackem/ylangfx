@@ -199,6 +199,10 @@ public class Interpreter {
                     final String str = popValuesAsString(stack, instr.intArg());
                     this.ctx.logWriter().write(str);
                 }
+                case CONCAT -> {
+                    final Value r = stack.pop();
+                    stack.push(BinaryOperator.CONCAT.invoke(stack.pop(), r));
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
             pc++;

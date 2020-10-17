@@ -29,14 +29,6 @@ public class GeometryFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.POINT),
                         GeometryFunctions::pointY)));
-        registry.put(new FunctionGroup("width",
-                FunctionOverload.method(
-                        List.of(ValueType.RECT),
-                        GeometryFunctions::rectWidth)));
-        registry.put(new FunctionGroup("height",
-                FunctionOverload.method(
-                        List.of(ValueType.RECT),
-                        GeometryFunctions::rectHeight)));
         registry.put(new FunctionGroup("right",
                 FunctionOverload.method(
                         List.of(ValueType.RECT),
@@ -49,6 +41,7 @@ public class GeometryFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.RECT, ValueType.NUMBER, ValueType.NUMBER),
                         GeometryFunctions::rectInflate)));
+        // rect width and height are defined in CommonFunctions
         registry.put(new FunctionGroup("line",
                 FunctionOverload.function(
                         List.of(ValueType.POINT, ValueType.POINT),
@@ -101,16 +94,6 @@ public class GeometryFunctions {
     private static Value rectRight(List<Value> args) {
         final RectVal rect = (RectVal) args.get(0);
         return new NumberVal(rect.right());
-    }
-
-    private static Value rectHeight(List<Value> args) {
-        final RectVal rect = (RectVal) args.get(0);
-        return new NumberVal(rect.height());
-    }
-
-    private static Value rectWidth(List<Value> args) {
-        final RectVal rect = (RectVal) args.get(0);
-        return new NumberVal(rect.width());
     }
 
     private static Value pointY(List<Value> args) {

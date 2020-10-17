@@ -44,19 +44,15 @@ abstract class BinaryOperatorImpl {
 
     private void implementLeftInternal(ValueType left, Func op) {
         final int leftIndex = left.index();
-        for (final var right : ValueType.values()) {
-            if (right.index() >= 0) {
-                this.functions[leftIndex][right.index()] = op;
-            }
+        for (final var right : ValueType.publicValues()) {
+            this.functions[leftIndex][right.index()] = op;
         }
     }
 
     private void implementRightInternal(ValueType right, Func op) {
         final int rightIndex = right.index();
-        for (final var left : ValueType.values()) {
-            if (left.index() >= 0) {
-                this.functions[left.index()][rightIndex] = op;
-            }
+        for (final var left : ValueType.publicValues()) {
+            this.functions[left.index()][rightIndex] = op;
         }
     }
 

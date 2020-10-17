@@ -11,7 +11,8 @@ public enum BinaryOperator {
     MOD(new ModOperatorImpl()),
     CMP(new CmpOperatorImpl()),
     INDEX(new IndexOperatorImpl()),
-    IN(new InOperatorImpl());
+    IN(new InOperatorImpl()),
+    CONCAT(new ConcatOperatorImpl());
 
     private final BinaryOperatorImpl impl;
 

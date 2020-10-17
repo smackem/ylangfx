@@ -1,6 +1,5 @@
 package net.smackem.ylang.execution.functions;
 
-import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.runtime.*;

@@ -1,5 +1,9 @@
 package net.smackem.ylang.runtime;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 public enum ValueType {
     NUMBER(0),
     POINT(1),
@@ -21,6 +25,12 @@ public enum ValueType {
     INFRASTRUCTURE(-1);
 
     public static final int MAX_INDEX = 17; // array size to hold all indices
+
+    public static Collection<ValueType> publicValues() {
+        return Arrays.stream(values())
+                .filter(valueType -> valueType.index >= 0)
+                .collect(Collectors.toList());
+    }
 
     private final int index;
 

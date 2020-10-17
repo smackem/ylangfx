@@ -299,7 +299,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             } else if (op.Cmp() != null) {
                 this.emitter.emit(OpCode.CMP);
             } else if (op.Concat() != null) {
-                throw new UnsupportedOperationException();
+                this.emitter.emit(OpCode.CONCAT);
             }
             index++;
         }
@@ -405,7 +405,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             this.emitter.emit(OpCode.LD_VAL, parseColor(ctx.Color().getText()));
         } else if (ctx.list() != null) {
             ctx.list().accept(this);
-            this.emitter.emit(OpCode.MK_LIST, ctx.list().arguments().expr().size());
+            this.emitter.emit(OpCode.MK_LIST, ctx.list().arguments() != null ?ctx.list().arguments().expr().size() : 0);
         } else if (ctx.map() != null) {
             throw new UnsupportedOperationException();
         } else if (ctx.expr() != null) {

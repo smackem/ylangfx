@@ -27,6 +27,11 @@ public class KernelVal extends Value implements Iterable<Value> {
         this(quadraticLen(values), values.toArray(new NumberVal[0]));
     }
 
+    @SuppressWarnings("CopyConstructorMissesField")
+    public KernelVal(KernelVal original) {
+        this(original.width, original.height, Arrays.copyOf(original.values, original.values.length));
+    }
+
     public NumberVal get(int x, int y) {
         Objects.checkIndex(x, this.width);
         Objects.checkIndex(y, this.height);
@@ -60,6 +65,14 @@ public class KernelVal extends Value implements Iterable<Value> {
             }
         }
         return false;
+    }
+
+    public NumberVal sum() {
+        float result = 0;
+        for (final NumberVal v : this.values) {
+            result += v.value();
+        }
+        return new NumberVal(result);
     }
 
     /**

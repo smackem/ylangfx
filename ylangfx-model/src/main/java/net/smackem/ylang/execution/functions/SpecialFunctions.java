@@ -10,7 +10,7 @@ public class SpecialFunctions {
 
     static void register(FunctionRegistry registry) {
         final List<FunctionOverload> setAtOverloads = new ArrayList<>();
-        for (final ValueType valueType : ValueType.values()) {
+        for (final ValueType valueType : ValueType.publicValues()) {
             setAtOverloads.add(FunctionOverload.function(
                     List.of(ValueType.LIST, ValueType.NUMBER, valueType),
                     SpecialFunctions::setListAtIndex));
