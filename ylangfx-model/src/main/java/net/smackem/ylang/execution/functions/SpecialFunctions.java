@@ -3,6 +3,7 @@ package net.smackem.ylang.execution.functions;
 import net.smackem.ylang.runtime.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class SpecialFunctions {
@@ -10,13 +11,16 @@ public class SpecialFunctions {
 
     static void register(FunctionRegistry registry) {
         final List<FunctionOverload> setAtOverloads = new ArrayList<>();
-        for (final ValueType valueType : ValueType.publicValues()) {
+        final Collection<ValueType> publicValueTypes = ValueType.publicValues();
+        for (final ValueType rvalueType : publicValueTypes) {
             setAtOverloads.add(FunctionOverload.function(
-                    List.of(ValueType.LIST, ValueType.NUMBER, valueType),
+                    List.of(ValueType.LIST, ValueType.NUMBER, rvalueType),
                     SpecialFunctions::setListAtIndex));
-            setAtOverloads.add(FunctionOverload.function(
-                    List.of(ValueType.MAP, ValueType.STRING, valueType),
-                    SpecialFunctions::setMapAtKey));
+            for (final ValueType keyValueType : publicValueTypes) {
+                setAtOverloads.add(FunctionOverload.function(
+                        List.of(ValueType.MAP, keyValueType, rvalueType),
+                        SpecialFunctions::setMapAtKey));
+            }
         }
         setAtOverloads.add(FunctionOverload.function(
                 List.of(ValueType.KERNEL, ValueType.NUMBER, ValueType.NUMBER),
@@ -32,8 +36,8 @@ public class SpecialFunctions {
 
     private static Value setMapAtKey(List<Value> args) {
         final MapVal map = (MapVal) args.get(0);
-        final StringVal key = (StringVal) args.get(1);
-        map.entries().put(key.value(), args.get(2));
+        final Value key = args.get(1);
+        map.entries().put(key, args.get(2));
         return null;
     }
 

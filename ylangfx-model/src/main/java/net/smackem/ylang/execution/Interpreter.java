@@ -205,8 +205,8 @@ public class Interpreter {
                 }
                 case MK_ENTRY -> {
                     final Value value = stack.pop();
-                    final StringVal key = (StringVal) stack.pop();
-                    stack.push(new MapEntryVal(key.value(), value));
+                    final Value key = stack.pop();
+                    stack.push(new MapEntryVal(key, value));
                 }
                 case MK_MAP -> {
                     final LinkedList<MapEntryVal> entries = new LinkedList<>();

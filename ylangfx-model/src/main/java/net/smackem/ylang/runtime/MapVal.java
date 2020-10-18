@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class MapVal extends Value {
 
-    private final Map<String, Value> entries = new HashMap<>();
+    private final Map<Value, Value> entries = new HashMap<>();
 
     public MapVal(Collection<MapEntryVal> entries) {
         super(ValueType.MAP);
@@ -16,7 +16,7 @@ public class MapVal extends Value {
         }
     }
 
-    public Map<String, Value> entries() {
+    public Map<Value, Value> entries() {
         return this.entries;
     }
 

@@ -10,12 +10,12 @@ public class IndexOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.LIST, ValueType.NUMBER, IndexOperatorImpl::listAtNumber);
         implement(ValueType.KERNEL, ValueType.NUMBER, IndexOperatorImpl::kernelAtNumber);
         implement(ValueType.KERNEL, ValueType.POINT, IndexOperatorImpl::kernelAtPoint);
-        implement(ValueType.MAP, ValueType.STRING, IndexOperatorImpl::mapAtString);
+        implementLeft(ValueType.MAP, IndexOperatorImpl::mapAtAny);
         // listAtRange
     }
 
-    private static Value mapAtString(Value l, Value r) {
-        final Value v = ((MapVal) l).entries().get(((StringVal) r).value());
+    private static Value mapAtAny(Value l, Value r) {
+        final Value v = ((MapVal) l).entries().get(r);
         return v != null ? v : NilVal.INSTANCE;
     }
 

@@ -4,16 +4,16 @@ import java.util.Objects;
 
 public class MapEntryVal extends Value {
 
-    private final String key;
+    private final Value key;
     private final Value value;
 
-    public MapEntryVal(String key, Value value) {
+    public MapEntryVal(Value key, Value value) {
         super(ValueType.MAP_ENTRY);
         this.key = Objects.requireNonNull(key);
         this.value = Objects.requireNonNull(value);
     }
 
-    public String key() {
+    public Value key() {
         return this.key;
     }
 
@@ -45,6 +45,9 @@ public class MapEntryVal extends Value {
 
     @Override
     public String toLangString() {
-        return String.format(RuntimeParameters.LOCALE, "%s:%s", this.key, this.value.toLangString());
+        return String.format(RuntimeParameters.LOCALE,
+                "%s:%s",
+                this.key.toLangString(),
+                this.value.toLangString());
     }
 }

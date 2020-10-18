@@ -52,7 +52,11 @@ arguments
     ;
 
 forStmt
-    : 'for' Ident 'in' expr block
+    : 'for' Ident 'in' expr whereClause? block
+    ;
+
+whereClause
+    : 'where' expr
     ;
 
 whileStmt
@@ -181,7 +185,7 @@ kernel
     ;
 
 map
-    : '{' mapEntries? '}'
+    : '{' mapEntries? ','? '}'
     ;
 
 mapEntries
@@ -193,7 +197,7 @@ mapEntry
     ;
 
 list
-    : '[' arguments? ']'
+    : '[' arguments? ','? ']'
     ;
 
 Or      : 'or';

@@ -2,6 +2,7 @@ package net.smackem.ylang.lang;
 
 import net.smackem.ylang.runtime.*;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -393,8 +394,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
                 this.emitter.emit(OpCode.LD_GLB, addr);
             }
         } else if (ctx.String() != null) {
-            final String s = ctx.String().getText();
-            this.emitter.emit(OpCode.LD_VAL, new StringVal(s.substring(1, s.length() - 1)));
+            emitStringLiteral(ctx.String());
         } else if (ctx.True() != null) {
             this.emitter.emit(OpCode.LD_VAL, BoolVal.TRUE);
         } else if (ctx.False() != null) {
@@ -427,7 +427,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         if (ctx.Ident() != null) {
             this.emitter.emit(OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
         } else {
-            ctx.String().accept(this);
+            emitStringLiteral(ctx.String());
         }
         ctx.expr().accept(this);
         this.emitter.emit(OpCode.MK_ENTRY);
@@ -453,6 +453,11 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
                 ctx.start.getLine(), ctx.start.getCharPositionInLine(), message);
         log.info(text);
         this.semanticErrors.add(text);
+    }
+
+    private void emitStringLiteral(TerminalNode str) {
+        final String s = str.getText();
+        this.emitter.emit(OpCode.LD_VAL, new StringVal(s.substring(1, s.length() - 1)));
     }
 
     private static NumberVal parseNumber(String s) {
