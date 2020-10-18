@@ -156,6 +156,10 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         this.emitter.emit(OpCode.LD_GLB, iteratorAddr); // iterator.next
         this.emitter.emit(OpCode.BR_NEXT, breakLabel);
         this.emitter.emit(OpCode.ST_GLB, itemAddr);     // store item
+        if (ctx.whereClause() != null) {
+            ctx.whereClause().accept(this);
+            this.emitter.emit(OpCode.BR_ZERO, loopLabel);
+        }
         ctx.block().accept(this);
         this.emitter.emit(OpCode.BR, loopLabel);
         this.emitter.emit(OpCode.LABEL, breakLabel);

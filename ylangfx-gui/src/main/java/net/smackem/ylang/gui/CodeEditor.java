@@ -23,7 +23,7 @@ public class CodeEditor extends CodeArea {
     private static final String[] KEYWORDS = new String[] {
             "and", "or", "not", "for", "in", "yield",
             "if", "else", "true", "false", "log",
-            "fn", "return", "nil", "while",
+            "fn", "return", "nil", "while", "where",
     };
 
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";

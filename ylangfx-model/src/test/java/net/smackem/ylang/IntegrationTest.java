@@ -221,6 +221,24 @@ public class IntegrationTest {
     }
 
     @Test
+    public void forStmtWithWhereClause() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                n := 0
+                for x in |1 2 3 4| where x > 2 {
+                    n = n + x
+                }
+                return n
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(program).isNotNull();
+        assertThat(errors).isEmpty();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(7));
+    }
+
+    @Test
     public void indexedAtom() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
