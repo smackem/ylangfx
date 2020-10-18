@@ -22,9 +22,10 @@ public enum ValueType {
     RANGE(14),
     LINE(15),
     FUNCTION(16),
+    MAP_ENTRY(17),
     INFRASTRUCTURE(-1);
 
-    public static final int MAX_INDEX = 17; // array size to hold all indices
+    public static final int MAX_INDEX = 18; // array size to hold all indices
 
     public static Collection<ValueType> publicValues() {
         return Arrays.stream(values())

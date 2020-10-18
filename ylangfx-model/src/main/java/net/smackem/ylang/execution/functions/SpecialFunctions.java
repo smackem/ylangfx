@@ -14,6 +14,9 @@ public class SpecialFunctions {
             setAtOverloads.add(FunctionOverload.function(
                     List.of(ValueType.LIST, ValueType.NUMBER, valueType),
                     SpecialFunctions::setListAtIndex));
+            setAtOverloads.add(FunctionOverload.function(
+                    List.of(ValueType.MAP, ValueType.STRING, valueType),
+                    SpecialFunctions::setMapAtKey));
         }
         setAtOverloads.add(FunctionOverload.function(
                 List.of(ValueType.KERNEL, ValueType.NUMBER, ValueType.NUMBER),
@@ -25,6 +28,13 @@ public class SpecialFunctions {
                 List.of(ValueType.IMAGE, ValueType.POINT, ValueType.RGB),
                 SpecialFunctions::setImageAtPoint));
         registry.put(new FunctionGroup(FunctionRegistry.FUNCTION_NAME_SET_AT, setAtOverloads));
+    }
+
+    private static Value setMapAtKey(List<Value> args) {
+        final MapVal map = (MapVal) args.get(0);
+        final StringVal key = (StringVal) args.get(1);
+        map.entries().put(key.value(), args.get(2));
+        return null;
     }
 
     private static Value setImageAtPoint(List<Value> args) {

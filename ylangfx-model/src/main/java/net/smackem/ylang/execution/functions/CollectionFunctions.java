@@ -44,7 +44,10 @@ public class CollectionFunctions {
                         CollectionFunctions::listSize),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
-                        CollectionFunctions::kernelSize)));
+                        CollectionFunctions::kernelSize),
+                FunctionOverload.method(
+                        List.of(ValueType.MAP),
+                        CollectionFunctions::mapSize)));
         registry.put(new FunctionGroup("kernel",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
@@ -60,6 +63,10 @@ public class CollectionFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
                         CollectionFunctions::kernelSum)));
+    }
+
+    private static Value mapSize(List<Value> args) {
+        return new NumberVal(((MapVal) args.get(0)).entries().size());
     }
 
     private static Value listSum(List<Value> args) {

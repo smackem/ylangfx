@@ -661,4 +661,40 @@ public class IntegrationTest {
                 new NumberVal(109)
         )));
     }
+
+    @Test
+    public void maps() throws MissingOverloadException, IOException, StackException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := {
+                    loc: 1;2,
+                    col: #ff0000,
+                    num: 100
+                }
+                a.loc = 2;3
+                a["col"] = #00ff00
+                b := {}
+                b.xyz = 123
+                return [a, a.num, a["num"], a["nope"], b, b.size]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new MapVal(List.of(
+                    new MapEntryVal("loc", new PointVal(2, 3)),
+                    new MapEntryVal("col", new RgbVal(0, 0xff, 0, 0xff)),
+                    new MapEntryVal("num", new NumberVal(100))
+                )),
+                new NumberVal(100),
+                new NumberVal(100),
+                NilVal.INSTANCE,
+                new MapVal(List.of(
+                    new MapEntryVal("xyz", new NumberVal(123))
+                )),
+                new NumberVal(1)
+        )));
+    }
 }

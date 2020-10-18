@@ -73,9 +73,12 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
                 if (ctx.invocationSuffix() != null) {
                     semanticErrors.add("cannot assign to invocation");
                     return null;
-                } else {
-                    throw new UnsupportedOperationException("assignment of map values is not yet implemented");
                 }
+                emitter.emit(OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
+                rvalueExpr.accept(EmittingVisitor.this);
+                emitter.emit(OpCode.INVOKE, 3, functionTable.indexAssignmentFunction());
+                emitter.emit(OpCode.POP); // like all functions, setAt returns a value -> discard it
+                return null;
             }
 
             @Override
@@ -357,7 +360,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             if (this.functionTable.contains(ident)) {
                 this.emitter.emit(OpCode.INVOKE, 1, ident);
             } else {
-                this.emitter.emit(OpCode.LD_VAL, ident); // emit x.property as x["property"]
+                this.emitter.emit(OpCode.LD_VAL, new StringVal(ident)); // emit x.property as x["property"]
                 this.emitter.emit(OpCode.IDX);
             }
         }
@@ -405,9 +408,10 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             this.emitter.emit(OpCode.LD_VAL, parseColor(ctx.Color().getText()));
         } else if (ctx.list() != null) {
             ctx.list().accept(this);
-            this.emitter.emit(OpCode.MK_LIST, ctx.list().arguments() != null ?ctx.list().arguments().expr().size() : 0);
+            this.emitter.emit(OpCode.MK_LIST, ctx.list().arguments() != null ? ctx.list().arguments().expr().size() : 0);
         } else if (ctx.map() != null) {
-            throw new UnsupportedOperationException();
+            ctx.map().accept(this);
+            this.emitter.emit(OpCode.MK_MAP, ctx.map().mapEntries() != null ? ctx.map().mapEntries().mapEntry().size() : 0);
         } else if (ctx.expr() != null) {
             ctx.expr().accept(this);
         } else if (ctx.functionInvocation() != null) {
@@ -415,6 +419,18 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         } else if (ctx.EnvironmentArg() != null) {
             this.emitter.emit(OpCode.LD_ENV, ctx.EnvironmentArg().getText().substring(1));
         }
+        return null;
+    }
+
+    @Override
+    public Void visitMapEntry(YLangParser.MapEntryContext ctx) {
+        if (ctx.Ident() != null) {
+            this.emitter.emit(OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
+        } else {
+            ctx.String().accept(this);
+        }
+        ctx.expr().accept(this);
+        this.emitter.emit(OpCode.MK_ENTRY);
         return null;
     }
 

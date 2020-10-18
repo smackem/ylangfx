@@ -203,6 +203,18 @@ public class Interpreter {
                     final Value r = stack.pop();
                     stack.push(BinaryOperator.CONCAT.invoke(stack.pop(), r));
                 }
+                case MK_ENTRY -> {
+                    final Value value = stack.pop();
+                    final StringVal key = (StringVal) stack.pop();
+                    stack.push(new MapEntryVal(key.value(), value));
+                }
+                case MK_MAP -> {
+                    final LinkedList<MapEntryVal> entries = new LinkedList<>();
+                    for (int i = 0; i < instr.intArg(); i++) {
+                        entries.addFirst((MapEntryVal) stack.pop());
+                    }
+                    stack.push(new MapVal(entries));
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
             pc++;
