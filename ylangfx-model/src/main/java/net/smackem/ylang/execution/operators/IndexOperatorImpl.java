@@ -3,6 +3,9 @@ package net.smackem.ylang.execution.operators;
 import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.runtime.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IndexOperatorImpl extends BinaryOperatorImpl {
     IndexOperatorImpl() {
         super(false);
@@ -11,7 +14,18 @@ public class IndexOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.KERNEL, ValueType.NUMBER, IndexOperatorImpl::kernelAtNumber);
         implement(ValueType.KERNEL, ValueType.POINT, IndexOperatorImpl::kernelAtPoint);
         implementLeft(ValueType.MAP, IndexOperatorImpl::mapAtAny);
-        // listAtRange
+        implement(ValueType.LIST, ValueType.RANGE, IndexOperatorImpl::listAtRange);
+    }
+
+    private static Value listAtRange(Value l, Value r) {
+        final ListVal list = (ListVal) l;
+        final RangeVal range = (RangeVal) r;
+        final List<Value> values = new ArrayList<>();
+        for (final Value v : range) {
+            final int i = (int) ((NumberVal) v).value();
+            values.add(list.get(i));
+        }
+        return new ListVal(values);
     }
 
     private static Value mapAtAny(Value l, Value r) {

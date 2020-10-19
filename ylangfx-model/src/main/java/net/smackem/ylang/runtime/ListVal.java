@@ -53,6 +53,12 @@ public class ListVal extends Value implements Iterable<Value> {
         return this.values.remove(index);
     }
 
+    public ListVal reversed() {
+        final List<Value> copies = new ArrayList<>(this.values);
+        Collections.reverse(copies);
+        return new ListVal(copies);
+    }
+
     @SuppressWarnings("NullableProblems")
     @Override
     public Iterator<Value> iterator() {

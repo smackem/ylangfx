@@ -2,10 +2,7 @@ package net.smackem.ylang.execution.operators;
 
 import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.execution.MissingOverloadException;
-import net.smackem.ylang.runtime.KernelVal;
-import net.smackem.ylang.runtime.ListVal;
-import net.smackem.ylang.runtime.NumberVal;
-import net.smackem.ylang.runtime.PointVal;
+import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
 import java.util.List;
@@ -70,5 +67,34 @@ public class IndexOperatorTest {
                 .isEqualTo(new NumberVal(-1));
         assertThatThrownBy(() -> BinaryOperator.INDEX.invoke(kernel, new PointVal(2, 0)))
                 .isInstanceOf(IndexOutOfBoundsException.class);
+    }
+
+    @Test
+    public void listAtRange() throws MissingOverloadException {
+        final ListVal list = new ListVal(List.of(
+                new NumberVal(1),
+                new NumberVal(2),
+                new NumberVal(3),
+                new NumberVal(4),
+                new NumberVal(5),
+                new NumberVal(6)));
+        assertThat(BinaryOperator.INDEX.invoke(list, new RangeVal(0, 1, 1)))
+                .isEqualTo(new ListVal(List.of(
+                        new NumberVal(1))));
+        assertThat(BinaryOperator.INDEX.invoke(list, new RangeVal(0, 3, 1)))
+                .isEqualTo(new ListVal(List.of(
+                        new NumberVal(1),
+                        new NumberVal(2),
+                        new NumberVal(3))));
+        assertThat(BinaryOperator.INDEX.invoke(list, new RangeVal(0, 6, 2)))
+                .isEqualTo(new ListVal(List.of(
+                        new NumberVal(1),
+                        new NumberVal(3),
+                        new NumberVal(5))));
+        assertThat(BinaryOperator.INDEX.invoke(list, new RangeVal(5, 0, -2)))
+                .isEqualTo(new ListVal(List.of(
+                        new NumberVal(6),
+                        new NumberVal(4),
+                        new NumberVal(2))));
     }
 }

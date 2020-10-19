@@ -38,6 +38,10 @@ public class CollectionFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.LIST, ValueType.NUMBER),
                         CollectionFunctions::removeAt)));
+        registry.put(new FunctionGroup("reverse",
+                FunctionOverload.method(
+                        List.of(ValueType.LIST),
+                        CollectionFunctions::reverse)));
         registry.put(new FunctionGroup("size",
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
@@ -63,6 +67,10 @@ public class CollectionFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
                         CollectionFunctions::kernelSum)));
+    }
+
+    private static Value reverse(List<Value> args) {
+        return ((ListVal) args.get(0)).reversed();
     }
 
     private static Value mapSize(List<Value> args) {
