@@ -10,6 +10,7 @@ import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new NumberVal(3));
     }
 
@@ -46,7 +47,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new RgbVal(0xff, 0xcc, 0x88, 0x40),
                 new KernelVal(List.of(NumberVal.ZERO, NumberVal.ONE, NumberVal.MINUS_ONE, new NumberVal(2))),
@@ -66,7 +67,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 NumberVal.ONE,
                 NumberVal.ZERO
@@ -87,7 +88,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(NumberVal.ONE);
     }
 
@@ -107,7 +108,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(NumberVal.ZERO);
     }
 
@@ -133,7 +134,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(NumberVal.ONE);
     }
 
@@ -153,7 +154,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(10),
                 NumberVal.ZERO
@@ -173,7 +174,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new NumberVal(666));
     }
 
@@ -191,7 +192,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new NumberVal(10));
     }
 
@@ -213,7 +214,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(10),
                 new NumberVal(11)
@@ -234,7 +235,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new NumberVal(7));
     }
 
@@ -250,7 +251,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(1),
                 new NumberVal(4)
@@ -271,7 +272,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(0xc0),
                 new NumberVal(0xa0),
@@ -294,7 +295,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(NilVal.INSTANCE);
     }
 
@@ -310,7 +311,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(4),
                 new RgbVal(255, 255, 255, 255),
@@ -331,7 +332,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new KernelVal(List.of(
                 new NumberVal(100),
                 new NumberVal(2),
@@ -356,7 +357,7 @@ public class IntegrationTest {
         assertThat(program).isNotNull();
         System.out.println(program.toString());
         final ImageVal inputImage = new ImageVal(64, 64);
-        final Value retVal = new Interpreter(program, inputImage).execute();
+        final Value retVal = new Interpreter(program, inputImage, Writer.nullWriter()).execute();
         assertThat(retVal).isInstanceOf(ImageVal.class);
         final ImageVal outputImage = (ImageVal) retVal;
         assertThat(outputImage.width()).isEqualTo(inputImage.width());
@@ -379,7 +380,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(100),
                 new NumberVal(200)
@@ -398,7 +399,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new RectVal(100, 200, 100, 50),
                 new RectVal(0, 10, 20, 20),
@@ -427,7 +428,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 BoolVal.of(true),
                 BoolVal.of(true),
@@ -449,7 +450,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(2),
                 new NumberVal(1)
@@ -498,7 +499,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(NumberVal.ONE);
     }
 
@@ -516,7 +517,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(NumberVal.ZERO);
     }
 
@@ -539,7 +540,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new NumberVal(4));
     }
 
@@ -559,7 +560,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new NumberVal(6));
     }
 
@@ -598,7 +599,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new NumberVal(100),
                 new NumberVal(120),
@@ -620,7 +621,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        new Interpreter(program, null).execute();
+        new Interpreter(program, null, Writer.nullWriter()).execute();
     }
 
     @Test
@@ -643,7 +644,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new ListVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3))),
                 new ListVal(List.of(new NumberVal(2))),
@@ -670,7 +671,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new KernelVal(List.of(new NumberVal(100), new NumberVal(2), new NumberVal(3), new NumberVal(4))),
                 new NumberVal(4),
@@ -700,7 +701,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
         System.out.println(program.toString());
-        final Value retVal = new Interpreter(program, null).execute();
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
                 new MapVal(List.of(
                     new MapEntryVal(new StringVal("loc"), new PointVal(2, 3)),

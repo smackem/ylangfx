@@ -39,4 +39,13 @@ public class MapVal extends Value {
                "entries=" + entries +
                '}';
     }
+
+    @Override
+    public String toLangString() {
+        final StringBuilder sb = new StringBuilder();
+        for (final var entry : this.entries.entrySet()) {
+            sb.append(String.format(RuntimeParameters.LOCALE, "{ %s: %s }, ", entry.getKey().toLangString(), entry.getValue().toLangString()));
+        }
+        return sb.toString();
+    }
 }

@@ -7,6 +7,7 @@ import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,7 +21,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LD_VAL, new NumberVal(2)),
                 new Instruction(OpCode.ADD)
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(0);
@@ -39,7 +40,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LD_VAL, new NumberVal(123.5f)),
                 new Instruction(OpCode.MUL)
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(0);
@@ -62,7 +63,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LD_GLB, 1),
                 new Instruction(OpCode.ADD) // a + b
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(2);
@@ -87,7 +88,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LE),
                 new Instruction(OpCode.OR)
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(0);
@@ -105,7 +106,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LD_VAL, BoolVal.FALSE),
                 new Instruction(OpCode.LD_VAL, BoolVal.TRUE)
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(0);
@@ -142,7 +143,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LABEL, "end"),
                 new Instruction(OpCode.LD_VAL, NilVal.INSTANCE) // return nil
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(2);
@@ -165,7 +166,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LD_GLB, 0),
                 new Instruction(OpCode.INVOKE, 1, "r")
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(1);
@@ -199,7 +200,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LABEL, "end"),
                 new Instruction(OpCode.LD_GLB, 0)
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(3);
@@ -215,7 +216,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LD_VAL, new RgbVal(10, 20, 30, 255)),
                 new Instruction(OpCode.MK_LIST, 3)
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(0);
@@ -234,7 +235,7 @@ public class InterpreterTest {
                 new Instruction(OpCode.LD_VAL, new NumberVal(2)),
                 new Instruction(OpCode.MK_POINT, 3)
         ));
-        final Interpreter interpreter = new Interpreter(program, null);
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
         final Value retVal = interpreter.execute();
         final Stack stack = interpreter.context().stack();
         assertThat(stack.size()).isEqualTo(0);

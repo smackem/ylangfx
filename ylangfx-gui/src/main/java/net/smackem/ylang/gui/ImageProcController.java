@@ -15,8 +15,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import net.smackem.ylang.execution.Interpreter;
-import net.smackem.ylang.execution.MissingOverloadException;
-import net.smackem.ylang.execution.StackException;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Program;
@@ -128,7 +126,8 @@ public class ImageProcController {
         if (program == null) {
             return;
         }
-        final Interpreter interpreter = new Interpreter(program, convertFromFX(this.sourceImage.get()));
+        final StringWriter logWriter = new StringWriter();
+        final Interpreter interpreter = new Interpreter(program, convertFromFX(this.sourceImage.get()), logWriter);
         final Value result;
         try {
             result = interpreter.execute();
@@ -138,6 +137,7 @@ public class ImageProcController {
             return;
         }
         this.message.setValue(null);
+        this.logOutput.setValue(logWriter.toString());
         if (result instanceof ImageVal) {
             this.targetImage.set(convertToFX((ImageVal) result));
         }

@@ -6,6 +6,7 @@ import net.smackem.ylang.execution.operators.UnaryOperator;
 import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
+import net.smackem.ylang.util.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,28 +15,38 @@ import java.io.Writer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Interpreter {
     private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
     private final Context ctx;
     private final Program program;
 
-    public Interpreter(Program program, ImageVal inputImage) {
+    public Interpreter(Program program, ImageVal inputImage, Writer logWriter) {
         this.program = program;
         this.ctx = new Context(inputImage, new Writer() {
             @SuppressWarnings("NullableProblems")
             @Override
             public void write(char[] buf, int off, int len) throws IOException {
-                log.info(new String(buf, off, len));
+                final String str = new String(buf, off, len);
+                logWriter.write(str);
+                log.info(str);
+            }
+
+            @SuppressWarnings("NullableProblems")
+            @Override
+            public void write(String str) throws IOException {
+                logWriter.write(str);
+                log.info(str);
             }
 
             @Override
             public void flush() throws IOException {
+                logWriter.flush();
             }
 
             @Override
             public void close() throws IOException {
+                logWriter.close();
             }
         });
     }
@@ -226,7 +237,7 @@ public class Interpreter {
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < count; i++) {
             final Value v = stack.pop();
-            String s = v.toLangString();
+            String s = Values.prettyPrint(v);
             if (v instanceof StringVal) {
                 s = s.substring(1, s.length() - 1);
             }
