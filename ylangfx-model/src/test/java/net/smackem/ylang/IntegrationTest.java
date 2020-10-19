@@ -660,6 +660,23 @@ public class IntegrationTest {
     }
 
     @Test
+    public void lists2() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                a := [1,2,3]
+                return a.reverse()
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(
+                new ListVal(List.of(new NumberVal(3), new NumberVal(2), new NumberVal(1)))
+        );
+    }
+
+    @Test
     public void kernels() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();

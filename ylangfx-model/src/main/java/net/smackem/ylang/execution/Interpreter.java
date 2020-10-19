@@ -28,14 +28,14 @@ public class Interpreter {
             @Override
             public void write(char[] buf, int off, int len) throws IOException {
                 final String str = new String(buf, off, len);
-                logWriter.write(str);
+                logWriter.write(str + "\n");
                 log.info(str);
             }
 
             @SuppressWarnings("NullableProblems")
             @Override
             public void write(String str) throws IOException {
-                logWriter.write(str);
+                logWriter.write(str + "\n");
                 log.info(str);
             }
 
