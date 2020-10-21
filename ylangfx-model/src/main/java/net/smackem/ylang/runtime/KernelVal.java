@@ -32,6 +32,30 @@ public class KernelVal extends Value implements Iterable<Value> {
         this(original.width, original.height, Arrays.copyOf(original.values, original.values.length));
     }
 
+    public static KernelVal laplace(int radius) {
+        final int len = radius * 2 + 1;
+        final KernelVal kernel = new KernelVal(len, len, -1);
+        kernel.values[kernel.values.length / 2] = new NumberVal(kernel.values.length - 1);
+        return kernel;
+    }
+
+    // formula: e^(-sqrt(r) * d^2 / r^2), where d is the distance to the kernel center and r is the kernel radius
+    public static KernelVal gauss(int radius) {
+        final int len = radius * 2 + 1;
+        final double r2 = radius * radius;
+        final KernelVal kernel = new KernelVal(len, len, 0);
+        int index = 0;
+        for (int y = 0; y < len; y++) {
+            for (int x = 0; x < len; x++) {
+                final double d = Math.hypot(radius - x, radius - y); // distance to center
+                final double v = Math.exp(-Math.sqrt(radius) * d * d / r2);
+                kernel.values[index] = new NumberVal((float) v);
+                index++;
+            }
+        }
+        return kernel;
+    }
+
     public NumberVal get(int x, int y) {
         Objects.checkIndex(x, this.width);
         Objects.checkIndex(y, this.height);

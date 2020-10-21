@@ -699,6 +699,29 @@ public class IntegrationTest {
     }
 
     @Test
+    public void gauss() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                log("gauss")
+                log(gauss(1))
+                log(gauss(2))
+                log(gauss(3))
+                log(gauss(5))
+                log(gauss(10))
+                log("laplace")
+                log(laplace(1))
+                log(laplace(2))
+                log(laplace(3))
+                return 0
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        new Interpreter(program, null, Writer.nullWriter()).execute();
+    }
+
+    @Test
     public void maps() throws MissingOverloadException, IOException, StackException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();

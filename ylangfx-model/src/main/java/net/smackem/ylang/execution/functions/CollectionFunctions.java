@@ -59,6 +59,14 @@ public class CollectionFunctions {
                 FunctionOverload.function(
                         List.of(ValueType.KERNEL),
                         CollectionFunctions::kernelClone)));
+        registry.put(new FunctionGroup("gauss",
+                FunctionOverload.function(
+                        List.of(ValueType.NUMBER),
+                        CollectionFunctions::gaussKernel)));
+        registry.put(new FunctionGroup("laplace",
+                FunctionOverload.function(
+                        List.of(ValueType.NUMBER),
+                        CollectionFunctions::laplaceKernel)));
         // kernel width and height are defined in CommonFunctions
         registry.put(new FunctionGroup("sum",
                 FunctionOverload.method(
@@ -67,6 +75,14 @@ public class CollectionFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
                         CollectionFunctions::kernelSum)));
+    }
+
+    private static Value laplaceKernel(List<Value> args) {
+        return KernelVal.laplace((int) ((NumberVal) args.get(0)).value());
+    }
+
+    private static Value gaussKernel(List<Value> args) {
+        return KernelVal.gauss((int) ((NumberVal) args.get(0)).value());
     }
 
     private static Value reverse(List<Value> args) {
