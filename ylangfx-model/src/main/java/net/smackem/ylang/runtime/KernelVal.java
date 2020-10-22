@@ -40,7 +40,7 @@ public class KernelVal extends Value implements Iterable<Value> {
     }
 
     // formula: e^(-sqrt(r) * d^2 / r^2), where d is the distance to the kernel center and r is the kernel radius
-    public static KernelVal gauss(int radius) {
+    public static KernelVal gaussian(int radius) {
         final int len = radius * 2 + 1;
         final double r2 = radius * radius;
         final KernelVal kernel = new KernelVal(len, len, 0);
@@ -54,6 +54,26 @@ public class KernelVal extends Value implements Iterable<Value> {
             }
         }
         return kernel;
+    }
+
+    // only works reasonably for radius <= 5
+    public static KernelVal simpleGauss(int radius) {
+        final int len = radius * 2 + 1;
+        final KernelVal k = new KernelVal(len, len, 0);
+        int index = 0;
+        for (int y = 0; y < len; y++) {
+            final int base = y > radius ? len - y - 1 : y;
+            for (int x = 0; x < len; x++) {
+                final double value = Math.pow(2, base + (x > radius ? len - x - 1 : x));
+                k.values[index] = new NumberVal((float) value);
+                index++;
+            }
+        }
+        return k;
+    }
+
+    public void sort() {
+        Arrays.sort(this.values, Comparator.comparing(NumberVal::value));
     }
 
     public NumberVal get(int x, int y) {

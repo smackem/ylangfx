@@ -1,7 +1,5 @@
 package net.smackem.ylang.runtime;
 
-import java.util.Locale;
-
 public final class NumberVal extends Value {
     private final float value;
 

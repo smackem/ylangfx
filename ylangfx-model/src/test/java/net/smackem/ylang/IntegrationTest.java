@@ -683,7 +683,9 @@ public class IntegrationTest {
         final Program program = compiler.compile("""
                 a := |1 2 3 4|
                 a[0] = 100
-                return [a, a.size, a.width, a.height, a.sum]
+                b := |2 4 3 1|
+                b.sort()
+                return [a, a.size, a.width, a.height, a.sum, b]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
@@ -694,21 +696,22 @@ public class IntegrationTest {
                 new NumberVal(4),
                 new NumberVal(2),
                 new NumberVal(2),
-                new NumberVal(109)
+                new NumberVal(109),
+                new KernelVal(List.of(new NumberVal(1), new NumberVal(2), new NumberVal(3), new NumberVal(4)))
         )));
     }
 
     @Test
-    public void gauss() throws StackException, MissingOverloadException, IOException {
+    public void filters() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
                 log("gauss")
-                log(gauss(1))
-                log(gauss(2))
-                log(gauss(3))
-                log(gauss(5))
-                log(gauss(10))
+                log(gaussian(1))
+                log(gaussian(2))
+                log(gaussian(3))
+                log(gaussian(5))
+                log(gaussian(10))
                 log("laplace")
                 log(laplace(1))
                 log(laplace(2))
