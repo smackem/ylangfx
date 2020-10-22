@@ -3,6 +3,7 @@ package net.smackem.ylang.execution.functions;
 import net.smackem.ylang.runtime.*;
 
 import java.util.List;
+import java.util.function.Function;
 
 public class ImageFunctions {
     private ImageFunctions() {}
@@ -26,6 +27,22 @@ public class ImageFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
                         ImageFunctions::convolve)));
+        registry.put(new FunctionGroup("selectAlpha",
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
+                        args -> selectKernel(args, RgbVal::a))));
+        registry.put(new FunctionGroup("selectRed",
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
+                        args -> selectKernel(args, RgbVal::r))));
+        registry.put(new FunctionGroup("selectGreen",
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
+                        args -> selectKernel(args, RgbVal::g))));
+        registry.put(new FunctionGroup("selectBlue",
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
+                        args -> selectKernel(args, RgbVal::b))));
         registry.put(new FunctionGroup("default",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.RGB),
@@ -53,6 +70,13 @@ public class ImageFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POLYGON, ValueType.RGB),
                         ImageFunctions::plot)));
+    }
+
+    private static Value selectKernel(List<Value> args, Function<RgbVal, Float> selector) {
+        final ImageVal image = (ImageVal) args.get(0);
+        final PointVal pt = (PointVal) args.get(1);
+        final KernelVal kernel = (KernelVal) args.get(2);
+        return image.selectKernel((int) pt.x(), (int) pt.y(), kernel, selector);
     }
 
     private static Value imageClone(List<Value> args) {

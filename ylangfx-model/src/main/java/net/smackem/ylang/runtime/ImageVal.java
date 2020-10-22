@@ -2,6 +2,7 @@ package net.smackem.ylang.runtime;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class ImageVal extends Value {
     private final int width;
@@ -144,6 +145,29 @@ public class ImageVal extends Value {
         }
 
         return new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
+    }
+
+    public KernelVal selectKernel(int x, int y, KernelVal kernel, Function<RgbVal, Float> selector) {
+        final int kernelWidth = kernel.width();
+        final int kernelHeight = kernel.height();
+        final KernelVal result = new KernelVal(kernelWidth, kernelHeight, 0);
+        int kernelIndex = 0;
+
+        for (int kernelY = 0; kernelY < kernelHeight; kernelY++) {
+            for (int kernelX = 0; kernelX < kernelWidth; kernelX++) {
+                final int sourceY = y - (kernelHeight / 2) + kernelY;
+                final int sourceX = x - (kernelWidth / 2) + kernelX;
+                if (sourceX >= 0 && sourceX < this.width && sourceY >= 0 && sourceY < this.height) {
+                    final float value = kernel.get(kernelIndex).value();
+                    final RgbVal px = getPixel(sourceX, sourceY);
+                    final Float f = selector.apply(px);
+                    result.set(kernelIndex, new NumberVal(value * f));
+                }
+                kernelIndex++;
+            }
+        }
+
+        return result;
     }
 
     public void plot(GeometryVal geometry, RgbVal rgb) {
