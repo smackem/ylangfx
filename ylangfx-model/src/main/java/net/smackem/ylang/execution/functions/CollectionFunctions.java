@@ -82,8 +82,9 @@ public class CollectionFunctions {
     }
 
     private static Value sortKernel(List<Value> args) {
-        ((KernelVal) args.get(0)).sort();
-        return NilVal.INSTANCE;
+        final KernelVal kernel = (KernelVal) args.get(0);
+        kernel.sort();
+        return kernel;
     }
 
     private static Value laplaceKernel(List<Value> args) {

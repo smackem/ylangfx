@@ -116,30 +116,30 @@ public class MathFunctions {
     }
 
     private static Value atan2(List<Value> args) {
-        return new NumberVal((float) Math.atan2(((NumberVal) args.get(0)).value(), ((NumberVal) args.get(1)).value()));
+        return new NumberVal((float) Math.toDegrees(Math.atan2(((NumberVal) args.get(0)).value(), ((NumberVal) args.get(1)).value())));
     }
 
     private static Value atan(List<Value> args) {
-        return new NumberVal((float) Math.atan(((NumberVal) args.get(0)).value()));
+        return new NumberVal((float) Math.toDegrees(Math.atan(((NumberVal) args.get(0)).value())));
     }
 
     private static Value acos(List<Value> args) {
-        return new NumberVal((float) Math.acos(((NumberVal) args.get(0)).value()));
+        return new NumberVal((float) Math.toDegrees(Math.acos(((NumberVal) args.get(0)).value())));
     }
 
     private static Value asin(List<Value> args) {
-        return new NumberVal((float) Math.asin(((NumberVal) args.get(0)).value()));
+        return new NumberVal((float) Math.toDegrees(Math.asin(((NumberVal) args.get(0)).value())));
     }
 
     private static Value tan(List<Value> args) {
-        return new NumberVal((float) Math.tan(((NumberVal) args.get(0)).value()));
+        return new NumberVal((float) Math.tan(Math.toRadians(((NumberVal) args.get(0)).value())));
     }
 
     private static Value cos(List<Value> args) {
-        return new NumberVal((float) Math.cos(((NumberVal) args.get(0)).value()));
+        return new NumberVal((float) Math.cos(Math.toRadians(((NumberVal) args.get(0)).value())));
     }
 
     private static Value sin(List<Value> args) {
-        return new NumberVal((float) Math.sin(((NumberVal) args.get(0)).value()));
+        return new NumberVal((float) Math.sin(Math.toRadians(((NumberVal) args.get(0)).value())));
     }
 }

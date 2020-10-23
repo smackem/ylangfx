@@ -1,0 +1,124 @@
+MaxTheta := 180 // degrees
+
+inp := image($in)
+out := image($in.bounds)
+Sin := list(360, nil)
+Cos := list(360, nil)
+for angle in 0 .. Sin.size {
+    Sin[angle] = sin(angle)
+    Cos[angle] = cos(angle)
+}
+
+///////////////////////////////////////////////////////////////////////////////
+log("Smoothen...")
+Gauss := gaussian(1)
+
+for p in inp.bounds {
+    out[p] = inp.convolve(p, Gauss)
+}
+
+inp <=> out
+
+///////////////////////////////////////////////////////////////////////////////
+log("Detect Edges...")
+
+SobelX := |-1  0  1
+           -2  0  2
+           -1  0  1|
+SobelY := | 1  2  1
+            0  0  0
+           -1 -2 -1|
+
+for p in inp.bounds {
+    gx := inp.convolve(p, SobelX)
+    gy := inp.convolve(p, SobelY)
+    magpx := hypot(gx, gy)
+    mag := (abs(magpx.r) + abs(magpx.g) + abs(magpx.b)) / 765
+    out[p] = mag > 0.5 ? rgb01(mag) : #000000
+}
+
+bw := out
+inp = out
+
+///////////////////////////////////////////////////////////////////////////////
+log("Accumulate...")
+
+MaxRho := hypot(inp.bounds.width, inp.bounds.height)
+log("MaxRho: ", MaxRho)
+acc := kernel(MaxRho * 2, MaxTheta, 0)
+
+for p in inp.bounds where inp[p].r > 0 {
+    for theta in 0 .. MaxTheta {
+        rho := p.x * Cos[theta] + p.y * Sin[theta]
+        ptAcc := MaxRho + rho; theta
+        weight := acc[ptAcc] + 1
+        acc[ptAcc] = weight
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+log("Find Maxima, Visualize...")
+
+accImg := image(acc.width, acc.height)
+for p in accImg.bounds {
+    accImg[p] = rgb(acc[p])
+}
+
+out = image(accImg)
+k := kernel(11, 11, 1)
+maxWeight := 0
+for p in accImg.bounds {
+    neighbours := accImg.selectRed(p, k)
+    maximum := neighbours.max()
+    out[p] = accImg[p].r == maximum ? rgb(accImg[p].r) : #000000
+    maxWeight = max(maxWeight, maximum)
+}
+
+houghLines := []
+threshold := maxWeight * 0.6
+for p in out.bounds where out[p].r > threshold {
+    houghLines.push({
+        rho: p.x,
+        theta: p.y,
+    })
+}
+log(houghLines)
+
+out = accImg
+
+for l in houghLines {
+    out[l.rho;l.theta] = #ff0000
+}
+//return out
+
+///////////////////////////////////////////////////////////////////////////////
+log("Draw Lines...")
+
+inp = $in//bw
+out = image(inp)
+out.clip(out.bounds)
+
+for l in houghLines {
+    // rho = x * cos(theta) + y * sin(theta)
+    theta := l.theta
+    rho := l.rho - MaxRho
+    lineToDraw := nil
+    color := #ff0000
+    if theta >= 45 and theta <= 135 {
+        // line has low slope -> intersect with x borders
+        // y = (rho - x * cos(theta)) / sin(theta)
+        y1 := rho / Sin[theta]
+        y2 := (rho - inp.bounds.width * Cos[theta]) / Sin[theta]
+        lineToDraw = line(0;y1, inp.bounds.width;y2)
+    } else {
+        // line has high slope -> intersect with y borders
+        // x = (rho - y * sin(theta)) / cos(theta)
+        x1 := rho / Cos[theta]
+        x2 := (rho - inp.bounds.height * Sin[theta]) / Cos[theta]
+        lineToDraw = line(x1;0, x2;inp.bounds.height)
+    }
+    log(lineToDraw)
+    out.plot(lineToDraw, color)
+}
+
+return out
