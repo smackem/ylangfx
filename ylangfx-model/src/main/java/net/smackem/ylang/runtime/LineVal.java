@@ -36,13 +36,22 @@ public class LineVal extends GeometryVal {
         return (float) Math.hypot(this.x2 - this.x1, this.y2 - this.y1);
     }
 
-    public PointVal intersect(LineVal other) {
+    public PointVal intersect(LineVal ignored) {
         return null;
     }
 
     @Override
     public GeometryVal translate(PointVal pt) {
         return new LineVal(this.x1 + pt.x(), this.y1 + pt.y(), this.x2 + pt.x(), this.y2 + pt.y());
+    }
+
+    @Override
+    public RectVal bounds() {
+        final float left = Math.min(this.x1, this.x2);
+        final float right = Math.max(this.x1, this.x2);
+        final float top = Math.min(this.y1, this.y2);
+        final float bottom = Math.max(this.y1, this.y2);
+        return new RectVal(left, top, right - left, bottom - top);
     }
 
     @SuppressWarnings("NullableProblems")

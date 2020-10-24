@@ -1,5 +1,6 @@
 package net.smackem.ylang.execution;
 
+import net.smackem.ylang.execution.functions.Func;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.execution.operators.UnaryOperator;
@@ -13,16 +14,19 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 public class Interpreter {
     private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
     private final Context ctx;
     private final Program program;
+    private final TaggedInstruction[] instructions;
 
     public Interpreter(Program program, ImageVal inputImage, Writer logWriter) {
         this.program = program;
+        this.instructions = program.instructions().stream()
+                .map(TaggedInstruction::new)
+                .toArray(TaggedInstruction[]::new);
         this.ctx = new Context(inputImage, new Writer() {
             @SuppressWarnings("NullableProblems")
             @Override
@@ -51,6 +55,10 @@ public class Interpreter {
         });
     }
 
+    public Program program() {
+        return this.program;
+    }
+
     Context context() {
         return this.ctx;
     }
@@ -58,11 +66,11 @@ public class Interpreter {
     public Value execute() throws StackException, MissingOverloadException, IOException {
         int pc = 0;
         int stackFrameIndex = 0;
-        final List<Instruction> instructions = this.program.instructions();
-        final int programSize = instructions.size();
+        final int programSize = this.instructions.length;
         final Stack stack = this.ctx.stack();
         while (pc < programSize) {
-            final Instruction instr = instructions.get(pc);
+            final TaggedInstruction taggedInstr = this.instructions[pc];
+            final Instruction instr = taggedInstr.instruction;
             if (log.isDebugEnabled()) {
                 log.debug("@{}: {}, stack.size={}", String.format("%4d", pc), instr.opCode(), stack.size());
             }
@@ -162,7 +170,10 @@ public class Interpreter {
                     for (int i = 0; i < instr.intArg(); i++) {
                         args.addFirst(stack.pop());
                     }
-                    final Value result = FunctionRegistry.INSTANCE.invoke(instr.strArg(), args);
+                    if (taggedInstr.invokedFunc == null) {
+                        taggedInstr.invokedFunc = FunctionRegistry.INSTANCE.getFunc(instr.strArg(), args);
+                    }
+                    final Value result = taggedInstr.invokedFunc.invoke(args);
                     stack.push(result);
                 }
                 case ITER -> {
@@ -244,5 +255,14 @@ public class Interpreter {
             sb.insert(0, s);
         }
         return sb.toString();
+    }
+
+    private static class TaggedInstruction {
+        final Instruction instruction;
+        Func invokedFunc;
+
+        TaggedInstruction(Instruction instruction) {
+            this.instruction = instruction;
+        }
     }
 }

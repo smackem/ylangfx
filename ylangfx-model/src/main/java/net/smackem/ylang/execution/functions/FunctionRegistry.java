@@ -43,6 +43,10 @@ public enum FunctionRegistry implements FunctionTable {
     }
 
     public Value invoke(String name, List<Value> values) throws MissingOverloadException {
+        return getFunc(name, values).invoke(values);
+    }
+
+    public Func getFunc(String name, List<Value> values) throws MissingOverloadException {
         final FunctionGroup fg = this.repository.get(name);
         if (fg == null) {
             throw new MissingOverloadException("no function with this name found: " + name);
@@ -51,6 +55,6 @@ public enum FunctionRegistry implements FunctionTable {
         for (final Value v : values) {
             parameters.add(v.type());
         }
-        return fg.get(parameters).invoke(values);
+        return fg.get(parameters);
     }
 }

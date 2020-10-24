@@ -11,11 +11,20 @@ public class InOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.NUMBER, ValueType.KERNEL, InOperatorImpl::numberInKernel);
         implementRight(ValueType.LIST, InOperatorImpl::anyInList);
         implement(ValueType.NUMBER, ValueType.RANGE, InOperatorImpl::numberInRange);
-        // pointInCircle
+        implement(ValueType.POINT, ValueType.CIRCLE, InOperatorImpl::pointInCircle);
+        implement(ValueType.RECT, ValueType.RECT, InOperatorImpl::rectInRect);
         // circleInRect
         // rectInCircle
         // polygonInRect
         // polygonInCircle
+    }
+
+    private static Value rectInRect(Value l, Value r) {
+        return BoolVal.of(((RectVal) r).contains((RectVal) l));
+    }
+
+    private static Value pointInCircle(Value l, Value r) {
+        return BoolVal.of(((CircleVal) r).contains((PointVal) l));
     }
 
     private static Value numberInRange(Value l, Value r) {

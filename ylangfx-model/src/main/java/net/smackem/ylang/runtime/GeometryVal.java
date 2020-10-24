@@ -6,4 +6,6 @@ public abstract class GeometryVal extends Value implements Iterable<Value> {
     }
 
     public abstract GeometryVal translate(PointVal pt);
+
+    public abstract RectVal bounds();
 }

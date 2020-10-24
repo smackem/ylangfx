@@ -683,8 +683,7 @@ public class IntegrationTest {
         final Program program = compiler.compile("""
                 a := |1 2 3 4|
                 a[0] = 100
-                b := |2 4 3 1|
-                b.sort()
+                b := |2 4 3 1|.sort()
                 return [a, a.size, a.width, a.height, a.sum, b]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(errors).isEmpty();

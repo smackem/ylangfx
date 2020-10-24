@@ -17,9 +17,9 @@ public class InOperatorTest {
                 .isEqualTo(BoolVal.TRUE);
         assertThat(BinaryOperator.IN.invoke(new PointVal(19, 19), rect))
                 .isEqualTo(BoolVal.TRUE);
-        assertThat(BinaryOperator.IN.invoke(new PointVal(20, 19), rect))
+        assertThat(BinaryOperator.IN.invoke(new PointVal(21, 19), rect))
                 .isEqualTo(BoolVal.FALSE);
-        assertThat(BinaryOperator.IN.invoke(new PointVal(19, 20), rect))
+        assertThat(BinaryOperator.IN.invoke(new PointVal(19, 21), rect))
                 .isEqualTo(BoolVal.FALSE);
     }
 

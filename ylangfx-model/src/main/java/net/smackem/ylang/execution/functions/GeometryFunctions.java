@@ -58,6 +58,30 @@ public class GeometryFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.LINE),
                         GeometryFunctions::lineLength)));
+        registry.put(new FunctionGroup("circle",
+                FunctionOverload.function(
+                        List.of(ValueType.POINT, ValueType.NUMBER),
+                        GeometryFunctions::circle)));
+        registry.put(new FunctionGroup("center",
+                FunctionOverload.method(
+                        List.of(ValueType.CIRCLE),
+                        GeometryFunctions::circleCenter)));
+        registry.put(new FunctionGroup("radius",
+                FunctionOverload.method(
+                        List.of(ValueType.CIRCLE),
+                        GeometryFunctions::circleRadius)));
+    }
+
+    private static Value circleRadius(List<Value> args) {
+        return new NumberVal(((CircleVal) args.get(0)).radius());
+    }
+
+    private static Value circleCenter(List<Value> args) {
+        return ((CircleVal) args.get(0)).center();
+    }
+
+    private static Value circle(List<Value> args) {
+        return new CircleVal((PointVal) args.get(0), ((NumberVal) args.get(1)).value());
     }
 
     private static Value rectInflate(List<Value> args) {

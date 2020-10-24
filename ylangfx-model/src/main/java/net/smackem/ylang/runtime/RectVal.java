@@ -53,13 +53,23 @@ public class RectVal extends GeometryVal {
     }
 
     public boolean contains(PointVal pt) {
-        return pt.x() >= this.x && pt.x() < this.right() &&
-                pt.y() >= this.y && pt.y() < this.bottom();
+        return pt.x() >= this.x && pt.x() <= this.right() &&
+                pt.y() >= this.y && pt.y() <= this.bottom();
+    }
+
+    public boolean contains(RectVal rc) {
+        return rc.x >= this.x && rc.right() <= this.right() &&
+               rc.y >= this.y && rc.bottom() <= this.bottom();
     }
 
     @Override
     public GeometryVal translate(PointVal pt) {
         return new RectVal(this.x + pt.x(), this.y + pt.y(), this.width, this.height);
+    }
+
+    @Override
+    public RectVal bounds() {
+        return this;
     }
 
     @Override
