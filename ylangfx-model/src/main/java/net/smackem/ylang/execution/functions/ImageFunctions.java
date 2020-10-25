@@ -72,7 +72,7 @@ public class ImageFunctions {
                         ImageFunctions::plot)));
     }
 
-    private static Value selectKernel(List<Value> args, Function<RgbVal, Float> selector) {
+    private static Value selectKernel(List<Value> args, ToFloatFunction<RgbVal> selector) {
         final ImageVal image = (ImageVal) args.get(0);
         final PointVal pt = (PointVal) args.get(1);
         final KernelVal kernel = (KernelVal) args.get(2);
@@ -89,30 +89,30 @@ public class ImageFunctions {
     }
 
     private static Value getClip(List<Value> args) {
-        return RectVal.fromIntRect(((ImageVal) args.get(0)).getClipRect());
+        final IntRect clipRect = ((ImageVal) args.get(0)).getClipRect();
+        return clipRect != null
+                ? RectVal.fromIntRect(clipRect)
+                : NilVal.INSTANCE;
     }
 
     private static Value setClip(List<Value> args) {
         final ImageVal image = (ImageVal) args.get(0);
         final RectVal rect = (RectVal) args.get(1);
-        final IntRect old = image.getClipRect();
         image.setClipRect(rect.round());
-        return old != null
-                ? RectVal.fromIntRect(old)
-                : NilVal.INSTANCE;
+        return image;
     }
 
     private static Value getDefault(List<Value> args) {
-        return ((ImageVal) args.get(0)).getDefaultPixel();
+        final RgbVal defaultRgb = ((ImageVal) args.get(0)).getDefaultPixel();
+        return defaultRgb != null
+                ? defaultRgb
+                : NilVal.INSTANCE;
     }
 
     private static Value setDefault(List<Value> args) {
         final ImageVal image = (ImageVal) args.get(0);
-        final Value old = image.getDefaultPixel();
         image.setDefaultPixel((RgbVal) args.get(1));
-        return old != null
-                ? old
-                : NilVal.INSTANCE;
+        return image;
     }
 
     private static Value convolve(List<Value> args) {
