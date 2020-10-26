@@ -11,6 +11,9 @@ import java.util.Collection;
 public class Compiler {
 
     public Program compile(String source, FunctionTable functionTable, Collection<String> outErrors) {
+        if (source.endsWith("\n") == false) {
+            source = source + "\n";
+        }
         final YLangParser.ProgramContext tree = compileToAst(source, outErrors);
         if (tree == null) {
             return null;

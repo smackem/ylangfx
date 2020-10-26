@@ -60,8 +60,8 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
-                a := 100 < 200 ? 1 : 0;
-                b := 100 > 200 ? 1 : 0;
+                a := 100 < 200 ? 1 : 0
+                b := 100 > 200 ? 1 : 0
                 return [a, b]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
@@ -167,9 +167,9 @@ public class IntegrationTest {
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
                 while 1 < 10 {
-                    return 666;
+                    return 666
                 }
-                return 0;
+                return 0
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
@@ -305,7 +305,8 @@ public class IntegrationTest {
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
                 c := [1, 2, 3]
-                c[0] = 4; c[1] = #ffffff
+                c[0] = 4
+                c[1] = #ffffff
                 return c
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
@@ -731,7 +732,7 @@ public class IntegrationTest {
                 a := {
                     loc: 1;2,
                     col: #ff0000,
-                    num: 100
+                    num: 100,
                 }
                 a.loc = 2;3
                 a["col"] = #00ff00
@@ -759,5 +760,19 @@ public class IntegrationTest {
                 )),
                 new NumberVal(2)
         )));
+    }
+
+    @Test
+    public void chainedInvocations() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                inp := image(rect(0;0, 10, 10)).clip(rect(0;0, 10, 10)).default(#ffffff)
+                return 0
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        new Interpreter(program, null, Writer.nullWriter()).execute();
     }
 }

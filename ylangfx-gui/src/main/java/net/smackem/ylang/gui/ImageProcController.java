@@ -71,6 +71,17 @@ public class ImageProcController {
         this.messageTextArea.textProperty().bind(this.message);
         this.logTextArea.textProperty().bind(this.logOutput);
         this.runButton.disableProperty().bind(this.isRunning);
+        this.codeEditor.appendText("""
+                inp := $in.default(#ffffff@00)
+                out := image(inp).clip(inp.bounds)
+                K := |1  1  1
+                      1  1  1
+                      1  1  1|
+                for p in inp.bounds {
+                    out[p] = -inp.convolve(p, K)
+                }
+                return out
+                """);
     }
 
     @FXML

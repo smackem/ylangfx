@@ -13,7 +13,7 @@ statement
     | logStmt
     | swapStmt
     | returnStmt
-    ) ';'?
+    )? LineBreak
     ;
 
 returnStmt
@@ -44,11 +44,11 @@ elseClause
     ;
 
 block
-    : '{' statement* '}'
+    : LBrace statement* RBrace
     ;
 
 arguments
-    : expr (',' expr)*
+    : expr (Comma expr)*
     ;
 
 forStmt
@@ -64,7 +64,7 @@ whileStmt
     ;
 
 logStmt
-    : 'log' '(' arguments ')'
+    : 'log' LParen arguments RParen
     ;
 
 swapStmt
@@ -72,7 +72,7 @@ swapStmt
     ;
 
 expr
-    : condition ('?' term ':' expr)?
+    : condition (QMark term Colon expr)?
     ;
 
 condition
@@ -153,11 +153,11 @@ memberSuffix
     ;
 
 indexSuffix
-    : '[' expr ']'
+    : LBracket expr RBracket
     ;
 
 invocationSuffix
-    : '(' arguments? ')'
+    : LParen arguments? RParen
     ;
 
 atom
@@ -173,7 +173,7 @@ atom
     | map
     | list
     | functionInvocation
-    | '(' expr ')'
+    | LParen expr RParen
     ;
 
 functionInvocation
@@ -181,27 +181,25 @@ functionInvocation
     ;
 
 kernel
-    : '|' number+ '|'
+    : Pipe (number LineBreak?)+ Pipe
     ;
 
 map
-    : '{' mapEntries? ','? '}'
+    : LBrace mapEntries? Comma? RBrace
     ;
 
 mapEntries
-    : mapEntry (',' mapEntry)*
+    : mapEntry (Comma mapEntry)*
     ;
 
 mapEntry
-    : (Ident | String) ':' expr
+    : (Ident | String) Colon expr
     ;
 
 list
-    : '[' arguments? ','? ']'
+    : LBracket arguments? Comma? RBracket
     ;
 
-Or      : 'or';
-And     : 'and';
 Plus    : '+';
 Minus   : '-';
 Cmp     : '~';
@@ -214,19 +212,32 @@ Gt      : '>';
 Ge      : '>=';
 Eq      : '==';
 Ne      : '!=';
-Beq     : '=';
-Decleq  : ':=';
 Concat  : '::';
 Pair    : ';';
 In      : 'in';
 Not     : 'not';
-Dot     : '.';
 At      : '@';
 True    : 'true';
 False   : 'false';
 Nil     : 'nil';
 FromTo  : '..';
 Swap    : '<=>';
+Pipe    : '|';
+
+Or          : 'or' LineBreak?;
+And         : 'and' LineBreak?;
+Beq         : '=' LineBreak?;
+Decleq      : ':=' LineBreak?;
+QMark       : '?' LineBreak?;
+Colon       : ':' LineBreak?;
+Dot         : '.' LineBreak?;
+Comma       : ',' LineBreak?;
+LBrace      : '{' LineBreak?;
+RBrace      : '}';
+LBracket    : '[' LineBreak?;
+RBracket    : ']';
+LParen      : '(' LineBreak?;
+RParen      : ')';
 
 number
     : ('+' | '-')? Number
@@ -260,6 +271,10 @@ Comment
     : '//' ~ [\r\n]* -> skip
     ;
 
+LineBreak
+    : [\r\n]+
+    ;
+
 Ws
-    : [ \t\r\n] -> skip
+    : [ \t] -> skip
     ;
