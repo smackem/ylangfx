@@ -1,7 +1,7 @@
 grammar YLang;
 
 program
-    : statement* returnStmt EOF
+    : statement* returnStmt LineBreak EOF
     ;
 
 statement

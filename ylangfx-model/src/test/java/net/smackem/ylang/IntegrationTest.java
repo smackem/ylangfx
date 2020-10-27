@@ -288,7 +288,7 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
-                #a0b0c0.b();
+                #a0b0c0.b()
                 [#aabbcc][0].r()
                 return nil
                 """, FunctionRegistry.INSTANCE, errors);
