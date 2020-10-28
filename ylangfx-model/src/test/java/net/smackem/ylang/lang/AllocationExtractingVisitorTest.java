@@ -7,7 +7,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class DeclExtractingVisitorTest {
+public class AllocationExtractingVisitorTest {
 
     @Test
     public void stackDepth1() {
@@ -21,7 +21,7 @@ public class DeclExtractingVisitorTest {
                 """, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
+        final AllocationExtractingVisitor visitor = new AllocationExtractingVisitor();
         ast.accept(visitor);
         assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
     }
@@ -40,7 +40,7 @@ public class DeclExtractingVisitorTest {
                 """, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
+        final AllocationExtractingVisitor visitor = new AllocationExtractingVisitor();
         ast.accept(visitor);
         assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
     }
@@ -62,7 +62,7 @@ public class DeclExtractingVisitorTest {
                 """, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
+        final AllocationExtractingVisitor visitor = new AllocationExtractingVisitor();
         ast.accept(visitor);
         assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
     }
@@ -98,7 +98,7 @@ public class DeclExtractingVisitorTest {
                 """, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
+        final AllocationExtractingVisitor visitor = new AllocationExtractingVisitor();
         ast.accept(visitor);
         assertThat(visitor.uniqueVariableCount()).isEqualTo(5);
     }
@@ -126,7 +126,7 @@ public class DeclExtractingVisitorTest {
                 """, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
+        final AllocationExtractingVisitor visitor = new AllocationExtractingVisitor();
         ast.accept(visitor);
         assertThat(visitor.uniqueVariableCount()).isEqualTo(8);
     }
@@ -141,7 +141,7 @@ public class DeclExtractingVisitorTest {
                 return a
                 """, errors);
         assertThat(ast).isNotNull();
-        final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
+        final AllocationExtractingVisitor visitor = new AllocationExtractingVisitor();
         ast.accept(visitor);
         assertThat(visitor.semanticErrors())
                 .hasSize(1)
@@ -161,7 +161,7 @@ public class DeclExtractingVisitorTest {
                 return a
                 """, errors);
         assertThat(ast).isNotNull();
-        final DeclExtractingVisitor visitor = new DeclExtractingVisitor();
+        final AllocationExtractingVisitor visitor = new AllocationExtractingVisitor();
         ast.accept(visitor);
         assertThat(visitor.semanticErrors())
                 .hasSize(1)

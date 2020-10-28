@@ -42,13 +42,20 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
+    public Void visitDeclStmt(YLangParser.DeclStmtContext ctx) {
+        final String ident = ctx.Ident().getText();
+        ctx.expr().accept(this);
+        final Integer addr = putIdent(ident);
+        this.emitter.emit(OpCode.ST_GLB, addr);
+        return null;
+    }
+
+    @Override
     public Void visitAssignStmt(YLangParser.AssignStmtContext ctx) {
         if (ctx.atom() == null) { // assign to ident, not to lvalue-expr
             ctx.expr().accept(this);
             final String ident = ctx.Ident().getText();
-            final Integer addr = ctx.Decleq() != null
-                    ? putIdent(ident)
-                    : lookupIdent(ident);
+            final Integer addr = lookupIdent(ident);
             if (addr == null) {
                 logSemanticError(ctx, "unknown identifier " + ident);
             } else {
@@ -146,7 +153,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         final String ident = ctx.Ident().getText();
         pushScope();
         final int itemAddr = putIdent(ident);
-        final int iteratorAddr = putIdent(DeclExtractingVisitor.getIteratorIdent(ident));
+        final int iteratorAddr = putIdent(AllocationExtractingVisitor.getIteratorIdent(ident));
         ctx.expr().accept(this);                 // push iterable
         this.emitter.emit(OpCode.ITER);                 // push iterator
         this.emitter.emit(OpCode.ST_GLB, iteratorAddr); // store iterator

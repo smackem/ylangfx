@@ -6,15 +6,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
+class AllocationExtractingVisitor extends YLangBaseVisitor<Void> {
 
-    private static final Logger log = LoggerFactory.getLogger(DeclExtractingVisitor.class);
+    private static final Logger log = LoggerFactory.getLogger(AllocationExtractingVisitor.class);
     private final List<String> semanticErrors = new ArrayList<>();
     private final Deque<DeclScope> scopes = new ArrayDeque<>();
     private int stackDepth;
     private int uniqueVariableCount;
 
-    DeclExtractingVisitor() {
+    AllocationExtractingVisitor() {
         this.scopes.push(new DeclScope());
     }
 
@@ -35,12 +35,10 @@ class DeclExtractingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitAssignStmt(YLangParser.AssignStmtContext ctx) {
-        if (ctx.Decleq() != null) {
-            final String ident = ctx.Ident().getText();
-            addVariable(ctx, ident);
-        }
-        return super.visitAssignStmt(ctx);
+    public Void visitDeclStmt(YLangParser.DeclStmtContext ctx) {
+        final String ident = ctx.Ident().getText();
+        addVariable(ctx, ident);
+        return super.visitDeclStmt(ctx);
     }
 
     @Override

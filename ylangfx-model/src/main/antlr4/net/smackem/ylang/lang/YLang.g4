@@ -1,11 +1,25 @@
 grammar YLang;
 
 program
-    : statement* returnStmt LineBreak EOF
+    : topLevelStmt* returnStmt LineBreak EOF
+    ;
+
+topLevelStmt
+    : functionDecl
+    | statement
+    ;
+
+functionDecl
+    : 'fn' Ident LParen parameters? RParen block
+    ;
+
+parameters
+    : Ident (Comma Ident)*
     ;
 
 statement
-    : (assignStmt
+    : (declStmt
+    | assignStmt
     | invocationStmt
     | ifStmt
     | forStmt
@@ -16,13 +30,12 @@ statement
     )? LineBreak
     ;
 
-returnStmt
-    : 'return' expr
+declStmt
+    : Ident Decleq expr
     ;
 
 assignStmt
-    : Ident Decleq expr
-    | Ident Beq expr
+    : Ident Beq expr
     | atom atomSuffix+ Beq expr
     ;
 
@@ -69,6 +82,10 @@ logStmt
 
 swapStmt
     : Ident Swap Ident
+    ;
+
+returnStmt
+    : 'return' expr
     ;
 
 expr
