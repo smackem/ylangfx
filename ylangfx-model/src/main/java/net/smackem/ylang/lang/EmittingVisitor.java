@@ -153,7 +153,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         final String ident = ctx.Ident().getText();
         pushScope();
         final int itemAddr = putIdent(ident);
-        final int iteratorAddr = putIdent(AllocationExtractingVisitor.getIteratorIdent(ident));
+        final int iteratorAddr = putIdent(AllocVisitor.getIteratorIdent(ident));
         ctx.expr().accept(this);                 // push iterable
         this.emitter.emit(OpCode.ITER);                 // push iterator
         this.emitter.emit(OpCode.ST_GLB, iteratorAddr); // store iterator

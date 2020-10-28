@@ -6,15 +6,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-class AllocationExtractingVisitor extends YLangBaseVisitor<Void> {
+class AllocVisitor extends BaseVisitor<Void> {
 
-    private static final Logger log = LoggerFactory.getLogger(AllocationExtractingVisitor.class);
-    private final List<String> semanticErrors = new ArrayList<>();
+    private static final Logger log = LoggerFactory.getLogger(AllocVisitor.class);
     private final Deque<DeclScope> scopes = new ArrayDeque<>();
     private int stackDepth;
     private int uniqueVariableCount;
 
-    AllocationExtractingVisitor() {
+    AllocVisitor() {
         this.scopes.push(new DeclScope());
     }
 
@@ -22,8 +21,9 @@ class AllocationExtractingVisitor extends YLangBaseVisitor<Void> {
         return this.uniqueVariableCount;
     }
 
-    public List<String> semanticErrors() {
-        return Collections.unmodifiableList(this.semanticErrors);
+    @Override
+    public Void visitFunctionDecl(YLangParser.FunctionDeclContext ctx) {
+        return null; // skip all function definitions when walking main body
     }
 
     @Override
@@ -56,13 +56,6 @@ class AllocationExtractingVisitor extends YLangBaseVisitor<Void> {
         return "<iter>" + itemIdent;
     }
 
-    private void logSemanticError(ParserRuleContext ctx, String message) {
-        final String text = String.format("line %d, char %d: %s",
-                ctx.start.getLine(), ctx.start.getCharPositionInLine(), message);
-        log.info(text);
-        this.semanticErrors.add(text);
-    }
-
     private DeclScope currentScope() {
         return this.scopes.peek();
     }
@@ -82,6 +75,7 @@ class AllocationExtractingVisitor extends YLangBaseVisitor<Void> {
         }
         this.stackDepth++;
         if (this.stackDepth > this.uniqueVariableCount) {
+            log.debug("new unique variable count: {}", this.stackDepth);
             this.uniqueVariableCount = this.stackDepth;
         }
     }

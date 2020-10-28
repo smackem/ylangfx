@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Emitter is used to emit byte code.
  */
-public class Emitter {
+class Emitter {
 
     private boolean disabled;
     private final List<Instruction> instructions = new ArrayList<>();
@@ -97,14 +97,14 @@ public class Emitter {
         if (this.instructions.isEmpty()) {
             throw new UnsupportedOperationException("operation not supported on empty instruction list");
         }
-        if (this.isDisabled()) {
+        if (this.disabled) {
             return;
         }
         this.instructions.add(instructions.size() - 1, instruction);
     }
 
     private void emit(Instruction instruction) {
-        if (this.isDisabled()) {
+        if (this.disabled) {
             return;
         }
         this.instructions.add(instruction);

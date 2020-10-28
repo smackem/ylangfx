@@ -18,7 +18,7 @@ public class Compiler {
         if (tree == null) {
             return null;
         }
-        final AllocationExtractingVisitor declExtractor = new AllocationExtractingVisitor();
+        final AllocVisitor declExtractor = new AllocVisitor();
         tree.accept(declExtractor);
         if (outErrors.addAll(declExtractor.semanticErrors())) {
             return null;
