@@ -15,7 +15,7 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
         super.visitProgram(ctx);
         final AllocVisitor allocVisitor = new AllocVisitor();
         ctx.accept(allocVisitor);
-        final FunctionDecl mainBody = new FunctionDecl(null, 0, allocVisitor.uniqueVariableCount());
+        final FunctionDecl mainBody = FunctionDecl.main(allocVisitor.uniqueVariableCount());
         return semanticErrors().isEmpty()
                 ? new ModuleDecl(mainBody, this.functions)
                 : null;
@@ -49,7 +49,7 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
         final int parameterCount = ctx.parameters() != null
                 ? ctx.parameters().Ident().size()
                 : 0;
-        final FunctionDecl func = new FunctionDecl(ctx.Ident().getText(),
+        final FunctionDecl func = FunctionDecl.function(ctx.Ident().getText(),
                 parameterCount,
                 allocVisitor.uniqueVariableCount());
         this.functions.add(func);

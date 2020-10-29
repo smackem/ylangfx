@@ -195,6 +195,8 @@ public class ModuleVisitorTest {
         final ModuleVisitor visitor = new ModuleVisitor();
         final ModuleDecl module = ast.accept(visitor);
         assertThat(module).isNull();
-        assertThat(visitor.semanticErrors()).hasSize(1).allMatch(msg -> msg.contains("function declaration"));
+        assertThat(visitor.semanticErrors())
+                .hasSize(1)
+                .allMatch(msg -> msg.contains("function declaration"));
     }
 }
