@@ -10,7 +10,7 @@ topLevelStmt
     ;
 
 functionDecl
-    : 'fn' Ident LParen parameters? RParen block
+    : 'fn' Ident LParen parameters? RParen block LineBreak
     ;
 
 parameters

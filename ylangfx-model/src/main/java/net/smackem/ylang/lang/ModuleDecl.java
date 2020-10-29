@@ -2,11 +2,11 @@ package net.smackem.ylang.lang;
 
 import java.util.*;
 
-class ProgramStructure {
+class ModuleDecl {
     private final Map<String, FunctionDecl> functions = new HashMap<>();
     private final FunctionDecl mainBody;
 
-    ProgramStructure(FunctionDecl mainBody, Collection<FunctionDecl> functions) {
+    ModuleDecl(FunctionDecl mainBody, Collection<FunctionDecl> functions) {
         this.mainBody = Objects.requireNonNull(mainBody);
         for (final FunctionDecl function : Objects.requireNonNull(functions)) {
             this.functions.put(function.name(), function);
