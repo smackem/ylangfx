@@ -14,8 +14,11 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
         }
         super.visitProgram(ctx);
         final AllocVisitor allocVisitor = new AllocVisitor();
-        ctx.accept(allocVisitor);
-        final FunctionDecl mainBody = FunctionDecl.main(allocVisitor.uniqueVariableCount());
+        final int allocCount = ctx.accept(allocVisitor);
+        if (logSemanticErrors(allocVisitor.semanticErrors())) {
+            return null;
+        }
+        final FunctionDecl mainBody = FunctionDecl.main(allocCount);
         return semanticErrors().isEmpty()
                 ? new ModuleDecl(mainBody, this.functions)
                 : null;
@@ -45,13 +48,16 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
     @Override
     public ModuleDecl visitFunctionDecl(YLangParser.FunctionDeclContext ctx) {
         final AllocVisitor allocVisitor = new AllocVisitor();
-        ctx.block().accept(allocVisitor);
+        final int allocCount = ctx.block().accept(allocVisitor);
+        if (logSemanticErrors(allocVisitor.semanticErrors())) {
+            return null;
+        }
         final int parameterCount = ctx.parameters() != null
                 ? ctx.parameters().Ident().size()
                 : 0;
         final FunctionDecl func = FunctionDecl.function(ctx.Ident().getText(),
                 parameterCount,
-                allocVisitor.uniqueVariableCount());
+                allocCount);
         this.functions.add(func);
         return null;
     }

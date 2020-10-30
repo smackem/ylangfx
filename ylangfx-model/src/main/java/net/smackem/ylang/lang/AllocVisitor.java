@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-class AllocVisitor extends BaseVisitor<Void> {
+class AllocVisitor extends BaseVisitor<Integer> {
 
     private static final Logger log = LoggerFactory.getLogger(AllocVisitor.class);
     private final Deque<DeclScope> scopes = new ArrayDeque<>();
@@ -17,17 +17,19 @@ class AllocVisitor extends BaseVisitor<Void> {
         this.scopes.push(new DeclScope());
     }
 
-    public int uniqueVariableCount() {
+    @Override
+    public Integer visitProgram(YLangParser.ProgramContext ctx) {
+        super.visitProgram(ctx);
         return this.uniqueVariableCount;
     }
 
     @Override
-    public Void visitFunctionDecl(YLangParser.FunctionDeclContext ctx) {
+    public Integer visitFunctionDecl(YLangParser.FunctionDeclContext ctx) {
         return null; // skip all function definitions when walking main body
     }
 
     @Override
-    public Void visitBlock(YLangParser.BlockContext ctx) {
+    public Integer visitBlock(YLangParser.BlockContext ctx) {
         enterScope();
         super.visitBlock(ctx);
         leaveScope();
@@ -35,14 +37,14 @@ class AllocVisitor extends BaseVisitor<Void> {
     }
 
     @Override
-    public Void visitDeclStmt(YLangParser.DeclStmtContext ctx) {
+    public Integer visitDeclStmt(YLangParser.DeclStmtContext ctx) {
         final String ident = ctx.Ident().getText();
         addVariable(ctx, ident);
         return super.visitDeclStmt(ctx);
     }
 
     @Override
-    public Void visitForStmt(YLangParser.ForStmtContext ctx) {
+    public Integer visitForStmt(YLangParser.ForStmtContext ctx) {
         enterScope();
         final String ident = ctx.Ident().getText();
         addVariable(ctx, ident);

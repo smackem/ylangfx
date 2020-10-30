@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class EmittingVisitor extends YLangBaseVisitor<Void> {
+class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     private static final Logger log = LoggerFactory.getLogger(EmittingVisitor.class);
     private static final String endLabel = "@end";
@@ -30,7 +30,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitProgram(YLangParser.ProgramContext ctx) {
+    public Program visitProgram(YLangParser.ProgramContext ctx) {
         for (int i = 0; i < this.allocationTable.slots.length; i++) {
             this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
         }
@@ -38,11 +38,11 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         super.visitProgram(ctx);
         this.emitter.emit(OpCode.LABEL, endLabel);
         popScope();
-        return null;
+        return this.emitter.buildProgram();
     }
 
     @Override
-    public Void visitDeclStmt(YLangParser.DeclStmtContext ctx) {
+    public Program visitDeclStmt(YLangParser.DeclStmtContext ctx) {
         final String ident = ctx.Ident().getText();
         ctx.expr().accept(this);
         final Integer addr = putIdent(ident);
@@ -51,7 +51,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitAssignStmt(YLangParser.AssignStmtContext ctx) {
+    public Program visitAssignStmt(YLangParser.AssignStmtContext ctx) {
         if (ctx.atom() == null) { // assign to ident, not to lvalue-expr
             ctx.expr().accept(this);
             final String ident = ctx.Ident().getText();
@@ -74,10 +74,10 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
         return null;
     }
 
-    private YLangVisitor<Void> getLValueAtomVisitor(YLangParser.ExprContext rvalueExpr) {
+    private YLangVisitor<Program> getLValueAtomVisitor(YLangParser.ExprContext rvalueExpr) {
         return new YLangBaseVisitor<>() {
             @Override
-            public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
+            public Program visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
                 if (ctx.invocationSuffix() != null) {
                     semanticErrors.add("cannot assign to invocation");
                     return null;
@@ -90,7 +90,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
             }
 
             @Override
-            public Void visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
+            public Program visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
                 EmittingVisitor.super.visitIndexSuffix(ctx);
                 rvalueExpr.accept(EmittingVisitor.this);
                 emitter.emit(OpCode.INVOKE, 3, functionTable.indexAssignmentFunction());
@@ -101,14 +101,14 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitReturnStmt(YLangParser.ReturnStmtContext ctx) {
+    public Program visitReturnStmt(YLangParser.ReturnStmtContext ctx) {
         super.visitReturnStmt(ctx);
         this.emitter.emit(OpCode.BR, endLabel);
         return null;
     }
 
     @Override
-    public Void visitIfStmt(YLangParser.IfStmtContext ctx) {
+    public Program visitIfStmt(YLangParser.IfStmtContext ctx) {
         final String ifLabel = nextLabel();
         final String elseLabel = ctx.elseClause() != null ? nextLabel() : null;
         visitConditionalBody(ifLabel, elseLabel, ctx.expr(), ctx.block());
@@ -136,7 +136,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitWhileStmt(YLangParser.WhileStmtContext ctx) {
+    public Program visitWhileStmt(YLangParser.WhileStmtContext ctx) {
         final String loopLabel = nextLabel();
         final String breakLabel = nextLabel();
         this.emitter.emit(OpCode.LABEL, loopLabel);
@@ -149,7 +149,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitForStmt(YLangParser.ForStmtContext ctx) {
+    public Program visitForStmt(YLangParser.ForStmtContext ctx) {
         final String ident = ctx.Ident().getText();
         pushScope();
         final int itemAddr = putIdent(ident);
@@ -175,7 +175,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitInvocationStmt(YLangParser.InvocationStmtContext ctx) {
+    public Program visitInvocationStmt(YLangParser.InvocationStmtContext ctx) {
         if (ctx.Ident() != null) {
             final int argCount = ctx.invocationSuffix().arguments() != null
                     ? ctx.invocationSuffix().arguments().expr().size()
@@ -193,7 +193,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitSwapStmt(YLangParser.SwapStmtContext ctx) {
+    public Program visitSwapStmt(YLangParser.SwapStmtContext ctx) {
         final Integer addr1 = lookupIdent(ctx.Ident(0).getText());
         if (addr1 == null) {
             logSemanticError(ctx, "unknown identifier " + ctx.Ident(0));
@@ -212,14 +212,14 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitLogStmt(YLangParser.LogStmtContext ctx) {
+    public Program visitLogStmt(YLangParser.LogStmtContext ctx) {
         super.visitLogStmt(ctx);
         this.emitter.emit(OpCode.LOG, ctx.arguments().expr().size());
         return null;
     }
 
     @Override
-    public Void visitBlock(YLangParser.BlockContext ctx) {
+    public Program visitBlock(YLangParser.BlockContext ctx) {
         pushScope();
         super.visitBlock(ctx);
         popScope();
@@ -227,7 +227,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitExpr(YLangParser.ExprContext ctx) {
+    public Program visitExpr(YLangParser.ExprContext ctx) {
         ctx.condition().accept(this);
         if (ctx.term() != null) {
             final String elseLabel = nextLabel();
@@ -243,7 +243,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitCondition(YLangParser.ConditionContext ctx) {
+    public Program visitCondition(YLangParser.ConditionContext ctx) {
         super.visitCondition(ctx);
         if (ctx.conditionOp() != null) {
             if (ctx.conditionOp().Or() != null) {
@@ -256,7 +256,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitComparison(YLangParser.ComparisonContext ctx) {
+    public Program visitComparison(YLangParser.ComparisonContext ctx) {
         ctx.tuple(0).accept(this);
         final var comparator = ctx.comparator();
         if (comparator != null) {
@@ -281,14 +281,14 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitPoint(YLangParser.PointContext ctx) {
+    public Program visitPoint(YLangParser.PointContext ctx) {
         super.visitPoint(ctx);
         this.emitter.emit(OpCode.MK_POINT);
         return null;
     }
 
     @Override
-    public Void visitRange(YLangParser.RangeContext ctx) {
+    public Program visitRange(YLangParser.RangeContext ctx) {
         if (ctx.term().size() == 2) {
             ctx.term(0).accept(this);
             this.emitter.emit(OpCode.LD_VAL, NumberVal.ONE);
@@ -302,7 +302,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitTerm(YLangParser.TermContext ctx) {
+    public Program visitTerm(YLangParser.TermContext ctx) {
         ctx.product(0).accept(this);
         int index = 1;
         for (final var op : ctx.termOp()) {
@@ -322,7 +322,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitProduct(YLangParser.ProductContext ctx) {
+    public Program visitProduct(YLangParser.ProductContext ctx) {
         ctx.molecule(0).accept(this);
         int index = 1;
         for (final var op : ctx.productOp()) {
@@ -340,7 +340,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMolecule(YLangParser.MoleculeContext ctx) {
+    public Program visitMolecule(YLangParser.MoleculeContext ctx) {
         ctx.atom().accept(this);
         for (final var atomSuffix : ctx.atomSuffix()) {
             atomSuffix.accept(this);
@@ -352,14 +352,14 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
+    public Program visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
         super.visitIndexSuffix(ctx);
         this.emitter.emit(OpCode.IDX);
         return null;
     }
 
     @Override
-    public Void visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
+    public Program visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
         final String ident = ctx.Ident().getText();
         if (ctx.invocationSuffix() != null) {
             final int argCount = ctx.invocationSuffix().arguments() != null
@@ -380,7 +380,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitAtomPrefix(YLangParser.AtomPrefixContext ctx) {
+    public Program visitAtomPrefix(YLangParser.AtomPrefixContext ctx) {
         if (ctx.Not() != null) {
             this.emitter.emit(OpCode.NOT);
         } else if (ctx.Minus() != null) {
@@ -392,7 +392,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitAtom(YLangParser.AtomContext ctx) {
+    public Program visitAtom(YLangParser.AtomContext ctx) {
         if (ctx.Nil() != null) {
             this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
         } else if (ctx.number() != null) {
@@ -434,7 +434,7 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitMapEntry(YLangParser.MapEntryContext ctx) {
+    public Program visitMapEntry(YLangParser.MapEntryContext ctx) {
         if (ctx.Ident() != null) {
             this.emitter.emit(OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
         } else {
@@ -446,17 +446,13 @@ class EmittingVisitor extends YLangBaseVisitor<Void> {
     }
 
     @Override
-    public Void visitFunctionInvocation(YLangParser.FunctionInvocationContext ctx) {
+    public Program visitFunctionInvocation(YLangParser.FunctionInvocationContext ctx) {
         final int argCount = ctx.invocationSuffix().arguments() != null
                 ? ctx.invocationSuffix().arguments().expr().size()
                 : 0;
         ctx.invocationSuffix().accept(this);
         this.emitter.emit(OpCode.INVOKE, argCount, ctx.Ident().getText());
         return null;
-    }
-
-    public Program buildProgram() {
-        return this.emitter.buildProgram();
     }
 
     private void logSemanticError(ParserRuleContext ctx, String message) {

@@ -19,16 +19,16 @@ public class Compiler {
             return null;
         }
         final AllocVisitor declExtractor = new AllocVisitor();
-        tree.accept(declExtractor);
+        final int allocCount = tree.accept(declExtractor);
         if (outErrors.addAll(declExtractor.semanticErrors())) {
             return null;
         }
-        final EmittingVisitor emitter = new EmittingVisitor(declExtractor.uniqueVariableCount(), functionTable);
-        tree.accept(emitter);
+        final EmittingVisitor emitter = new EmittingVisitor(allocCount, functionTable);
+        final Program program = tree.accept(emitter);
         if (outErrors.addAll(emitter.semanticErrors())) {
             return null;
         }
-        return emitter.buildProgram();
+        return program;
     }
 
     YLangParser.ProgramContext compileToAst(String source, Collection<String> outErrors) {
