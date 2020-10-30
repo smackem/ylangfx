@@ -18,14 +18,13 @@ class AllocVisitor extends BaseVisitor<Integer> {
     }
 
     @Override
-    public Integer visitProgram(YLangParser.ProgramContext ctx) {
-        super.visitProgram(ctx);
+    protected Integer defaultResult() {
         return this.uniqueVariableCount;
     }
 
     @Override
     public Integer visitFunctionDecl(YLangParser.FunctionDeclContext ctx) {
-        return null; // skip all function definitions when walking main body
+        return defaultResult(); // skip all function definitions when walking main body
     }
 
     @Override
@@ -33,7 +32,7 @@ class AllocVisitor extends BaseVisitor<Integer> {
         enterScope();
         super.visitBlock(ctx);
         leaveScope();
-        return null;
+        return defaultResult();
     }
 
     @Override
@@ -51,7 +50,7 @@ class AllocVisitor extends BaseVisitor<Integer> {
         addVariable(ctx, getIteratorIdent(ident));
         super.visitForStmt(ctx);
         leaveScope();
-        return null;
+        return defaultResult();
     }
 
     static String getIteratorIdent(String itemIdent) {

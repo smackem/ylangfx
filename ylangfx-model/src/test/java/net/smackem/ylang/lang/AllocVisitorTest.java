@@ -22,8 +22,8 @@ public class AllocVisitorTest {
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
         final AllocVisitor visitor = new AllocVisitor();
-        ast.accept(visitor);
-        assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
+        final Integer allocCount = ast.accept(visitor);
+        assertThat(allocCount).isEqualTo(3);
     }
 
     @Test
@@ -41,8 +41,8 @@ public class AllocVisitorTest {
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
         final AllocVisitor visitor = new AllocVisitor();
-        ast.accept(visitor);
-        assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
+        final Integer allocCount = ast.accept(visitor);
+        assertThat(allocCount).isEqualTo(3);
     }
 
     @Test
@@ -63,8 +63,8 @@ public class AllocVisitorTest {
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
         final AllocVisitor visitor = new AllocVisitor();
-        ast.accept(visitor);
-        assertThat(visitor.uniqueVariableCount()).isEqualTo(3);
+        final Integer allocCount = ast.accept(visitor);
+        assertThat(allocCount).isEqualTo(3);
     }
 
     @Test
@@ -99,8 +99,8 @@ public class AllocVisitorTest {
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
         final AllocVisitor visitor = new AllocVisitor();
-        ast.accept(visitor);
-        assertThat(visitor.uniqueVariableCount()).isEqualTo(5);
+        final Integer allocCount = ast.accept(visitor);
+        assertThat(allocCount).isEqualTo(5);
     }
 
     @Test
@@ -127,8 +127,8 @@ public class AllocVisitorTest {
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
         final AllocVisitor visitor = new AllocVisitor();
-        ast.accept(visitor);
-        assertThat(visitor.uniqueVariableCount()).isEqualTo(8);
+        final Integer allocCount = ast.accept(visitor);
+        assertThat(allocCount).isEqualTo(8);
     }
 
     @Test
