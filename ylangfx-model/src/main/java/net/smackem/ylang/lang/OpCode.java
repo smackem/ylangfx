@@ -21,7 +21,7 @@ public enum OpCode {
     GE,         // pop b, a, push a >= b
     LT,         // pop b, a, push a < b
     LE,         // pop b, a, push a <= b
-    BR,         // branch to label intArg
+    BR,         // branch to intArg
     BR_ZERO,    // pop a, if not a then branch to intArg
     DUP,        // pop a, push a, push a
     NOT,        // pop a, push a != 0
@@ -40,12 +40,12 @@ public enum OpCode {
     MK_RANGE,   // pop upper, pop step, pop lower, push range(lower, upper, step)
     LOG,        // pop intArg arguments, write to log
     CONCAT,     // pop b, pop a, push a :: b
-    CALL,       // push pc, branch to label intArg, no. of arguments: valueArg (NumberVal)
-    RET;        // pop v, pop a, a -> pc, push v
+    CALL,       // push pc, branch to intArg, no. of arguments: valueArg (NumberVal)
+    RET;        // pop v, pop a, branch to a, push v
 
     public boolean isBranch() {
         return switch (this) {
-            case BR, BR_ZERO, BR_NEXT, CALL -> true;
+            case BR, BR_ZERO, BR_NEXT, CALL, RET -> true;
             default -> false;
         };
     }

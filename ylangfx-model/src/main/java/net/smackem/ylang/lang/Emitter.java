@@ -89,6 +89,12 @@ class Emitter {
         emit(new Instruction(opCode, intArg, strArg));
     }
 
+    public void emit(OpCode opCode, int intArg, String strArg, Value valueArg) {
+        final Instruction instr = new Instruction(opCode, intArg, strArg);
+        instr.setValueArg(valueArg);
+        emit(instr);
+    }
+
     /**
      * Emits an instruction, inserting it immediately before the last instruction.
      * @param instruction The {@link Instruction} to emit.

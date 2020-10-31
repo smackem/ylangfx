@@ -75,6 +75,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         }
         super.visitFunctionDecl(ctx);
         popScope();
+        if (ctx.block().statement(ctx.block().statement().size() - 1).returnStmt() == null) {
+            // return nil if no return statement present
+            this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
+            this.emitter.emit(OpCode.RET);
+        }
         this.currentFunction = this.mainFunction;
         this.currentAllocationTable = this.mainAllocationTable;
         this.emitter.emit(OpCode.LABEL, endLabel);
@@ -143,7 +148,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitReturnStmt(YLangParser.ReturnStmtContext ctx) {
         super.visitReturnStmt(ctx);
-        this.emitter.emit(OpCode.BR, endLabel);
+        if (this.currentFunction.decl.isMain()) {
+            this.emitter.emit(OpCode.BR, endLabel);
+        } else {
+            this.emitter.emit(OpCode.RET);
+        }
         return null;
     }
 
@@ -235,7 +244,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         ctx.accept(this);
         if (this.functions.containsKey(ident)) {
             // user-defined function
-            this.emitter.emit(OpCode.CALL, argCount, ident);
+            this.emitter.emit(OpCode.CALL, argCount, ident, new NumberVal(argCount));
         } else {
             // built-in function
             this.emitter.emit(OpCode.INVOKE, argCount, ident);

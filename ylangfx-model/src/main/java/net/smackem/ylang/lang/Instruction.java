@@ -43,6 +43,10 @@ public final class Instruction {
         return this.valueArg;
     }
 
+    public void setValueArg(Value value) {
+        this.valueArg = value;
+    }
+
     public int intArg() {
         return this.intArg;
     }

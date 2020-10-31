@@ -775,4 +775,29 @@ public class IntegrationTest {
         System.out.println(program.toString());
         new Interpreter(program, null, Writer.nullWriter()).execute();
     }
+
+    @Test
+    public void ignoredFunctions() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                fn ignored1() {
+                    return 1
+                }
+                a := 100
+                fn ignored2() {
+                    return 2
+                }
+                b := 200
+                return [a, b]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(100),
+                new NumberVal(200)
+        )));
+    }
 }
