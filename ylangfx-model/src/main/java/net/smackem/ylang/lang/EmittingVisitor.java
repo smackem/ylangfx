@@ -12,17 +12,28 @@ import java.util.stream.Collectors;
 class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     private static final Logger log = LoggerFactory.getLogger(EmittingVisitor.class);
+    private static final String beginLabel = "@begin";
     private static final String endLabel = "@end";
     private final FunctionTable functionTable;
     private final Emitter emitter = new Emitter();
     private final List<String> semanticErrors = new ArrayList<>();
-    private final AllocationTable allocationTable;
     private final LinkedList<Scope> scopes = new LinkedList<>();
+    private final ModuleDecl module;
+    private final AllocationTable mainAllocationTable;
+    private final Map<String, FunctionDef> functions = new HashMap<>();
+    private final FunctionDef mainFunction;
+    private AllocationTable currentAllocationTable;
+    private FunctionDef currentFunction;
     private int labelNumber = 1;
 
-    public EmittingVisitor(int allocationSlots, FunctionTable functionTable) {
-        this.functionTable = functionTable;
-        this.allocationTable = new AllocationTable(allocationSlots);
+    public EmittingVisitor(ModuleDecl module, FunctionTable functionTable) {
+        this.module = Objects.requireNonNull(module);
+        this.functionTable = Objects.requireNonNull(functionTable);
+        this.mainAllocationTable = new AllocationTable(module.mainBody().localCount());
+        for (final FunctionDecl functionDecl : module.functions().values()) {
+            this.functions.put(functionDecl.name(), new FunctionDef(functionDecl));
+        }
+        this.mainFunction = new FunctionDef(module.mainBody());
     }
 
     public List<String> semanticErrors() {
@@ -31,7 +42,9 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     @Override
     public Program visitProgram(YLangParser.ProgramContext ctx) {
-        for (int i = 0; i < this.allocationTable.slots.length; i++) {
+        this.currentAllocationTable = this.mainAllocationTable;
+        this.currentFunction = this.mainFunction;
+        for (int i = 0; i < this.currentAllocationTable.slots.length; i++) {
             this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
         }
         pushScope();
@@ -39,6 +52,33 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         this.emitter.emit(OpCode.LABEL, endLabel);
         popScope();
         return this.emitter.buildProgram();
+    }
+
+    @Override
+    public Program visitFunctionDecl(YLangParser.FunctionDeclContext ctx) {
+        final String ident = ctx.Ident().getText();
+        final String endLabel = ident + "@end";
+        this.currentFunction = this.functions.get(ident);
+        this.emitter.emit(OpCode.BR, endLabel); // hop over function
+        this.currentFunction.address = this.emitter.instructions().size();
+        this.emitter.emit(OpCode.LABEL, ident);
+        final int localCount = this.currentFunction.decl.localCount();
+        this.currentAllocationTable = new AllocationTable(localCount + this.currentFunction.decl.parameterCount());
+        for (int i = 0; i < localCount; i++) {
+            this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
+        }
+        pushScope();
+        if (ctx.parameters() != null) {
+            for (final var parameterIdent : ctx.parameters().Ident()) {
+                putIdent(parameterIdent.getText());
+            }
+        }
+        super.visitFunctionDecl(ctx);
+        popScope();
+        this.currentFunction = this.mainFunction;
+        this.currentAllocationTable = this.mainAllocationTable;
+        this.emitter.emit(OpCode.LABEL, endLabel);
+        return null;
     }
 
     @Override
@@ -177,11 +217,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitInvocationStmt(YLangParser.InvocationStmtContext ctx) {
         if (ctx.Ident() != null) {
-            final int argCount = ctx.invocationSuffix().arguments() != null
-                    ? ctx.invocationSuffix().arguments().expr().size()
-                    : 0;
-            ctx.invocationSuffix().accept(this);
-            this.emitter.emit(OpCode.INVOKE, argCount, ctx.Ident().getText());
+            emitInvocation(ctx.Ident().getText(), ctx.invocationSuffix());
         } else {
             ctx.atom().accept(this);
             for (final var atomSuffix : ctx.atomSuffix()) {
@@ -190,6 +226,20 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         }
         this.emitter.emit(OpCode.POP); // discard result
         return null;
+    }
+
+    private void emitInvocation(String ident, YLangParser.InvocationSuffixContext ctx) {
+        final int argCount = ctx.arguments() != null
+                ? ctx.arguments().expr().size()
+                : 0;
+        ctx.accept(this);
+        if (this.functions.containsKey(ident)) {
+            // user-defined function
+            this.emitter.emit(OpCode.CALL, argCount, ident);
+        } else {
+            // built-in function
+            this.emitter.emit(OpCode.INVOKE, argCount, ident);
+        }
     }
 
     @Override
@@ -447,11 +497,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     @Override
     public Program visitFunctionInvocation(YLangParser.FunctionInvocationContext ctx) {
-        final int argCount = ctx.invocationSuffix().arguments() != null
-                ? ctx.invocationSuffix().arguments().expr().size()
-                : 0;
-        ctx.invocationSuffix().accept(this);
-        this.emitter.emit(OpCode.INVOKE, argCount, ctx.Ident().getText());
+        emitInvocation(ctx.Ident().getText(), ctx.invocationSuffix());
         return null;
     }
 
@@ -496,11 +542,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     private void popScope() {
         final Scope poppedScope = this.scopes.removeFirst();
-        this.allocationTable.free(poppedScope.variableAddresses.size());
+        this.currentAllocationTable.free(poppedScope.variableAddresses.size());
     }
 
     private Integer putIdent(String ident) {
-        final int addr = this.allocationTable.alloc(ident);
+        final int addr = this.currentAllocationTable.alloc(ident);
         currentScope().variableAddresses.put(ident, addr);
         return addr;
     }
@@ -541,5 +587,14 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     private static class Scope {
         final Map<String, Integer> variableAddresses = new HashMap<>();
+    }
+
+    private static class FunctionDef {
+        final FunctionDecl decl;
+        Integer address;
+
+        FunctionDef(FunctionDecl decl) {
+            this.decl = decl;
+        }
     }
 }

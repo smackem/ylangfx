@@ -14,17 +14,17 @@ public class Compiler {
         if (source.endsWith("\n") == false) {
             source = source + "\n";
         }
-        final YLangParser.ProgramContext tree = compileToAst(source, outErrors);
-        if (tree == null) {
+        final YLangParser.ProgramContext ast = compileToAst(source, outErrors);
+        if (ast == null) {
             return null;
         }
-        final AllocVisitor declExtractor = new AllocVisitor();
-        final int allocCount = tree.accept(declExtractor);
-        if (outErrors.addAll(declExtractor.semanticErrors())) {
+        final ModuleVisitor moduleVisitor = new ModuleVisitor();
+        final ModuleDecl module = ast.accept(moduleVisitor);
+        if (outErrors.addAll(moduleVisitor.semanticErrors())) {
             return null;
         }
-        final EmittingVisitor emitter = new EmittingVisitor(allocCount, functionTable);
-        final Program program = tree.accept(emitter);
+        final EmittingVisitor emitter = new EmittingVisitor(module, functionTable);
+        final Program program = ast.accept(emitter);
         if (outErrors.addAll(emitter.semanticErrors())) {
             return null;
         }

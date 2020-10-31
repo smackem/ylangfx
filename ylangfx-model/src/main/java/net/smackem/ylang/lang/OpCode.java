@@ -39,11 +39,13 @@ public enum OpCode {
     MK_POINT,   // pop b, pop a, push point(a, b)
     MK_RANGE,   // pop upper, pop step, pop lower, push range(lower, upper, step)
     LOG,        // pop intArg arguments, write to log
-    CONCAT;     // pop b, pop a, push a :: b
+    CONCAT,     // pop b, pop a, push a :: b
+    CALL,       // push pc, branch to label intArg, no. of arguments: valueArg (NumberVal)
+    RET;        // pop v, pop a, a -> pc, push v
 
     public boolean isBranch() {
         return switch (this) {
-            case BR, BR_ZERO, BR_NEXT -> true;
+            case BR, BR_ZERO, BR_NEXT, CALL -> true;
             default -> false;
         };
     }
