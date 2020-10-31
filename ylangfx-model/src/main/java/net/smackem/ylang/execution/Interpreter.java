@@ -237,6 +237,12 @@ public class Interpreter {
                     }
                     stack.push(new MapVal(entries));
                 }
+                case CALL -> {
+
+                }
+                case RET -> {
+
+                }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }
             pc++;

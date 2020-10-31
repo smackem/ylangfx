@@ -12,13 +12,11 @@ import java.util.stream.Collectors;
 class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     private static final Logger log = LoggerFactory.getLogger(EmittingVisitor.class);
-    private static final String beginLabel = "@begin";
     private static final String endLabel = "@end";
     private final FunctionTable functionTable;
     private final Emitter emitter = new Emitter();
     private final List<String> semanticErrors = new ArrayList<>();
     private final LinkedList<Scope> scopes = new LinkedList<>();
-    private final ModuleDecl module;
     private final AllocationTable mainAllocationTable;
     private final Map<String, FunctionDef> functions = new HashMap<>();
     private final FunctionDef mainFunction;
@@ -27,7 +25,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     private int labelNumber = 1;
 
     public EmittingVisitor(ModuleDecl module, FunctionTable functionTable) {
-        this.module = Objects.requireNonNull(module);
+        Objects.requireNonNull(module);
         this.functionTable = Objects.requireNonNull(functionTable);
         this.mainAllocationTable = new AllocationTable(module.mainBody().localCount());
         for (final FunctionDecl functionDecl : module.functions().values()) {
@@ -90,8 +88,8 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     public Program visitDeclStmt(YLangParser.DeclStmtContext ctx) {
         final String ident = ctx.Ident().getText();
         ctx.expr().accept(this);
-        final Integer addr = putIdent(ident);
-        this.emitter.emit(OpCode.ST_GLB, addr);
+        final Address addr = putIdent(ident);
+        addr.emitStore(this.emitter);
         return null;
     }
 
@@ -100,11 +98,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         if (ctx.atom() == null) { // assign to ident, not to lvalue-expr
             ctx.expr().accept(this);
             final String ident = ctx.Ident().getText();
-            final Integer addr = lookupIdent(ident);
+            final Address addr = lookupIdent(ident);
             if (addr == null) {
                 logSemanticError(ctx, "unknown identifier " + ident);
             } else {
-                this.emitter.emit(OpCode.ST_GLB, addr);
+                addr.emitStore(this.emitter);
             }
         } else {
             int index = 0;
@@ -201,17 +199,17 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     public Program visitForStmt(YLangParser.ForStmtContext ctx) {
         final String ident = ctx.Ident().getText();
         pushScope();
-        final int itemAddr = putIdent(ident);
-        final int iteratorAddr = putIdent(AllocVisitor.getIteratorIdent(ident));
+        final Address itemAddr = putIdent(ident);
+        final Address iteratorAddr = putIdent(AllocVisitor.getIteratorIdent(ident));
         ctx.expr().accept(this);                 // push iterable
         this.emitter.emit(OpCode.ITER);                 // push iterator
-        this.emitter.emit(OpCode.ST_GLB, iteratorAddr); // store iterator
+        iteratorAddr.emitStore(this.emitter);           // store iterator
         final String loopLabel = nextLabel();
         final String breakLabel = nextLabel();
         this.emitter.emit(OpCode.LABEL, loopLabel);
-        this.emitter.emit(OpCode.LD_GLB, iteratorAddr); // iterator.next
+        iteratorAddr.emitLoad(this.emitter);            // iterator.next
         this.emitter.emit(OpCode.BR_NEXT, breakLabel);
-        this.emitter.emit(OpCode.ST_GLB, itemAddr);     // store item
+        itemAddr.emitStore(this.emitter);               // store item
         if (ctx.whereClause() != null) {
             ctx.whereClause().accept(this);
             this.emitter.emit(OpCode.BR_ZERO, loopLabel);
@@ -242,31 +240,36 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
                 ? ctx.arguments().expr().size()
                 : 0;
         ctx.accept(this);
-        if (this.functions.containsKey(ident)) {
+        final FunctionDef function = this.functions.get(ident);
+        if (function != null) {
             // user-defined function
-            this.emitter.emit(OpCode.CALL, argCount, ident, new NumberVal(argCount));
-        } else {
-            // built-in function
-            this.emitter.emit(OpCode.INVOKE, argCount, ident);
+            this.emitter.emit(OpCode.CALL, function.address, ident, new NumberVal(argCount));
+            return;
         }
+        // built-in function
+        if (this.functionTable.contains(ident) == false) {
+            logSemanticError(ctx, "no function with name '" + ident + "' defined!");
+            return;
+        }
+        this.emitter.emit(OpCode.INVOKE, argCount, ident);
     }
 
     @Override
     public Program visitSwapStmt(YLangParser.SwapStmtContext ctx) {
-        final Integer addr1 = lookupIdent(ctx.Ident(0).getText());
+        final Address addr1 = lookupIdent(ctx.Ident(0).getText());
         if (addr1 == null) {
             logSemanticError(ctx, "unknown identifier " + ctx.Ident(0));
             return null;
         }
-        final Integer addr2 = lookupIdent(ctx.Ident(1).getText());
+        final Address addr2 = lookupIdent(ctx.Ident(1).getText());
         if (addr2 == null) {
             logSemanticError(ctx, "unknown identifier " + ctx.Ident(1));
             return null;
         }
-        this.emitter.emit(OpCode.LD_GLB, addr1);
-        this.emitter.emit(OpCode.LD_GLB, addr2);
-        this.emitter.emit(OpCode.ST_GLB, addr1);
-        this.emitter.emit(OpCode.ST_GLB, addr2);
+        addr1.emitLoad(this.emitter);
+        addr2.emitLoad(this.emitter);
+        addr1.emitStore(this.emitter);
+        addr2.emitStore(this.emitter);
         return null;
     }
 
@@ -457,11 +460,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         } else if (ctx.number() != null) {
             this.emitter.emit(OpCode.LD_VAL, parseNumber(ctx.number().getText()));
         } else if (ctx.Ident() != null) {
-            final Integer addr = lookupIdent(ctx.Ident().getText());
+            final Address addr = lookupIdent(ctx.Ident().getText());
             if (addr == null) {
                 logSemanticError(ctx, "unknown identifier " + ctx.Ident());
             } else {
-                this.emitter.emit(OpCode.LD_GLB, addr);
+                addr.emitLoad(this.emitter);
             }
         } else if (ctx.String() != null) {
             emitStringLiteral(ctx.String());
@@ -546,7 +549,8 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     }
 
     private void pushScope() {
-        this.scopes.addFirst(new Scope());
+        final Scope scope = new Scope(this.scopes.isEmpty());
+        this.scopes.addFirst(scope);
     }
 
     private void popScope() {
@@ -554,17 +558,17 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         this.currentAllocationTable.free(poppedScope.variableAddresses.size());
     }
 
-    private Integer putIdent(String ident) {
-        final int addr = this.currentAllocationTable.alloc(ident);
-        currentScope().variableAddresses.put(ident, addr);
-        return addr;
+    private Address putIdent(String ident) {
+        final int offset = this.currentAllocationTable.alloc(ident);
+        currentScope().variableAddresses.put(ident, offset);
+        return new Address(offset, currentScope().global);
     }
 
-    private Integer lookupIdent(String ident) {
+    private Address lookupIdent(String ident) {
         for (final Scope scope : this.scopes) {
             final Integer addr = scope.variableAddresses.get(ident);
             if (addr != null) {
-                return addr;
+                return new Address(addr, scope.global);
             }
         }
         return null;
@@ -596,6 +600,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     private static class Scope {
         final Map<String, Integer> variableAddresses = new HashMap<>();
+        final boolean global;
+
+        Scope(boolean global) {
+            this.global = global;
+        }
     }
 
     private static class FunctionDef {
@@ -604,6 +613,24 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
         FunctionDef(FunctionDecl decl) {
             this.decl = decl;
+        }
+    }
+
+    private static class Address {
+        final int offset;
+        final boolean global;
+
+        Address(int offset, boolean global) {
+            this.offset = offset;
+            this.global = global;
+        }
+
+        void emitLoad(Emitter emitter) {
+            emitter.emit(this.global ? OpCode.LD_GLB : OpCode.LD_LOC, this.offset);
+        }
+
+        void emitStore(Emitter emitter) {
+            emitter.emit(this.global ? OpCode.ST_GLB : OpCode.ST_LOC, this.offset);
         }
     }
 }

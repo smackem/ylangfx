@@ -786,7 +786,8 @@ public class IntegrationTest {
                 }
                 a := 100
                 fn ignored2() {
-                    return 2
+                    loc := a
+                    return loc
                 }
                 b := 200
                 return [a, b]
