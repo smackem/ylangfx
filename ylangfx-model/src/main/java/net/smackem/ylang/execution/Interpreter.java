@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -65,7 +67,8 @@ public class Interpreter {
 
     public Value execute() throws StackException, MissingOverloadException, IOException {
         int pc = 0;
-        int stackFrameIndex = 0;
+        int stackFrameOffset = 0;
+        final Deque<Integer> stackFrames = new ArrayDeque<>();
         final int programSize = this.instructions.length;
         final Stack stack = this.ctx.stack();
         while (pc < programSize) {
@@ -79,8 +82,8 @@ public class Interpreter {
                 case LD_GLB -> stack.push(stack.get(instr.intArg()));
                 case LD_ENV -> stack.push(Objects.equals(instr.strArg(), "in") ? ctx.inputImage() : NilVal.INSTANCE);
                 case ST_GLB -> stack.set(instr.intArg(), stack.pop());
-                case LD_LOC -> stack.push(stack.get(instr.intArg() + stackFrameIndex));
-                case ST_LOC -> stack.set(instr.intArg() + stackFrameIndex, stack.pop());
+                case LD_LOC -> stack.push(stack.get(instr.intArg() + stackFrameOffset));
+                case ST_LOC -> stack.set(instr.intArg() + stackFrameOffset, stack.pop());
                 case EQ -> {
                     final Value r = stack.pop();
                     stack.push(BoolVal.of(stack.pop().equals(r)));
@@ -238,10 +241,19 @@ public class Interpreter {
                     stack.push(new MapVal(entries));
                 }
                 case CALL -> {
-
+                    final int argCount = (int) ((NumberVal) instr.valueArg()).value();
+                    stackFrames.push(stackFrameOffset);
+                    stack.insert(stack.size() - argCount, new NumberVal(pc + 1));
+                    stackFrameOffset = stack.size() - argCount;
+                    pc = instr.intArg() - 1;
                 }
                 case RET -> {
-
+                    final Value retVal = stack.pop(); // return value
+                    stack.setTail(stackFrameOffset);
+                    stackFrameOffset = stackFrames.pop();
+                    final int retPC = (int) ((NumberVal) stack.pop()).value();
+                    stack.push(retVal);
+                    pc = retPC - 1;
                 }
                 default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
             }

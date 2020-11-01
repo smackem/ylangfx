@@ -37,4 +37,17 @@ class Stack {
         this.count--;
         return this.array[this.count];
     }
+
+    public void insert(int index, Value value) {
+        Objects.checkIndex(index, this.count + 1);
+        if (index < this.count) {
+            System.arraycopy(this.array, index, this.array, index + 1, this.count - index);
+        }
+        this.array[index] = value;
+        this.count++;
+    }
+
+    public void setTail(int tail) {
+        this.count = Objects.checkIndex(tail, this.array.length);
+    }
 }

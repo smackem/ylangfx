@@ -243,7 +243,12 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         final FunctionDef function = this.functions.get(ident);
         if (function != null) {
             // user-defined function
-            this.emitter.emit(OpCode.CALL, function.address, ident, new NumberVal(argCount));
+            if (function.decl.parameterCount() == argCount) {
+                this.emitter.emit(OpCode.CALL, function.address, ident, new NumberVal(argCount));
+            } else {
+                logSemanticError(ctx, "function %s expects %d arguments, but only %d passed".formatted(
+                        ident, function.decl.parameterCount(), argCount));
+            }
             return;
         }
         // built-in function

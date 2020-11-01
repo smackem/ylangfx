@@ -781,8 +781,8 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
-                fn ignored1() {
-                    return 1
+                fn ignored1(x) {
+                    return x
                 }
                 a := 100
                 fn ignored2() {
@@ -800,5 +800,78 @@ public class IntegrationTest {
                 new NumberVal(100),
                 new NumberVal(200)
         )));
+    }
+
+    @Test
+    public void callFunctionWithOneParameter() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                fn timesTwo(x) {
+                    return x * 2
+                }
+                return timesTwo(3)
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(6));
+    }
+
+    @Test
+    public void callFunctionWithoutParameters() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                fn ret100() {
+                    return 100
+                }
+                return ret100()
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(100));
+    }
+
+    @Test
+    public void callFunctionWithMultipleParameters() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                fn add(a, b) {
+                    return a + b
+                }
+                return add(1, 2)
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(3));
+    }
+
+    @Test
+    public void callFunctionsRecursively() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                count := 0
+                fn recurse(x) {
+                    if x > 0 {
+                        recurse(x - 1)
+                    }
+                    count = count + 1
+                }
+                recurse(3)
+                return count
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(4));
     }
 }
