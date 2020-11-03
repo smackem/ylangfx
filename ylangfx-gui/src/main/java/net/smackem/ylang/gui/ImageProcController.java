@@ -72,21 +72,19 @@ public class ImageProcController {
         this.logTextArea.textProperty().bind(this.logOutput);
         this.runButton.disableProperty().bind(this.isRunning);
         this.codeEditor.appendText("""
-                inp := $in.default(#ffffff@00)
-                out := image(inp).clip(inp.bounds)
-                K := |1  1  1
-                      1  1  1
-                      1  1  1|
-                for p in inp.bounds {
-                    out[p] = -inp.convolve(p, K)
+                fn invertAndBlur(inp) {
+                    out := image(inp).clip(inp.bounds)
+                    K := |1  1  1
+                          1  1  1
+                          1  1  1|
+                    for p in inp.bounds {
+                        out[p] = -inp.convolve(p, K)
+                    }
+                    return out
                 }
-                return out
+                inp := $in.default(#ffffff@00)
+                return invertAndBlur(inp)
                 """);
-    }
-
-    @FXML
-    private void switchToSecondary() throws IOException {
-        App.getInstance().setRoot("secondary");
     }
 
     @FXML

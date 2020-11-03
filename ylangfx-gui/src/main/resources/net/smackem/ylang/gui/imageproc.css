@@ -8,6 +8,7 @@
     -fx-font-size: 12pt;
     -fx-background-color: #fff;
     -fx-opacity: 0.5;
+    -fx-text-fill: #000;
 }
 
 #codeEditor {
