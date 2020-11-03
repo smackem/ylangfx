@@ -1,5 +1,6 @@
 package net.smackem.ylang.gui;
 
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -26,15 +27,19 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 public class ImageProcController {
 
+    private static final String PREF_SOURCE = "imageProc.source";
+    private static final String PREF_IMAGE_PATH = "imageProc.imagePath";
+    private static final String PREF_HORIZONTAL_SPLIT = "imageProc.horizontalSplit";
     private final ReadOnlyObjectWrapper<Image> sourceImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyObjectWrapper<Image> targetImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
     private final ReadOnlyStringWrapper logOutput = new ReadOnlyStringWrapper();
     private final ReadOnlyBooleanWrapper isRunning = new ReadOnlyBooleanWrapper();
-    private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.ENTER, KeyCombination.CONTROL_DOWN);
+    private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVEAS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
 
@@ -71,7 +76,8 @@ public class ImageProcController {
         this.messageTextArea.textProperty().bind(this.message);
         this.logTextArea.textProperty().bind(this.logOutput);
         this.runButton.disableProperty().bind(this.isRunning);
-        this.codeEditor.appendText("""
+        final Preferences prefs = Preferences.userNodeForPackage(ImageProcController.class);
+        final String source = prefs.get(PREF_SOURCE, """
                 fn invertAndBlur(inp) {
                     out := image(inp).clip(inp.bounds)
                     K := |1  1  1
@@ -85,6 +91,18 @@ public class ImageProcController {
                 inp := $in.default(#ffffff@00)
                 return invertAndBlur(inp)
                 """);
+        this.codeEditor.appendText(source);
+        this.splitToggle.setSelected(prefs.getBoolean(PREF_HORIZONTAL_SPLIT, false));
+        Platform.runLater(() -> {
+            this.runButton.getScene().getWindow().setOnCloseRequest(ignored -> {
+                prefs.put(PREF_SOURCE, this.codeEditor.getText());
+                prefs.putBoolean(PREF_HORIZONTAL_SPLIT, splitToggle.isSelected());
+            });
+            final String imagePath = prefs.get(PREF_IMAGE_PATH, null);
+            if (imagePath != null) {
+                loadImageFromFile(new File(imagePath));
+            }
+        });
     }
 
     @FXML
@@ -94,12 +112,18 @@ public class ImageProcController {
         final File file = fileChooser.showOpenDialog(App.getInstance().getStage());
 
         if (file != null) {
-            try {
-                this.sourceImage.setValue(loadImage(file));
-                this.tabPane.getSelectionModel().select(sourceTab);
-            } catch (IOException e) {
-                new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
-            }
+            loadImageFromFile(file);
+            final Preferences prefs = Preferences.userNodeForPackage(ImageProcController.class);
+            prefs.put(PREF_IMAGE_PATH, file.getAbsolutePath());
+        }
+    }
+
+    private void loadImageFromFile(File file) {
+        try {
+            this.sourceImage.setValue(loadImage(file));
+            this.tabPane.getSelectionModel().select(sourceTab);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
         }
     }
 
