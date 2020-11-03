@@ -1,5 +1,8 @@
+.text {
+    -fx-fill: #d0c8c0;
+}
 .keyword {
-    -fx-fill: purple;
+    -fx-fill: #a4a;
 }
 .at {
     -fx-fill: darkorange;
@@ -12,10 +15,10 @@
     -fx-fill: teal;
 }
 .fncall {
-    -fx-fill: firebrick;
+    -fx-fill: #a44;
 }
 .paren {
-    -fx-fill: firebrick;
+    -fx-fill: #a44;
 }
 .string {
     -fx-fill: darkgreen;
@@ -25,5 +28,5 @@
 }
 
 .paragraph-box:has-caret {
-    -fx-background-color: #f2f9fc;
+    -fx-background-color: #222;
 }

@@ -1,4 +1,5 @@
 .root {
+    -fx-base: #111;
     -fx-snap-to-pixel: true;
 }
 
@@ -12,6 +13,7 @@
 #codeEditor {
     -fx-font-family: 'Cascadia Code',monospace;
     -fx-font-size: 12pt;
+    -fx-background-color: #111;
 }
 
 #logTextArea {

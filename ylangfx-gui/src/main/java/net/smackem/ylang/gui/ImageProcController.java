@@ -176,6 +176,9 @@ public class ImageProcController {
     }
 
     private static ImageVal convertFromFX(Image image) {
+        if (image == null) {
+            return null;
+        }
         final PixelReader pixelReader = image.getPixelReader();
         final int width = (int) image.getWidth();
         final int height = (int) image.getHeight();
