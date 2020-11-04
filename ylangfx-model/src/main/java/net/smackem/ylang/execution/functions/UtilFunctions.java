@@ -23,6 +23,9 @@ public class UtilFunctions {
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
                         UtilFunctions::minNumber),
+                FunctionOverload.function(
+                        List.of(ValueType.RGB, ValueType.RGB),
+                        UtilFunctions::minRgb),
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
                         UtilFunctions::minList),
@@ -33,12 +36,33 @@ public class UtilFunctions {
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
                         UtilFunctions::maxNumber),
+                FunctionOverload.function(
+                        List.of(ValueType.RGB, ValueType.RGB),
+                        UtilFunctions::maxRgb),
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
                         UtilFunctions::maxList),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
                         UtilFunctions::maxKernel)));
+    }
+
+    private static Value maxRgb(List<Value> args) {
+        final RgbVal rgb1 = (RgbVal) args.get(0);
+        final RgbVal rgb2 = (RgbVal) args.get(1);
+        return new RgbVal(Math.max(rgb1.r(), rgb2.r()),
+                Math.max(rgb1.g(), rgb2.g()),
+                Math.max(rgb1.b(), rgb2.b()),
+                rgb1.a());
+    }
+
+    private static Value minRgb(List<Value> args) {
+        final RgbVal rgb1 = (RgbVal) args.get(0);
+        final RgbVal rgb2 = (RgbVal) args.get(1);
+        return new RgbVal(Math.min(rgb1.r(), rgb2.r()),
+                Math.min(rgb1.g(), rgb2.g()),
+                Math.min(rgb1.b(), rgb2.b()),
+                rgb1.a());
     }
 
     private static Value maxKernel(List<Value> args) {

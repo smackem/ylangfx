@@ -77,6 +77,8 @@ class RgbFunctions {
         registry.put(new FunctionGroup("over",
                 FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
                         RgbFunctions::over)));
+        registry.put(new FunctionGroup("grey",
+                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::greyscale)));
         registry.put(new FunctionGroup("hsv",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
@@ -99,6 +101,12 @@ class RgbFunctions {
                 FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addSaturation)));
         registry.put(new FunctionGroup("addValue",
                 FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addValue)));
+    }
+
+    private static Value greyscale(List<Value> args) {
+        final RgbVal rgb = ((RgbVal) args.get(0));
+        final float i = rgb.intensity();
+        return new RgbVal(i, i, i, rgb.a());
     }
 
     private static Value withHue(List<Value> args) {
