@@ -2,7 +2,7 @@
     -fx-fill: #d0c8c0;
 }
 .keyword {
-    -fx-fill: #a4a;
+    -fx-fill: #c6c;
 }
 .at {
     -fx-fill: darkorange;
@@ -15,10 +15,10 @@
     -fx-fill: teal;
 }
 .fncall {
-    -fx-fill: #a44;
+    -fx-fill: #c66;
 }
 .paren {
-    -fx-fill: #a44;
+    -fx-fill: #c66;
 }
 .string {
     -fx-fill: darkgreen;

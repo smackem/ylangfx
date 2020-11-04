@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import net.smackem.ylang.model.RemoteImageProcService;
 
 import java.io.IOException;
@@ -67,8 +68,9 @@ public final class App extends Application {
         }
         this.imageProcService = new RemoteImageProcService("localhost", 50051, UI_EXECUTOR);
         stage.setScene(this.scene);
+        stage.setTitle("ylangfx");
         stage.show();
-        stage.setOnCloseRequest(ignored -> {
+        stage.addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, ignored -> {
             prefs.putDouble(PREF_WIDTH, stage.getWidth());
             prefs.putDouble(PREF_HEIGHT, stage.getHeight());
             prefs.putDouble(PREF_LEFT, stage.getX());

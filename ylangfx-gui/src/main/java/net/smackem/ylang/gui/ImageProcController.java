@@ -1,9 +1,8 @@
 package net.smackem.ylang.gui;
 
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.*;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,6 +14,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
+import javafx.stage.WindowEvent;
 import net.smackem.ylang.execution.Interpreter;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
@@ -34,21 +34,20 @@ public class ImageProcController {
     private static final String PREF_SOURCE = "imageProc.source";
     private static final String PREF_IMAGE_PATH = "imageProc.imagePath";
     private static final String PREF_HORIZONTAL_SPLIT = "imageProc.horizontalSplit";
+    private static final String PREF_DIVIDER_POS = "imageProc.dividerPos";
     private final ReadOnlyObjectWrapper<Image> sourceImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyObjectWrapper<Image> targetImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
     private final ReadOnlyStringWrapper logOutput = new ReadOnlyStringWrapper();
     private final ReadOnlyBooleanWrapper isRunning = new ReadOnlyBooleanWrapper();
+    private final BooleanProperty horizontalSplit = new SimpleBooleanProperty();
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVEAS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
-
     @FXML
     private Button runButton;
     @FXML
     private TextArea logTextArea;
-    @FXML
-    private Tab logTab;
     @FXML
     private Tab targetTab;
     @FXML
@@ -76,6 +75,10 @@ public class ImageProcController {
         this.messageTextArea.textProperty().bind(this.message);
         this.logTextArea.textProperty().bind(this.logOutput);
         this.runButton.disableProperty().bind(this.isRunning);
+        this.splitToggle.selectedProperty().bindBidirectional(this.horizontalSplit);
+        this.splitPane.orientationProperty().bind(Bindings.when(this.horizontalSplit)
+                .then(Orientation.HORIZONTAL)
+                .otherwise(Orientation.VERTICAL));
         final Preferences prefs = Preferences.userNodeForPackage(ImageProcController.class);
         final String source = prefs.get(PREF_SOURCE, """
                 fn invertAndBlur(inp) {
@@ -91,12 +94,15 @@ public class ImageProcController {
                 inp := $in.default(#ffffff@00)
                 return invertAndBlur(inp)
                 """);
+
+        this.splitPane.setDividerPositions(prefs.getDouble(PREF_DIVIDER_POS, 0.6));
         this.codeEditor.appendText(source);
-        this.splitToggle.setSelected(prefs.getBoolean(PREF_HORIZONTAL_SPLIT, false));
+        this.horizontalSplit.set(prefs.getBoolean(PREF_HORIZONTAL_SPLIT, false));
         Platform.runLater(() -> {
-            this.runButton.getScene().getWindow().setOnCloseRequest(ignored -> {
+            this.runButton.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, ignored -> {
                 prefs.put(PREF_SOURCE, this.codeEditor.getText());
-                prefs.putBoolean(PREF_HORIZONTAL_SPLIT, splitToggle.isSelected());
+                prefs.putBoolean(PREF_HORIZONTAL_SPLIT, this.horizontalSplit.get());
+                prefs.putDouble(PREF_DIVIDER_POS, this.splitPane.getDividerPositions()[0]);
             });
             final String imagePath = prefs.get(PREF_IMAGE_PATH, null);
             if (imagePath != null) {
@@ -251,12 +257,5 @@ public class ImageProcController {
         } else if (KEY_COMBINATION_SAVEAS.match(keyEvent)) {
             saveImageAs(new ActionEvent());
         }
-    }
-
-    @FXML
-    private void toggleHorizontalSplit(ActionEvent actionEvent) {
-        this.splitPane.setOrientation(this.splitToggle.isSelected()
-                ? Orientation.HORIZONTAL
-                : Orientation.VERTICAL);
     }
 }

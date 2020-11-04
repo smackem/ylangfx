@@ -21,3 +21,13 @@
     -fx-font-family: 'Cascadia Code',monospace;
     -fx-font-size: 12pt;
 }
+
+#sourceContainer > .viewport {
+    -fx-background-image: url("checker_dark.png");
+    -fx-background-repeat: repeat;
+}
+
+#targetContainer > .viewport {
+    -fx-background-image: url("checker_dark.png");
+    -fx-background-repeat: repeat;
+}
