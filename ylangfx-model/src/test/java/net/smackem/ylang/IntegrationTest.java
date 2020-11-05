@@ -874,4 +874,25 @@ public class IntegrationTest {
         final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new NumberVal(4));
     }
+
+    @Test
+    public void callFunctionsInReverseDeclOrder() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                count := 0
+                fn ping(x) {
+                    return pong(x + 1)
+                }
+                fn pong(x) {
+                    return x + 1
+                }
+                return ping(1)
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(3));
+    }
 }

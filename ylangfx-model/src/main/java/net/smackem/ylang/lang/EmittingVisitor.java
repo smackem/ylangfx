@@ -58,7 +58,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         final String endLabel = ident + "@end";
         this.currentFunction = this.functions.get(ident);
         this.emitter.emit(OpCode.BR, endLabel); // hop over function
-        this.currentFunction.address = this.emitter.instructions().size();
+        // function addresses CALL instructions are fixed up in emitter.buildProgram
         this.emitter.emit(OpCode.LABEL, ident);
         final int localCount = this.currentFunction.decl.localCount();
         this.currentAllocationTable = new AllocationTable(localCount + this.currentFunction.decl.parameterCount());
@@ -244,7 +244,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         if (function != null) {
             // user-defined function
             if (function.decl.parameterCount() == argCount) {
-                this.emitter.emit(OpCode.CALL, function.address, ident, new NumberVal(argCount));
+                this.emitter.emit(OpCode.CALL, 0, ident, new NumberVal(argCount));
             } else {
                 logSemanticError(ctx, "function %s expects %d arguments, but only %d passed".formatted(
                         ident, function.decl.parameterCount(), argCount));
@@ -614,7 +614,6 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     private static class FunctionDef {
         final FunctionDecl decl;
-        Integer address;
 
         FunctionDef(FunctionDecl decl) {
             this.decl = decl;
