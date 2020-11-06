@@ -10,10 +10,10 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>ylangfx-model</artifactId>
+  <artifactId>ylangfx-core</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <name>ylangfx-model</name>
+  <name>ylangfx-core</name>
 
   <dependencies>
     <dependency>

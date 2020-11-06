@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ylangfx.iml" filepath="$PROJECT_DIR$/ylangfx.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ylangfx-core/ylangfx-core.iml" filepath="$PROJECT_DIR$/ylangfx-core/ylangfx-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/ylangfx-gui/ylangfx-gui.iml" filepath="$PROJECT_DIR$/ylangfx-gui/ylangfx-gui.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ylangfx-model/ylangfx-model.iml" filepath="$PROJECT_DIR$/ylangfx-model/ylangfx-model.iml" />
     </modules>
   </component>
 </project>

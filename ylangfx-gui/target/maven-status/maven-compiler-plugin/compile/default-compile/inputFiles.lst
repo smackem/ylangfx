@@ -4,6 +4,5 @@
 /home/philip/java/ylangfx/ylangfx-gui/src/main/java/net/smackem/ylang/gui/App.java
 /home/philip/java/ylangfx/ylangfx-gui/target/generated-sources/protobuf/java/net/smackem/ylang/listener/YLangProtos.java
 /home/philip/java/ylangfx/ylangfx-gui/src/main/java/net/smackem/ylang/model/RemoteImageProcService.java
-/home/philip/java/ylangfx/ylangfx-gui/src/main/java/net/smackem/ylang/gui/SecondaryController.java
 /home/philip/java/ylangfx/ylangfx-gui/src/main/java/net/smackem/ylang/model/ProcessImageResult.java
 /home/philip/java/ylangfx/ylangfx-gui/target/generated-sources/protobuf/grpc-java/net/smackem/ylang/listener/ImageProcGrpc.java
