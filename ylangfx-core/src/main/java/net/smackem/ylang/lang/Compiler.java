@@ -12,7 +12,7 @@ public class Compiler {
 
     public Program compile(String source, FunctionTable functionTable, Collection<String> outErrors) {
         if (source.endsWith("\n") == false) {
-            source = source + "\n";
+            source += "\n";
         }
         final YLangParser.ProgramContext ast = compileToAst(source, outErrors);
         if (ast == null) {

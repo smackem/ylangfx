@@ -3,8 +3,10 @@ package net.smackem.ylang.gui;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;
@@ -19,12 +21,15 @@ import net.smackem.ylang.execution.Interpreter;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Program;
+import net.smackem.ylang.model.ScriptLibrary;
 import net.smackem.ylang.runtime.ImageVal;
 import net.smackem.ylang.runtime.Value;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -41,9 +46,30 @@ public class ImageProcController {
     private final ReadOnlyStringWrapper logOutput = new ReadOnlyStringWrapper();
     private final ReadOnlyBooleanWrapper isRunning = new ReadOnlyBooleanWrapper();
     private final BooleanProperty horizontalSplit = new SimpleBooleanProperty();
+    private final ScriptLibrary scriptLibrary;
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
-    private static final KeyCombination KEY_COMBINATION_SAVEAS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+    private static final KeyCombination KEY_COMBINATION_SAVE_AS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+
+    public ImageProcController() {
+        ScriptLibrary lib = null;
+        try {
+            lib = ScriptLibrary.fromDirectory(System.getProperty("user.home"));
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR,
+                    "Error opening script library under user home directory: " + e.getMessage()).show();
+        }
+        if (lib == null) {
+            try {
+                // fallback to current directory. if this also fails, all hope is lost.
+                lib = ScriptLibrary.fromDirectory(System.getProperty("user.dir"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        this.scriptLibrary = lib;
+    }
+
     @FXML
     private Button runButton;
     @FXML
@@ -66,6 +92,8 @@ public class ImageProcController {
     private SplitPane splitPane;
     @FXML
     private ToggleButton splitToggle;
+    @FXML
+    private SplitMenuButton openMenuButton;
 
     @FXML
     private void initialize() {
@@ -96,7 +124,7 @@ public class ImageProcController {
                 """);
 
         this.splitPane.setDividerPositions(prefs.getDouble(PREF_DIVIDER_POS, 0.6));
-        this.codeEditor.appendText(source);
+        this.codeEditor.replaceText(source);
         this.horizontalSplit.set(prefs.getBoolean(PREF_HORIZONTAL_SPLIT, false));
         Platform.runLater(() -> {
             this.runButton.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, ignored -> {
@@ -254,8 +282,62 @@ public class ImageProcController {
             processImage(new ActionEvent());
         } else if (KEY_COMBINATION_TAKE.match(keyEvent)) {
             takeImage(new ActionEvent());
-        } else if (KEY_COMBINATION_SAVEAS.match(keyEvent)) {
+        } else if (KEY_COMBINATION_SAVE_AS.match(keyEvent)) {
             saveImageAs(new ActionEvent());
+        }
+    }
+
+    @FXML
+    private void fillScriptsMenu(Event event) throws IOException {
+        final ObservableList<MenuItem> items = this.openMenuButton.getItems();
+        items.clear();
+        for (final Path path : this.scriptLibrary.scriptFiles()) {
+            final MenuItem menuItem = new MenuItem(path.getFileName().toString());
+            menuItem.setOnAction(ignored -> openScript(path));
+            items.add(menuItem);
+        }
+    }
+
+    private void openScript(Path path) {
+        try {
+            this.codeEditor.replaceText(Files.readString(path));
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
+        }
+    }
+
+    @FXML
+    private void openScriptFile(ActionEvent actionEvent) {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Script File");
+        fileChooser.setInitialDirectory(this.scriptLibrary.basePath().toFile());
+        final File file = fileChooser.showOpenDialog(App.getInstance().getStage());
+
+        if (file != null) {
+            openScript(file.toPath());
+        }
+    }
+
+    @FXML
+    private void browseLibrary(ActionEvent actionEvent) {
+        this.scriptLibrary.browse();
+    }
+
+    @FXML
+    private void saveScriptAs(ActionEvent actionEvent) {
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Script File");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("YLang File", "*.ylang"));
+        fileChooser.setInitialDirectory(this.scriptLibrary.basePath().toFile());
+        final File file = fileChooser.showSaveDialog(App.getInstance().getStage());
+
+        if (file != null) {
+            try {
+                Files.writeString(file.toPath(), this.codeEditor.getText());
+            } catch (Exception e) {
+                new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
+            }
         }
     }
 }
