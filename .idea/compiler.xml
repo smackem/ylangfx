@@ -6,14 +6,14 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="ylangfx-app" />
         <module name="ylangfx-core" />
-        <module name="ylangfx-gui" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="ylangfx" target="15" />
+      <module name="ylangfx-app" target="15" />
       <module name="ylangfx-core" target="15" />
-      <module name="ylangfx-gui" target="15" />
     </bytecodeTargetLevel>
   </component>
 </project>
