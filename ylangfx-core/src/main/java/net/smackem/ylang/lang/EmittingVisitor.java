@@ -452,8 +452,6 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
             this.emitter.emit(OpCode.NOT);
         } else if (ctx.Minus() != null) {
             this.emitter.emit(OpCode.NEG);
-        } else if (ctx.At() != null) {
-            throw new UnsupportedOperationException();
         }
         return null;
     }
@@ -515,6 +513,13 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitFunctionInvocation(YLangParser.FunctionInvocationContext ctx) {
         emitInvocation(ctx.Ident().getText(), ctx.invocationSuffix());
+        return null;
+    }
+
+    @Override
+    public Program visitFunctionRef(YLangParser.FunctionRefContext ctx) {
+        final String ident = ctx.Ident().getText();
+        this.emitter.emit(OpCode.LD_FUNC, ident);
         return null;
     }
 

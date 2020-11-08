@@ -157,7 +157,6 @@ molecule
 atomPrefix
     : Minus
     | Not
-    | At
     ;
 
 atomSuffix
@@ -190,11 +189,16 @@ atom
     | map
     | list
     | functionInvocation
+    | functionRef
     | LParen expr RParen
     ;
 
 functionInvocation
     : Ident invocationSuffix
+    ;
+
+functionRef
+    : At Ident
     ;
 
 kernel

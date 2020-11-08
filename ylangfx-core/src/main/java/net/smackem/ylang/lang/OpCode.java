@@ -41,11 +41,12 @@ public enum OpCode {
     LOG,        // pop intArg arguments, write to log
     CONCAT,     // pop b, pop a, push a :: b
     CALL,       // push pc, branch to intArg, no. of arguments: valueArg (NumberVal)
-    RET;        // pop v, pop a, branch to a, push v
+    RET,        // pop v, pop a, branch to a, push v
+    LD_FUNC;    // push func(@strArg)
 
-    public boolean isBranch() {
+    public boolean isLabelRef() {
         return switch (this) {
-            case BR, BR_ZERO, BR_NEXT, CALL, RET -> true;
+            case BR, BR_ZERO, BR_NEXT, CALL, RET, LD_FUNC -> true;
             default -> false;
         };
     }

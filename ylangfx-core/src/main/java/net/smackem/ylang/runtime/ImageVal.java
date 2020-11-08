@@ -203,9 +203,6 @@ public class ImageVal extends Value {
 
     @Override
     public String toString() {
-        return "ImageVal{" +
-               "width=" + width +
-               ", height=" + height +
-               '}';
+        return "image{size=%dx%d, hash=%x}".formatted(this.width, this.height, hashCode());
     }
 }
