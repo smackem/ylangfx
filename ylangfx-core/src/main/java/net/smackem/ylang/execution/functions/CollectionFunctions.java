@@ -78,7 +78,37 @@ public class CollectionFunctions {
         registry.put(new FunctionGroup("sort",
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
-                        CollectionFunctions::sortKernel)));
+                        CollectionFunctions::sortKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.LIST),
+                        CollectionFunctions::sortList),
+                FunctionOverload.method(
+                        List.of(ValueType.LIST, ValueType.FUNCTION),
+                        CollectionFunctions::sortListByComparison)));
+    }
+
+    private static Value sortListByComparison(List<Value> args) {
+        final ListVal list = (ListVal) args.get(0);
+        final FunctionVal compare = (FunctionVal) args.get(1);
+        list.sort((a, b) -> {
+            final NumberVal result = (NumberVal) compare.invoke(List.of(a, b));
+            return (int) result.value();
+        });
+        return list;
+    }
+
+    private static Value sortList(List<Value> args) {
+        final ListVal list = (ListVal) args.get(0);
+        list.sort((a, b) -> {
+            final NumberVal result;
+            try {
+                result = (NumberVal) BinaryOperator.CMP.invoke(a, b);
+            } catch (MissingOverloadException e) {
+                throw new RuntimeException(e);
+            }
+            return (int) result.value();
+        });
+        return list;
     }
 
     private static Value sortKernel(List<Value> args) {

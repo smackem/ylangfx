@@ -895,4 +895,86 @@ public class IntegrationTest {
         final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new NumberVal(3));
     }
+
+    @Test
+    public void functionReferencesWithoutArguments() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                count := 0
+                fn doIt() {
+                    count = 1
+                    return count
+                }
+                fun := @doIt
+                return fun@()
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(1));
+    }
+
+    @Test
+    public void functionReferencesWithArguments() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                count := 0
+                fn doIt(x, y) {
+                    count = y - x
+                    return count
+                }
+                fun := @doIt
+                return fun@(100, 500)
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new NumberVal(400));
+    }
+
+    @Test
+    public void sortList() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                list := [4, 3, 100, -1]
+                return list.sort()
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(-1),
+                new NumberVal(3),
+                new NumberVal(4),
+                new NumberVal(100)
+        )));
+    }
+
+    @Test
+    public void sortListWithCompareCallback() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                list := [{xx: 100}, {xx: -1}, {xx: 23}]
+                fn compare(a, b) {
+                    return a.xx ~ b.xx
+                }
+                return list.sort(@compare)
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new MapVal(List.of(new MapEntryVal(new StringVal("xx"), new NumberVal(-1)))),
+                new MapVal(List.of(new MapEntryVal(new StringVal("xx"), new NumberVal(23)))),
+                new MapVal(List.of(new MapEntryVal(new StringVal("xx"), new NumberVal(100))))
+        )));
+    }
 }

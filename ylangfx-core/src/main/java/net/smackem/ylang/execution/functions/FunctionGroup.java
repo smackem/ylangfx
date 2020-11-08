@@ -3,10 +3,7 @@ package net.smackem.ylang.execution.functions;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.runtime.ValueType;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 final class FunctionGroup {
     private final String name;
@@ -37,7 +34,7 @@ final class FunctionGroup {
     }
 
     public Func get(List<ValueType> parameters) throws MissingOverloadException {
-        final FunctionOverload overload = this.overloads.get(parameters);
+        FunctionOverload overload = this.overloads.get(parameters);
         if (overload == null) {
             throw new MissingOverloadException(this.name + ": no overload found that matches parameters: " + parameters);
         }

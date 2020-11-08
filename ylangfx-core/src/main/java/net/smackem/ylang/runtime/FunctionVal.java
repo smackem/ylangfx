@@ -1,23 +1,22 @@
 package net.smackem.ylang.runtime;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class FunctionVal extends Value {
 
-    private final int pc;
+    private final Function<List<Value>, Value> invocation;
     private final String name;
 
-    public FunctionVal(int pc, String name) {
+    public FunctionVal(String name, Function<List<Value>, Value> invocation) {
         super(ValueType.FUNCTION);
-        if (pc < 0) {
-            throw new IllegalArgumentException("pc must be zero or positive");
-        }
-        this.pc = pc;
+        this.invocation = Objects.requireNonNull(invocation);
         this.name = Objects.requireNonNull(name);
     }
 
-    public int pc() {
-        return this.pc;
+    public Value invoke(List<Value> args) {
+        return this.invocation.apply(args);
     }
 
     public String name() {
@@ -29,20 +28,18 @@ public class FunctionVal extends Value {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         final FunctionVal that = (FunctionVal) o;
-        return pc == that.pc &&
-               Objects.equals(name, that.name);
+        return Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pc, name);
+        return Objects.hash(name);
     }
 
     @Override
     public String toString() {
         return "FunctionVal{" +
-               "pc=" + pc +
-               ", name='" + name + '\'' +
+               "name='" + name + '\'' +
                '}';
     }
 }

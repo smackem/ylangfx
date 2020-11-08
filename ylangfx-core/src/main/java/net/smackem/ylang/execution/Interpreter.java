@@ -274,7 +274,20 @@ public class Interpreter {
                 stack.push(retVal);
                 pc = retPC - 1;
             }
-            case LD_FUNC -> stack.push(new FunctionVal(instr.intArg(), instr.strArg()));
+            case LD_FUNC -> {
+                final FunctionVal function = new FunctionVal(instr.strArg(), args ->
+                        executeFunction(instr.intArg(), args));
+                stack.push(function);
+            }
+            case CALL_FUNC -> {
+                final LinkedList<Value> args = new LinkedList<>();
+                for (int i = 0; i < instr.intArg(); i++) {
+                    args.addFirst(stack.pop());
+                }
+                final FunctionVal function = (FunctionVal) stack.pop();
+                final Value retVal = function.invoke(args);
+                stack.push(retVal);
+            }
             default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
         }
     }
@@ -287,18 +300,23 @@ public class Interpreter {
         this.pc = pc;
     }
 
-    private Value executeFunction(int pc, List<Value> args) throws MissingOverloadException, IOException, StackException {
+    private Value executeFunction(int pc, List<Value> args) {
         final int originalStackFrameOffset = this.stackFrameOffset;
         final Stack stack = this.ctx.stack();
-        for (final Value value : args) {
-            stack.push(value);
+        try {
+            for (final Value value : args) {
+                stack.push(value);
+            }
+            branchToFunction(pc, args.size());
+            while (this.stackFrameOffset != originalStackFrameOffset) {
+                executeInstr(this.instructions[this.pc]);
+                this.pc++;
+            }
+            return stack.pop();
+        } catch (IOException | StackException | MissingOverloadException e) {
+            log.error("error executing function", e);
+            throw new RuntimeException(e);
         }
-        branchToFunction(pc, args.size());
-        while (this.stackFrameOffset != originalStackFrameOffset) {
-            executeInstr(this.instructions[this.pc]);
-            this.pc++;
-        }
-        return stack.pop();
     }
 
     private static String popValuesAsString(Stack stack, int count) throws StackException {

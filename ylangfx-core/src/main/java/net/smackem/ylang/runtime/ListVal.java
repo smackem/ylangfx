@@ -59,6 +59,10 @@ public class ListVal extends Value implements Iterable<Value> {
         return new ListVal(copies);
     }
 
+    public void sort(Comparator<Value> comparator) {
+        this.values.sort(comparator);
+    }
+
     @SuppressWarnings("NullableProblems")
     @Override
     public Iterator<Value> iterator() {

@@ -42,7 +42,8 @@ public enum OpCode {
     CONCAT,     // pop b, pop a, push a :: b
     CALL,       // push pc, branch to intArg, no. of arguments: valueArg (NumberVal)
     RET,        // pop v, pop a, branch to a, push v
-    LD_FUNC;    // push func(@strArg)
+    LD_FUNC,    // push func(@strArg)
+    CALL_FUNC;  // pop intArg arguments, pop FunctionVal, push FunctionVal.invoke(arguments)
 
     public boolean isLabelRef() {
         return switch (this) {

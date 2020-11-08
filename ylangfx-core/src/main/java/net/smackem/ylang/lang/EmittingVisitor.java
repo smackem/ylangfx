@@ -243,12 +243,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         final FunctionDef function = this.functions.get(ident);
         if (function != null) {
             // user-defined function
-            if (function.decl.parameterCount() == argCount) {
-                this.emitter.emit(OpCode.CALL, 0, ident, new NumberVal(argCount));
-            } else {
+            if (function.decl.parameterCount() != argCount) {
                 logSemanticError(ctx, "function %s expects %d arguments, but only %d passed".formatted(
                         ident, function.decl.parameterCount(), argCount));
             }
+            this.emitter.emit(OpCode.CALL, 0, ident, new NumberVal(argCount));
             return;
         }
         // built-in function
@@ -427,21 +426,31 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     @Override
     public Program visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
-        final String ident = ctx.Ident().getText();
+        final String ident = ctx.Ident() != null ? ctx.Ident().getText() : null;
         if (ctx.invocationSuffix() != null) {
             final int argCount = ctx.invocationSuffix().arguments() != null
                     ? ctx.invocationSuffix().arguments().expr().size()
                     : 0;
             ctx.invocationSuffix().accept(this);
+            if (ident == null) {
+                // invoke function object
+                this.emitter.emit(OpCode.CALL_FUNC, argCount);
+                return null;
+            }
             // method receiver is first argument -> argCount + 1
             this.emitter.emit(OpCode.INVOKE, argCount + 1, ident);
         } else {
+            if (ident == null) {
+                // invoke function object
+                this.emitter.emit(OpCode.CALL_FUNC, 0);
+                return null;
+            }
             if (this.functionTable.contains(ident)) {
                 this.emitter.emit(OpCode.INVOKE, 1, ident);
-            } else {
-                this.emitter.emit(OpCode.LD_VAL, new StringVal(ident)); // emit x.property as x["property"]
-                this.emitter.emit(OpCode.IDX);
+                return null;
             }
+            this.emitter.emit(OpCode.LD_VAL, new StringVal(ident)); // emit x.property as x["property"]
+            this.emitter.emit(OpCode.IDX);
         }
         return null;
     }
@@ -494,6 +503,8 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
             ctx.functionInvocation().accept(this);
         } else if (ctx.EnvironmentArg() != null) {
             this.emitter.emit(OpCode.LD_ENV, ctx.EnvironmentArg().getText().substring(1));
+        } else if (ctx.functionRef() != null) {
+            ctx.functionRef().accept(this);
         }
         return null;
     }

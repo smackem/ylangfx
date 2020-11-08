@@ -165,7 +165,7 @@ atomSuffix
     ;
 
 memberSuffix
-    : Dot Ident invocationSuffix?
+    : ((Dot Ident) | At) invocationSuffix?
     ;
 
 indexSuffix
