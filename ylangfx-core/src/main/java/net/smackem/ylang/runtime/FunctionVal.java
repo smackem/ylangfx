@@ -8,19 +8,30 @@ public class FunctionVal extends Value {
 
     private final Function<List<Value>, Value> invocation;
     private final String name;
+    private final int parameterCount;
 
-    public FunctionVal(String name, Function<List<Value>, Value> invocation) {
+    public FunctionVal(String name, int parameterCount, Function<List<Value>, Value> invocation) {
         super(ValueType.FUNCTION);
-        this.invocation = Objects.requireNonNull(invocation);
         this.name = Objects.requireNonNull(name);
+        this.parameterCount = parameterCount;
+        this.invocation = Objects.requireNonNull(invocation);
     }
 
     public Value invoke(List<Value> args) {
+        if (Objects.requireNonNull(args).size() != this.parameterCount) {
+            throw new IllegalArgumentException(
+                    "function expects %d arguments, only %d were passed".formatted(
+                            this.parameterCount, args.size()));
+        }
         return this.invocation.apply(args);
     }
 
     public String name() {
         return this.name;
+    }
+
+    public int parameterCount() {
+        return this.parameterCount;
     }
 
     @Override
@@ -39,7 +50,8 @@ public class FunctionVal extends Value {
     @Override
     public String toString() {
         return "FunctionVal{" +
-               "name='" + name + '\'' +
+               "name='" + name + "', " +
+               "parameterCount=" + parameterCount +
                '}';
     }
 }

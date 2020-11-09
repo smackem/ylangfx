@@ -530,7 +530,12 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitFunctionRef(YLangParser.FunctionRefContext ctx) {
         final String ident = ctx.Ident().getText();
-        this.emitter.emit(OpCode.LD_FUNC, ident);
+        final FunctionDef function = this.functions.get(ident);
+        if (function == null) {
+            logSemanticError(ctx, "unknown function '" + ident + "'");
+            return null;
+        }
+        this.emitter.emit(OpCode.LD_FUNC, 0, ident, new NumberVal(function.decl.parameterCount()));
         return null;
     }
 

@@ -275,8 +275,9 @@ public class Interpreter {
                 pc = retPC - 1;
             }
             case LD_FUNC -> {
-                final FunctionVal function = new FunctionVal(instr.strArg(), args ->
-                        executeFunction(instr.intArg(), args));
+                final FunctionVal function = new FunctionVal(instr.strArg(),
+                        (int) ((NumberVal) instr.valueArg()).value(),
+                        args -> executeFunction(instr.intArg(), args));
                 stack.push(function);
             }
             case CALL_FUNC -> {

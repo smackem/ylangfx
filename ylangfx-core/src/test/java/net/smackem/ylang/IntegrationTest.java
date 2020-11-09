@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class IntegrationTest {
     @Test
@@ -937,6 +938,26 @@ public class IntegrationTest {
     }
 
     @Test
+    public void functionReferencesWithWrongArguments() throws StackException, MissingOverloadException, IOException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                count := 0
+                fn doIt(x, y) {
+                    count = y - x
+                    return count
+                }
+                fun := @doIt
+                return fun@(100)
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
+        assertThatThrownBy(interpreter::execute).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     public void sortList() throws StackException, MissingOverloadException, IOException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
@@ -961,9 +982,9 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compile("""
-                list := [{xx: 100}, {xx: -1}, {xx: 23}]
+                list := [{x: 100}, {x: -1}, {x: 23}]
                 fn compare(a, b) {
-                    return a.xx ~ b.xx
+                    return a["x"] ~ b["x"]
                 }
                 return list.sort(@compare)
                 """, FunctionRegistry.INSTANCE, errors);
@@ -972,9 +993,9 @@ public class IntegrationTest {
         System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
         assertThat(retVal).isEqualTo(new ListVal(List.of(
-                new MapVal(List.of(new MapEntryVal(new StringVal("xx"), new NumberVal(-1)))),
-                new MapVal(List.of(new MapEntryVal(new StringVal("xx"), new NumberVal(23)))),
-                new MapVal(List.of(new MapEntryVal(new StringVal("xx"), new NumberVal(100))))
+                new MapVal(List.of(new MapEntryVal(new StringVal("x"), new NumberVal(-1)))),
+                new MapVal(List.of(new MapEntryVal(new StringVal("x"), new NumberVal(23)))),
+                new MapVal(List.of(new MapEntryVal(new StringVal("x"), new NumberVal(100))))
         )));
     }
 }
