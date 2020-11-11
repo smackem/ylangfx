@@ -1,0 +1,73 @@
+fn conv(inp, K) {
+    out := image(inp.bounds)
+    for p in inp.bounds {
+        out[p] = inp.convolve(p, K)
+    }
+    return out
+}
+
+fn smoothen(inp) {
+    K := gaussian(5)
+    return conv(inp, K)
+}
+
+fn sharpen(inp) {
+    radius := 2
+    K := laplace(radius)
+    K[radius;radius] = K[radius;radius] + 1
+    return conv(inp, K)
+}
+
+fn resize(inp, ratio) {
+    out := image(rect(0;0, inp.bounds.width * ratio, inp.bounds.height * ratio))
+    for p in out.bounds {
+        out[p] = inp[p.x / ratio; p.y / ratio]
+    }
+    return out
+}
+
+fn binarize(inp) {
+    out := image(inp.bounds)
+    for p in inp.bounds {
+        out[p] = inp[p].i01 > 0.5 ? #ffffff : #000000
+    }
+    return out
+}
+
+fn dilate(inp, radius) {
+    out := image(inp.bounds)
+    //K := kernel(radius*2, radius*2, 1)
+    K := |0 1 0
+          1 1 1
+          0 1 0|
+    for p in inp.bounds {
+        values := inp.selectRed(p, K)
+        out[p] = hasNonZero(K, values) ? #ffffff : #000000
+    }
+    return out
+}
+
+fn hasNonZero(selection, values) {
+    for i in 0 .. selection.size where selection[i] != 0 {
+        if values[i] != 0 {
+            return true
+        }
+    }
+    return false
+}
+
+fn subtract(left, right) {
+    out := image(left.bounds)
+    for p in left.bounds {
+        out[p] = left[p] - right[p]
+    }
+    return out
+}
+
+inp := $in.default(#ffffff@00)
+out := inp//resize(inp, 0.1)
+out = smoothen(out)
+binarized := binarize(out)
+out = dilate(binarized, 2)
+out = subtract(out, binarized)
+return out
