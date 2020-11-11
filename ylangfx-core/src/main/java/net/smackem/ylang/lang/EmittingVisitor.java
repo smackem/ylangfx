@@ -43,11 +43,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         this.currentAllocationTable = this.mainAllocationTable;
         this.currentFunction = this.mainFunction;
         for (int i = 0; i < this.currentAllocationTable.slots.length; i++) {
-            this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
+            this.emitter.emit(ctx, OpCode.LD_VAL, NilVal.INSTANCE);
         }
         pushScope();
         super.visitProgram(ctx);
-        this.emitter.emit(OpCode.LABEL, endLabel);
+        this.emitter.emit(ctx, OpCode.LABEL, endLabel);
         popScope();
         return this.emitter.buildProgram();
     }
@@ -57,13 +57,13 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         final String ident = ctx.Ident().getText();
         final String endLabel = ident + "@end";
         this.currentFunction = this.functions.get(ident);
-        this.emitter.emit(OpCode.BR, endLabel); // hop over function
+        this.emitter.emit(ctx, OpCode.BR, endLabel); // hop over function
         // function addresses CALL instructions are fixed up in emitter.buildProgram
-        this.emitter.emit(OpCode.LABEL, ident);
+        this.emitter.emit(ctx, OpCode.LABEL, ident);
         final int localCount = this.currentFunction.decl.localCount();
         this.currentAllocationTable = new AllocationTable(localCount + this.currentFunction.decl.parameterCount());
         for (int i = 0; i < localCount; i++) {
-            this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
+            this.emitter.emit(ctx, OpCode.LD_VAL, NilVal.INSTANCE);
         }
         pushScope();
         if (ctx.parameters() != null) {
@@ -75,12 +75,12 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         popScope();
         if (ctx.block().statement(ctx.block().statement().size() - 1).returnStmt() == null) {
             // return nil if no return statement present
-            this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
-            this.emitter.emit(OpCode.RET);
+            this.emitter.emit(ctx, OpCode.LD_VAL, NilVal.INSTANCE);
+            this.emitter.emit(ctx, OpCode.RET);
         }
         this.currentFunction = this.mainFunction;
         this.currentAllocationTable = this.mainAllocationTable;
-        this.emitter.emit(OpCode.LABEL, endLabel);
+        this.emitter.emit(ctx, OpCode.LABEL, endLabel);
         return null;
     }
 
@@ -125,10 +125,10 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
                     semanticErrors.add("cannot assign to invocation");
                     return null;
                 }
-                emitter.emit(OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
+                emitter.emit(ctx, OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
                 rvalueExpr.accept(EmittingVisitor.this);
-                emitter.emit(OpCode.INVOKE, 3, functionTable.indexAssignmentFunction());
-                emitter.emit(OpCode.POP); // like all functions, setAt returns a value -> discard it
+                emitter.emit(ctx, OpCode.INVOKE, 3, functionTable.indexAssignmentFunction());
+                emitter.emit(ctx, OpCode.POP); // like all functions, setAt returns a value -> discard it
                 return null;
             }
 
@@ -136,8 +136,8 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
             public Program visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
                 EmittingVisitor.super.visitIndexSuffix(ctx);
                 rvalueExpr.accept(EmittingVisitor.this);
-                emitter.emit(OpCode.INVOKE, 3, functionTable.indexAssignmentFunction());
-                emitter.emit(OpCode.POP); // like all functions, setAt returns a value -> discard it
+                emitter.emit(ctx, OpCode.INVOKE, 3, functionTable.indexAssignmentFunction());
+                emitter.emit(ctx, OpCode.POP); // like all functions, setAt returns a value -> discard it
                 return null;
             }
         };
@@ -147,9 +147,9 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     public Program visitReturnStmt(YLangParser.ReturnStmtContext ctx) {
         super.visitReturnStmt(ctx);
         if (this.currentFunction.decl.isMain()) {
-            this.emitter.emit(OpCode.BR, endLabel);
+            this.emitter.emit(ctx, OpCode.BR, endLabel);
         } else {
-            this.emitter.emit(OpCode.RET);
+            this.emitter.emit(ctx, OpCode.RET);
         }
         return null;
     }
@@ -165,7 +165,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         }
         if (ctx.elseClause() != null) {
             ctx.elseClause().accept(this);
-            this.emitter.emit(OpCode.LABEL, elseLabel);
+            this.emitter.emit(ctx, OpCode.LABEL, elseLabel);
         }
         return null;
     }
@@ -174,24 +174,24 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
                                       YLangParser.ExprContext expr,
                                       YLangParser.BlockContext block) {
         expr.accept(this);
-        this.emitter.emit(OpCode.BR_ZERO, ifLabel);
+        this.emitter.emit(expr, OpCode.BR_ZERO, ifLabel);
         block.accept(this);
         if (elseLabel != null) {
-            this.emitter.emit(OpCode.BR, elseLabel);
+            this.emitter.emit(expr, OpCode.BR, elseLabel);
         }
-        this.emitter.emit(OpCode.LABEL, ifLabel);
+        this.emitter.emit(expr, OpCode.LABEL, ifLabel);
     }
 
     @Override
     public Program visitWhileStmt(YLangParser.WhileStmtContext ctx) {
         final String loopLabel = nextLabel();
         final String breakLabel = nextLabel();
-        this.emitter.emit(OpCode.LABEL, loopLabel);
+        this.emitter.emit(ctx, OpCode.LABEL, loopLabel);
         ctx.expr().accept(this);
-        this.emitter.emit(OpCode.BR_ZERO, breakLabel);
+        this.emitter.emit(ctx, OpCode.BR_ZERO, breakLabel);
         ctx.block().accept(this);
-        this.emitter.emit(OpCode.BR, loopLabel);
-        this.emitter.emit(OpCode.LABEL, breakLabel);
+        this.emitter.emit(ctx, OpCode.BR, loopLabel);
+        this.emitter.emit(ctx, OpCode.LABEL, breakLabel);
         return null;
     }
 
@@ -202,21 +202,21 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         final Address itemAddr = putIdent(ident);
         final Address iteratorAddr = putIdent(AllocVisitor.getIteratorIdent(ident));
         ctx.expr().accept(this);                 // push iterable
-        this.emitter.emit(OpCode.ITER);                 // push iterator
+        this.emitter.emit(ctx, OpCode.ITER);                 // push iterator
         iteratorAddr.emitStore(this.emitter);           // store iterator
         final String loopLabel = nextLabel();
         final String breakLabel = nextLabel();
-        this.emitter.emit(OpCode.LABEL, loopLabel);
+        this.emitter.emit(ctx, OpCode.LABEL, loopLabel);
         iteratorAddr.emitLoad(this.emitter);            // iterator.next
-        this.emitter.emit(OpCode.BR_NEXT, breakLabel);
+        this.emitter.emit(ctx, OpCode.BR_NEXT, breakLabel);
         itemAddr.emitStore(this.emitter);               // store item
         if (ctx.whereClause() != null) {
             ctx.whereClause().accept(this);
-            this.emitter.emit(OpCode.BR_ZERO, loopLabel);
+            this.emitter.emit(ctx, OpCode.BR_ZERO, loopLabel);
         }
         ctx.block().accept(this);
-        this.emitter.emit(OpCode.BR, loopLabel);
-        this.emitter.emit(OpCode.LABEL, breakLabel);
+        this.emitter.emit(ctx, OpCode.BR, loopLabel);
+        this.emitter.emit(ctx, OpCode.LABEL, breakLabel);
         popScope();
         return null;
     }
@@ -231,7 +231,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
                 atomSuffix.accept(this);
             }
         }
-        this.emitter.emit(OpCode.POP); // discard result
+        this.emitter.emit(ctx, OpCode.POP); // discard result
         return null;
     }
 
@@ -247,7 +247,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
                 logSemanticError(ctx, "function %s expects %d arguments, but only %d passed".formatted(
                         ident, function.decl.parameterCount(), argCount));
             }
-            this.emitter.emit(OpCode.CALL, 0, ident, new NumberVal(argCount));
+            this.emitter.emit(ctx, OpCode.CALL, 0, ident, new NumberVal(argCount));
             return;
         }
         // built-in function
@@ -255,7 +255,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
             logSemanticError(ctx, "no function with name '" + ident + "' defined!");
             return;
         }
-        this.emitter.emit(OpCode.INVOKE, argCount, ident);
+        this.emitter.emit(ctx, OpCode.INVOKE, argCount, ident);
     }
 
     @Override
@@ -280,7 +280,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitLogStmt(YLangParser.LogStmtContext ctx) {
         super.visitLogStmt(ctx);
-        this.emitter.emit(OpCode.LOG, ctx.arguments().expr().size());
+        this.emitter.emit(ctx, OpCode.LOG, ctx.arguments().expr().size());
         return null;
     }
 
@@ -298,12 +298,12 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         if (ctx.term() != null) {
             final String elseLabel = nextLabel();
             final String endLabel = nextLabel();
-            emitter.emit(OpCode.BR_ZERO, elseLabel);
+            emitter.emit(ctx, OpCode.BR_ZERO, elseLabel);
             ctx.term().accept(this);
-            emitter.emit(OpCode.BR, endLabel);
-            emitter.emit(OpCode.LABEL, elseLabel);
+            emitter.emit(ctx, OpCode.BR, endLabel);
+            emitter.emit(ctx, OpCode.LABEL, elseLabel);
             ctx.expr().accept(this);
-            emitter.emit(OpCode.LABEL, endLabel);
+            emitter.emit(ctx, OpCode.LABEL, endLabel);
         }
         return null;
     }
@@ -313,9 +313,9 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         super.visitCondition(ctx);
         if (ctx.conditionOp() != null) {
             if (ctx.conditionOp().Or() != null) {
-                this.emitter.emit(OpCode.OR);
+                this.emitter.emit(ctx, OpCode.OR);
             } else if (ctx.conditionOp().And() != null) {
-                this.emitter.emit(OpCode.AND);
+                this.emitter.emit(ctx, OpCode.AND);
             }
         }
         return null;
@@ -328,19 +328,19 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         if (comparator != null) {
             ctx.tuple(1).accept(this);
             if (comparator.Eq() != null) {
-                this.emitter.emit(OpCode.EQ);
+                this.emitter.emit(ctx, OpCode.EQ);
             } else if (comparator.Lt() != null) {
-                this.emitter.emit(OpCode.LT);
+                this.emitter.emit(ctx, OpCode.LT);
             } else if (comparator.Le() != null) {
-                this.emitter.emit(OpCode.LE);
+                this.emitter.emit(ctx, OpCode.LE);
             } else if (comparator.Gt() != null) {
-                this.emitter.emit(OpCode.GT);
+                this.emitter.emit(ctx, OpCode.GT);
             } else if (comparator.Ge() != null) {
-                this.emitter.emit(OpCode.GE);
+                this.emitter.emit(ctx, OpCode.GE);
             } else if (comparator.Ne() != null) {
-                this.emitter.emit(OpCode.NEQ);
+                this.emitter.emit(ctx, OpCode.NEQ);
             } else if (comparator.In() != null) {
-                this.emitter.emit(OpCode.IN);
+                this.emitter.emit(ctx, OpCode.IN);
             }
         }
         return null;
@@ -349,7 +349,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitPoint(YLangParser.PointContext ctx) {
         super.visitPoint(ctx);
-        this.emitter.emit(OpCode.MK_POINT);
+        this.emitter.emit(ctx, OpCode.MK_POINT);
         return null;
     }
 
@@ -357,13 +357,13 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     public Program visitRange(YLangParser.RangeContext ctx) {
         if (ctx.term().size() == 2) {
             ctx.term(0).accept(this);
-            this.emitter.emit(OpCode.LD_VAL, NumberVal.ONE);
+            this.emitter.emit(ctx, OpCode.LD_VAL, NumberVal.ONE);
             ctx.term(1).accept(this);
         } else {
             // visit all three terms
             super.visitRange(ctx);
         }
-        this.emitter.emit(OpCode.MK_RANGE);
+        this.emitter.emit(ctx, OpCode.MK_RANGE);
         return null;
     }
 
@@ -374,13 +374,13 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         for (final var op : ctx.termOp()) {
             ctx.product(index).accept(this);
             if (op.Plus() != null) {
-                this.emitter.emit(OpCode.ADD);
+                this.emitter.emit(ctx, OpCode.ADD);
             } else if (op.Minus() != null) {
-                this.emitter.emit(OpCode.SUB);
+                this.emitter.emit(ctx, OpCode.SUB);
             } else if (op.Cmp() != null) {
-                this.emitter.emit(OpCode.CMP);
+                this.emitter.emit(ctx, OpCode.CMP);
             } else if (op.Concat() != null) {
-                this.emitter.emit(OpCode.CONCAT);
+                this.emitter.emit(ctx, OpCode.CONCAT);
             }
             index++;
         }
@@ -394,11 +394,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         for (final var op : ctx.productOp()) {
             ctx.molecule(index).accept(this);
             if (op.Times() != null) {
-                this.emitter.emit(OpCode.MUL);
+                this.emitter.emit(ctx, OpCode.MUL);
             } else if (op.Div() != null) {
-                this.emitter.emit(OpCode.DIV);
+                this.emitter.emit(ctx, OpCode.DIV);
             } else if (op.Mod() != null) {
-                this.emitter.emit(OpCode.MOD);
+                this.emitter.emit(ctx, OpCode.MOD);
             }
             index++;
         }
@@ -420,7 +420,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitIndexSuffix(YLangParser.IndexSuffixContext ctx) {
         super.visitIndexSuffix(ctx);
-        this.emitter.emit(OpCode.IDX);
+        this.emitter.emit(ctx, OpCode.IDX);
         return null;
     }
 
@@ -434,23 +434,23 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
             ctx.invocationSuffix().accept(this);
             if (ident == null) {
                 // invoke function object
-                this.emitter.emit(OpCode.CALL_FUNC, argCount);
+                this.emitter.emit(ctx, OpCode.CALL_FUNC, argCount);
                 return null;
             }
             // method receiver is first argument -> argCount + 1
-            this.emitter.emit(OpCode.INVOKE, argCount + 1, ident);
+            this.emitter.emit(ctx, OpCode.INVOKE, argCount + 1, ident);
         } else {
             if (ident == null) {
                 // invoke function object
-                this.emitter.emit(OpCode.CALL_FUNC, 0);
+                this.emitter.emit(ctx, OpCode.CALL_FUNC, 0);
                 return null;
             }
             if (this.functionTable.contains(ident)) {
-                this.emitter.emit(OpCode.INVOKE, 1, ident);
+                this.emitter.emit(ctx, OpCode.INVOKE, 1, ident);
                 return null;
             }
-            this.emitter.emit(OpCode.LD_VAL, new StringVal(ident)); // emit x.property as x["property"]
-            this.emitter.emit(OpCode.IDX);
+            this.emitter.emit(ctx, OpCode.LD_VAL, new StringVal(ident)); // emit x.property as x["property"]
+            this.emitter.emit(ctx, OpCode.IDX);
         }
         return null;
     }
@@ -458,9 +458,9 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitAtomPrefix(YLangParser.AtomPrefixContext ctx) {
         if (ctx.Not() != null) {
-            this.emitter.emit(OpCode.NOT);
+            this.emitter.emit(ctx, OpCode.NOT);
         } else if (ctx.Minus() != null) {
-            this.emitter.emit(OpCode.NEG);
+            this.emitter.emit(ctx, OpCode.NEG);
         }
         return null;
     }
@@ -468,9 +468,9 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitAtom(YLangParser.AtomContext ctx) {
         if (ctx.Nil() != null) {
-            this.emitter.emit(OpCode.LD_VAL, NilVal.INSTANCE);
+            this.emitter.emit(ctx, OpCode.LD_VAL, NilVal.INSTANCE);
         } else if (ctx.number() != null) {
-            this.emitter.emit(OpCode.LD_VAL, parseNumber(ctx.number().getText()));
+            this.emitter.emit(ctx, OpCode.LD_VAL, parseNumber(ctx.number().getText()));
         } else if (ctx.Ident() != null) {
             final Address addr = lookupIdent(ctx.Ident().getText());
             if (addr == null) {
@@ -481,28 +481,28 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         } else if (ctx.String() != null) {
             emitStringLiteral(ctx.String());
         } else if (ctx.True() != null) {
-            this.emitter.emit(OpCode.LD_VAL, BoolVal.TRUE);
+            this.emitter.emit(ctx, OpCode.LD_VAL, BoolVal.TRUE);
         } else if (ctx.False() != null) {
-            this.emitter.emit(OpCode.LD_VAL, BoolVal.FALSE);
+            this.emitter.emit(ctx, OpCode.LD_VAL, BoolVal.FALSE);
         } else if (ctx.kernel() != null) {
             final List<NumberVal> numbers = ctx.kernel().number().stream()
                     .map(n -> parseNumber(n.getText()))
                     .collect(Collectors.toList());
-            this.emitter.emit(OpCode.LD_VAL, new KernelVal(numbers));
+            this.emitter.emit(ctx, OpCode.LD_VAL, new KernelVal(numbers));
         } else if (ctx.Color() != null) {
-            this.emitter.emit(OpCode.LD_VAL, parseColor(ctx.Color().getText()));
+            this.emitter.emit(ctx, OpCode.LD_VAL, parseColor(ctx.Color().getText()));
         } else if (ctx.list() != null) {
             ctx.list().accept(this);
-            this.emitter.emit(OpCode.MK_LIST, ctx.list().arguments() != null ? ctx.list().arguments().expr().size() : 0);
+            this.emitter.emit(ctx, OpCode.MK_LIST, ctx.list().arguments() != null ? ctx.list().arguments().expr().size() : 0);
         } else if (ctx.map() != null) {
             ctx.map().accept(this);
-            this.emitter.emit(OpCode.MK_MAP, ctx.map().mapEntries() != null ? ctx.map().mapEntries().mapEntry().size() : 0);
+            this.emitter.emit(ctx, OpCode.MK_MAP, ctx.map().mapEntries() != null ? ctx.map().mapEntries().mapEntry().size() : 0);
         } else if (ctx.expr() != null) {
             ctx.expr().accept(this);
         } else if (ctx.functionInvocation() != null) {
             ctx.functionInvocation().accept(this);
         } else if (ctx.EnvironmentArg() != null) {
-            this.emitter.emit(OpCode.LD_ENV, ctx.EnvironmentArg().getText().substring(1));
+            this.emitter.emit(ctx, OpCode.LD_ENV, ctx.EnvironmentArg().getText().substring(1));
         } else if (ctx.functionRef() != null) {
             ctx.functionRef().accept(this);
         }
@@ -512,12 +512,12 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     @Override
     public Program visitMapEntry(YLangParser.MapEntryContext ctx) {
         if (ctx.Ident() != null) {
-            this.emitter.emit(OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
+            this.emitter.emit(ctx, OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
         } else {
             emitStringLiteral(ctx.String());
         }
         ctx.expr().accept(this);
-        this.emitter.emit(OpCode.MK_ENTRY);
+        this.emitter.emit(ctx, OpCode.MK_ENTRY);
         return null;
     }
 
@@ -535,7 +535,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
             logSemanticError(ctx, "unknown function '" + ident + "'");
             return null;
         }
-        this.emitter.emit(OpCode.LD_FUNC, 0, ident, new NumberVal(function.decl.parameterCount()));
+        this.emitter.emit(ctx, OpCode.LD_FUNC, 0, ident, new NumberVal(function.decl.parameterCount()));
         return null;
     }
 
@@ -548,7 +548,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
 
     private void emitStringLiteral(TerminalNode str) {
         final String s = str.getText();
-        this.emitter.emit(OpCode.LD_VAL, new StringVal(s.substring(1, s.length() - 1)));
+        this.emitter.emit(null, OpCode.LD_VAL, new StringVal(s.substring(1, s.length() - 1)));
     }
 
     private static NumberVal parseNumber(String s) {
@@ -651,11 +651,11 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         }
 
         void emitLoad(Emitter emitter) {
-            emitter.emit(this.global ? OpCode.LD_GLB : OpCode.LD_LOC, this.offset);
+            emitter.emit(null, this.global ? OpCode.LD_GLB : OpCode.LD_LOC, this.offset);
         }
 
         void emitStore(Emitter emitter) {
-            emitter.emit(this.global ? OpCode.ST_GLB : OpCode.ST_LOC, this.offset);
+            emitter.emit(null, this.global ? OpCode.ST_GLB : OpCode.ST_LOC, this.offset);
         }
     }
 }

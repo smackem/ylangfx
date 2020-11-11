@@ -1,35 +1,42 @@
 package net.smackem.ylang.lang;
 
 import net.smackem.ylang.runtime.Value;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.Objects;
 
 public final class Instruction {
     private final OpCode opCode;
+    private final DebugInfo debugInfo;
     private Value valueArg;
     private int intArg;
     private String strArg;
 
-    public Instruction(OpCode opCode) {
+    public Instruction(DebugInfo debugInfo, OpCode opCode) {
+        this.debugInfo = debugInfo;
         this.opCode = opCode;
     }
 
-    public Instruction(OpCode opCode, Value valueArg) {
+    public Instruction(DebugInfo debugInfo, OpCode opCode, Value valueArg) {
+        this.debugInfo = debugInfo;
         this.opCode = opCode;
         this.valueArg = valueArg;
     }
 
-    public Instruction(OpCode opCode, int intArg) {
+    public Instruction(DebugInfo debugInfo, OpCode opCode, int intArg) {
+        this.debugInfo = debugInfo;
         this.opCode = opCode;
         this.intArg = intArg;
     }
 
-    public Instruction(OpCode opCode, String strArg) {
+    public Instruction(DebugInfo debugInfo, OpCode opCode, String strArg) {
+        this.debugInfo = debugInfo;
         this.opCode = opCode;
         this.strArg = strArg;
     }
 
-    public Instruction(OpCode opCode, int intArg, String strArg) {
+    public Instruction(DebugInfo debugInfo, OpCode opCode, int intArg, String strArg) {
+        this.debugInfo = debugInfo;
         this.opCode = opCode;
         this.strArg = strArg;
         this.intArg = intArg;
@@ -37,6 +44,10 @@ public final class Instruction {
 
     public OpCode opCode() {
         return this.opCode;
+    }
+
+    public DebugInfo debugInfo() {
+        return this.debugInfo;
     }
 
     public Value valueArg() {

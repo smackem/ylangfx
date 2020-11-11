@@ -1,6 +1,7 @@
 package net.smackem.ylang.lang;
 
 import net.smackem.ylang.runtime.Value;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.*;
 
@@ -48,8 +49,8 @@ class Emitter {
      * Emits an instruction without argument.
      * @param opCode The {@link OpCode} of the instruction to emit.
      */
-    public void emit(OpCode opCode) {
-        emit(new Instruction(opCode));
+    public void emit(ParserRuleContext ctx, OpCode opCode) {
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode));
     }
 
     /**
@@ -57,8 +58,8 @@ class Emitter {
      * @param opCode The {@link OpCode} of the instruction to emit.
      * @param intArg The integer argument.
      */
-    public void emit(OpCode opCode, int intArg) {
-        emit(new Instruction(opCode, intArg));
+    public void emit(ParserRuleContext ctx, OpCode opCode, int intArg) {
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode, intArg));
     }
 
     /**
@@ -66,8 +67,8 @@ class Emitter {
      * @param opCode The {@link OpCode} of the instruction to emit.
      * @param valueArg The floating point argument.
      */
-    public void emit(OpCode opCode, Value valueArg) {
-        emit(new Instruction(opCode, valueArg));
+    public void emit(ParserRuleContext ctx, OpCode opCode, Value valueArg) {
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode, valueArg));
     }
 
     /**
@@ -75,8 +76,8 @@ class Emitter {
      * @param opCode The {@link OpCode} of the instruction to emit.
      * @param strArg The string argument.
      */
-    public void emit(OpCode opCode, String strArg) {
-        emit(new Instruction(opCode, strArg));
+    public void emit(ParserRuleContext ctx, OpCode opCode, String strArg) {
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode, strArg));
     }
 
     /**
@@ -85,12 +86,12 @@ class Emitter {
      * @param intArg The integer argument.
      * @param strArg The string argument.
      */
-    public void emit(OpCode opCode, int intArg, String strArg) {
-        emit(new Instruction(opCode, intArg, strArg));
+    public void emit(ParserRuleContext ctx, OpCode opCode, int intArg, String strArg) {
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode, intArg, strArg));
     }
 
-    public void emit(OpCode opCode, int intArg, String strArg, Value valueArg) {
-        final Instruction instr = new Instruction(opCode, intArg, strArg);
+    public void emit(ParserRuleContext ctx, OpCode opCode, int intArg, String strArg, Value valueArg) {
+        final Instruction instr = new Instruction(DebugInfo.fromRuleContext(ctx), opCode, intArg, strArg);
         instr.setValueArg(valueArg);
         emit(instr);
     }
