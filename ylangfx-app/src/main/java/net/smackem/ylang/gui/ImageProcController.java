@@ -200,6 +200,7 @@ public class ImageProcController {
             result = interpreter.execute();
         } catch (Exception e) {
             this.message.setValue(e.getMessage());
+            this.logOutput.setValue(logWriter.toString());
             e.printStackTrace();
             return;
         }
