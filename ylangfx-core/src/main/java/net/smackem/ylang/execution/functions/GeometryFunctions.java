@@ -2,7 +2,10 @@ package net.smackem.ylang.execution.functions;
 
 import net.smackem.ylang.runtime.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GeometryFunctions {
     private GeometryFunctions() {}
@@ -70,6 +73,31 @@ public class GeometryFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.CIRCLE),
                         GeometryFunctions::circleRadius)));
+        final Collection<ValueType> geometryTypes = ValueType.publicValues().stream()
+                .filter(ValueType::isGeometry)
+                .collect(Collectors.toList());
+        final List<FunctionOverload> intersectOverloads = new ArrayList<>();
+        final List<FunctionOverload> distanceOverloads = new ArrayList<>();
+        for (final ValueType left : geometryTypes) {
+            for (final ValueType right : geometryTypes) {
+                intersectOverloads.add(FunctionOverload.method(List.of(left, right), GeometryFunctions::intersect));
+                distanceOverloads.add(FunctionOverload.method(List.of(left, right), GeometryFunctions::distance));
+            }
+        }
+        registry.put(new FunctionGroup("intersect", intersectOverloads));
+        registry.put(new FunctionGroup("distance", distanceOverloads));
+    }
+
+    private static Value distance(List<Value> args) {
+        final GeometryVal lg = (GeometryVal) args.get(0);
+        final GeometryVal rg = (GeometryVal) args.get(1);
+        return new NumberVal(GeometryVal.distance(lg, rg));
+    }
+
+    private static Value intersect(List<Value> args) {
+        final GeometryVal lg = (GeometryVal) args.get(0);
+        final GeometryVal rg = (GeometryVal) args.get(1);
+        return new ListVal(GeometryVal.intersect(lg, rg));
     }
 
     private static Value circleRadius(List<Value> args) {

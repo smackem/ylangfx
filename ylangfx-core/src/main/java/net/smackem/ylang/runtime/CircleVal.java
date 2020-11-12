@@ -1,5 +1,10 @@
 package net.smackem.ylang.runtime;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -26,6 +31,13 @@ public class CircleVal extends GeometryVal {
 
     public boolean contains(PointVal pt) {
         return Math.hypot(pt.x() - this.center.x(), pt.y() - this.center.y()) <= this.radius;
+    }
+
+    @Override
+    protected Geometry createGeometry() {
+        final GeometryFactory gf = new GeometryFactory();
+        final Point pt = gf.createPoint(new Coordinate(this.center.x(), this.center.y()));
+        return pt.buffer(this.radius, 16);
     }
 
     @Override

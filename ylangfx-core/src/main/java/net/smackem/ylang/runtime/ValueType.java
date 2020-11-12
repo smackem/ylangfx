@@ -33,6 +33,13 @@ public enum ValueType {
                 .collect(Collectors.toList());
     }
 
+    public boolean isGeometry() {
+        return switch (this) {
+            case POINT, RECT, CIRCLE, LINE, POLYGON -> true;
+            default -> false;
+        };
+    }
+
     private final int index;
 
     ValueType(int index) {

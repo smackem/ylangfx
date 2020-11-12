@@ -1,8 +1,13 @@
 package net.smackem.ylang.runtime;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+
+import java.util.Iterator;
 import java.util.Objects;
 
-public final class PointVal extends Value {
+public final class PointVal extends GeometryVal {
     private final float x;
     private final float y;
 
@@ -20,8 +25,20 @@ public final class PointVal extends Value {
         return this.y;
     }
 
+    @Override
     public PointVal translate(PointVal other) {
         return new PointVal(this.x + other.x, this.y + other.y);
+    }
+
+    @Override
+    public RectVal bounds() {
+        return new RectVal(this.x, this.y, this.x, this.y);
+    }
+
+    @Override
+    Geometry createGeometry() {
+        final GeometryFactory gf = new GeometryFactory();
+        return gf.createPoint(new Coordinate(this.x, this.y));
     }
 
     public PointVal offset(float offset) {
@@ -69,5 +86,23 @@ public final class PointVal extends Value {
     @Override
     public String toLangString() {
         return String.format(RuntimeParameters.LOCALE, "%f;%f", this.x, this.y);
+    }
+
+    @Override
+    public Iterator<Value> iterator() {
+        return new Iterator<>() {
+            private boolean hasReturned;
+
+            @Override
+            public boolean hasNext() {
+                return this.hasReturned == false;
+            }
+
+            @Override
+            public Value next() {
+                this.hasReturned = true;
+                return PointVal.this;
+            }
+        };
     }
 }

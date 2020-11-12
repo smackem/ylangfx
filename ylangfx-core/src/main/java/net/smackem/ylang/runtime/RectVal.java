@@ -1,5 +1,9 @@
 package net.smackem.ylang.runtime;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -63,6 +67,18 @@ public class RectVal extends GeometryVal {
     }
 
     @Override
+    Geometry createGeometry() {
+        final GeometryFactory gf = new GeometryFactory();
+        return gf.createLinearRing(new Coordinate[] {
+                new Coordinate(this.x, this.y),
+                new Coordinate(right(), this.y),
+                new Coordinate(right(), bottom()),
+                new Coordinate(this.x, bottom()),
+                new Coordinate(this.x, this.y),
+        });
+    }
+
+    @Override
     public GeometryVal translate(PointVal pt) {
         return new RectVal(this.x + pt.x(), this.y + pt.y(), this.width, this.height);
     }
@@ -108,15 +124,15 @@ public class RectVal extends GeometryVal {
 
         @Override
         public boolean hasNext() {
-            return this.y < height;
+            return this.y < bottom();
         }
 
         @Override
         public Value next() {
             final var pt = new PointVal(this.x, this.y);
             this.x++;
-            if (this.x >= width) {
-                this.x = 0;
+            if (this.x >= right()) {
+                this.x = (int) RectVal.this.x;
                 this.y++;
             }
             return pt;

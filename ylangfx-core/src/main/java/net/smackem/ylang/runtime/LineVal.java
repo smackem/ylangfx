@@ -1,5 +1,9 @@
 package net.smackem.ylang.runtime;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Objects;
@@ -36,8 +40,13 @@ public class LineVal extends GeometryVal {
         return (float) Math.hypot(this.x2 - this.x1, this.y2 - this.y1);
     }
 
-    public PointVal intersect(LineVal ignored) {
-        return null;
+    @Override
+    Geometry createGeometry() {
+        final GeometryFactory gf = new GeometryFactory();
+        return gf.createLineString(new Coordinate[] {
+                new Coordinate(this.x1, this.y1),
+                new Coordinate(this.x2, this.y2)
+        });
     }
 
     @Override

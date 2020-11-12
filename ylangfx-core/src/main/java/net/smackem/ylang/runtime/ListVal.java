@@ -11,8 +11,9 @@ public class ListVal extends Value implements Iterable<Value> {
         this.values = copyValues ? new ArrayList<>(values) : values;
     }
 
-    public ListVal(List<Value> values) {
-        this(values, true);
+    public ListVal(List<? extends Value> values) {
+        //noinspection unchecked
+        this((List<Value>)values, true);
     }
 
     public ListVal(ListVal original) {
