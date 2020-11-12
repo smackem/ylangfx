@@ -9,10 +9,10 @@
     -fx-font-weight: bold;
 }
 .color {
-    -fx-fill: teal;
+    -fx-fill: cadetblue;
 }
 .number {
-    -fx-fill: teal;
+    -fx-fill: cadetblue;
 }
 .fncall {
     -fx-fill: #c66;
@@ -21,10 +21,10 @@
     -fx-fill: #c66;
 }
 .string {
-    -fx-fill: darkgreen;
+    -fx-fill: teal;
 }
 .comment {
-    -fx-fill: cadetblue;
+    -fx-fill: darkgreen;
 }
 
 .paragraph-box:has-caret {

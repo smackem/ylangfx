@@ -42,7 +42,7 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
     private static boolean isBodyStatement(YLangParser.StatementContext ctx) {
         // if statement only contains one child, it is LineBreak
         // declStmts are allowed both in body and in declaration
-        return ctx.children.size() > 1 && ctx.declStmt() == null;
+        return ctx.children != null && ctx.children.size() > 1 && ctx.declStmt() == null;
     }
 
     @Override

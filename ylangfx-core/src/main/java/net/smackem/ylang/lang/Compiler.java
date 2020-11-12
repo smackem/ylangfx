@@ -39,10 +39,11 @@ public class Compiler {
         final CommonTokenStream tokens = new CommonTokenStream(lexer);
         final YLangParser parser = new YLangParser(tokens);
         parser.addErrorListener(errorListener);
+        final YLangParser.ProgramContext ast = parser.program();
         if (outErrors.addAll(errorListener.errors)) {
             return null;
         }
-        return parser.program();
+        return ast;
     }
 
     private static class ErrorListener implements ANTLRErrorListener {

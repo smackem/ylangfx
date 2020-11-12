@@ -1,10 +1,11 @@
 package net.smackem.ylang.lang;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 
 import java.util.Objects;
 
-class DebugInfo {
+public class DebugInfo {
     private final ParserRuleContext ctx;
 
     private DebugInfo(ParserRuleContext ctx) {
@@ -21,5 +22,11 @@ class DebugInfo {
 
     public int charPosition() {
         return this.ctx.start.getCharPositionInLine();
+    }
+
+    @Override
+    public String toString() {
+        final Token token = this.ctx.getStart();
+        return "@ line %d:%d (near token '%s')".formatted(token.getLine(), token.getCharPositionInLine(), token.getText());
     }
 }

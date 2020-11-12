@@ -67,15 +67,15 @@ public class Interpreter {
         return this.ctx;
     }
 
-    public Value execute() throws StackException, MissingOverloadException, IOException {
+    public Value execute() throws ExecutionException {
         final int programSize = this.instructions.length;
         final LocalDateTime begin = LocalDateTime.now();
-        this.ctx.logWriter().write("""
+        writeLogMessageGuarded("""
                 >> execution started @ %s
                    input image: %s""".formatted(
                 begin,
                 this.ctx.inputImage()));
-        while (pc < programSize) {
+        while (this.pc < programSize) {
             final TaggedInstruction taggedInstr = this.instructions[pc];
             if (log.isDebugEnabled()) {
                 log.debug("@{}: {}, stack.size={}",
@@ -83,13 +83,24 @@ public class Interpreter {
                         taggedInstr.instruction.opCode(),
                         this.ctx.stack().size());
             }
-            executeInstr(taggedInstr);
-            pc++;
+            try {
+                executeInstr(taggedInstr);
+            } catch (Exception e) {
+                final String message = "execution error @pc=%d instruction=%s debugInfo=%s".formatted(this.pc, taggedInstr.instruction, taggedInstr.instruction.debugInfo());
+                log.error(message, e);
+                throw new ExecutionException(message, taggedInstr.instruction.debugInfo(), e);
+            }
+            this.pc++;
         }
-        final Value retVal = this.ctx.stack().pop();
+        final Value retVal;
+        try {
+            retVal = this.ctx.stack().pop();
+        } catch (StackException e) {
+            throw new ExecutionException("error popping return value:", null, e);
+        }
         final LocalDateTime end = LocalDateTime.now();
         final Duration duration = Duration.between(begin, end);
-        this.ctx.logWriter().write("""
+        writeLogMessageGuarded("""
                >> execution finished @ %s
                   elapsed time: %d.%s seconds
                   return value: %s""".formatted(
@@ -99,16 +110,25 @@ public class Interpreter {
         return retVal;
     }
 
+    private void writeLogMessageGuarded(String message) throws ExecutionException {
+        try {
+            this.ctx.logWriter().write(message);
+        } catch (IOException e) {
+            log.error("error writing log message", e);
+            throw new ExecutionException("error writing log message", null, e);
+        }
+    }
+
     private void executeInstr(TaggedInstruction taggedInstr) throws StackException, MissingOverloadException, IOException {
         final Stack stack = this.ctx.stack();
         final Instruction instr = taggedInstr.instruction;
         switch (instr.opCode()) {
             case LD_VAL -> stack.push(instr.valueArg());
             case LD_GLB -> stack.push(stack.get(instr.intArg()));
-            case LD_ENV -> stack.push(Objects.equals(instr.strArg(), "in") ? ctx.inputImage() : NilVal.INSTANCE);
+            case LD_ENV -> stack.push(Objects.equals(instr.strArg(), "in") ? this.ctx.inputImage() : NilVal.INSTANCE);
             case ST_GLB -> stack.set(instr.intArg(), stack.pop());
-            case LD_LOC -> stack.push(stack.get(instr.intArg() + stackFrameOffset));
-            case ST_LOC -> stack.set(instr.intArg() + stackFrameOffset, stack.pop());
+            case LD_LOC -> stack.push(stack.get(instr.intArg() + this.stackFrameOffset));
+            case ST_LOC -> stack.set(instr.intArg() + this.stackFrameOffset, stack.pop());
             case EQ -> {
                 final Value r = stack.pop();
                 stack.push(BoolVal.of(stack.pop().equals(r)));
@@ -183,10 +203,10 @@ public class Interpreter {
             case NEG -> stack.push(UnaryOperator.NEG.invoke(stack.pop()));
             case BR_ZERO -> {
                 if (((BoolVal) UnaryOperator.NOT.invoke(stack.pop())).value()) {
-                    pc = instr.intArg() - 1;
+                    this.pc = instr.intArg() - 1;
                 }
             }
-            case BR -> pc = instr.intArg() - 1;
+            case BR -> this.pc = instr.intArg() - 1;
             case DUP -> {
                 final Value v = stack.pop();
                 stack.push(v);
@@ -218,7 +238,7 @@ public class Interpreter {
                 if (next != null) {
                     stack.push(next);
                 } else {
-                    pc = instr.intArg() - 1;
+                    this.pc = instr.intArg() - 1;
                 }
             }
             case LABEL-> {
@@ -268,11 +288,11 @@ public class Interpreter {
             case CALL -> branchToFunction(instr.intArg() - 1, (int) ((NumberVal) instr.valueArg()).value());
             case RET -> {
                 final Value retVal = stack.pop(); // return value
-                stack.setTail(stackFrameOffset);
-                stackFrameOffset = stackFrames.pop();
+                stack.setTail(this.stackFrameOffset);
+                this.stackFrameOffset = this.stackFrames.pop();
                 final int retPC = (int) ((NumberVal) stack.pop()).value();
                 stack.push(retVal);
-                pc = retPC - 1;
+                this.pc = retPC - 1;
             }
             case LD_FUNC -> {
                 final FunctionVal function = new FunctionVal(instr.strArg(),
@@ -295,9 +315,9 @@ public class Interpreter {
 
     private void branchToFunction(int pc, int argCount) {
         final Stack stack = this.ctx.stack();
-        stackFrames.push(stackFrameOffset);
+        this.stackFrames.push(this.stackFrameOffset);
         stack.insert(stack.size() - argCount, new NumberVal(this.pc + 1));
-        stackFrameOffset = stack.size() - argCount;
+        this.stackFrameOffset = stack.size() - argCount;
         this.pc = pc;
     }
 

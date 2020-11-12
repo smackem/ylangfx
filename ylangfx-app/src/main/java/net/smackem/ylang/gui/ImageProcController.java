@@ -17,6 +17,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
+import net.smackem.ylang.execution.ExecutionException;
 import net.smackem.ylang.execution.Interpreter;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
@@ -186,9 +187,15 @@ public class ImageProcController {
     private void processImageYLang2() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile(this.codeEditor.getText(), FunctionRegistry.INSTANCE, errors);
+        final Program program;
+        try {
+            program = compiler.compile(this.codeEditor.getText(), FunctionRegistry.INSTANCE, errors);
+        } catch (Exception e) {
+            this.message.setValue(e.getMessage());
+            return;
+        }
         if (errors.isEmpty() == false) {
-            this.message.setValue(String.join("\n", errors));
+            this.message.setValue(String.join(System.lineSeparator(), errors));
         }
         if (program == null) {
             return;
@@ -198,8 +205,10 @@ public class ImageProcController {
         final Value result;
         try {
             result = interpreter.execute();
-        } catch (Exception e) {
-            this.message.setValue(e.getMessage());
+        } catch (ExecutionException e) {
+            final String message = buildErrorMessage(e);
+            this.message.setValue(message);
+            logWriter.append(message);
             this.logOutput.setValue(logWriter.toString());
             e.printStackTrace();
             return;
@@ -209,6 +218,17 @@ public class ImageProcController {
         if (result instanceof ImageVal) {
             this.targetImage.set(convertToFX((ImageVal) result));
         }
+    }
+
+    private String buildErrorMessage(ExecutionException e) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(e.getMessage()).append(System.lineSeparator())
+                .append("caused by ").append(e.getCause().getClass()).append(": ").append(System.lineSeparator())
+                .append("    ").append(e.getCause().getMessage());
+        if (e.debugInfo() != null) {
+            sb.append(System.lineSeparator()).append("    ").append(e.debugInfo());
+        }
+        return sb.toString();
     }
 
     private void processImageRemote() {
