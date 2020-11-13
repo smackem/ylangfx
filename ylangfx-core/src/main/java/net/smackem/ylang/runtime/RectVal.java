@@ -111,7 +111,7 @@ public class RectVal extends GeometryVal {
     @SuppressWarnings("NullableProblems")
     @Override
     public Iterator<Value> iterator() {
-        return new PointIterator();
+        return new PointIterator(this);
     }
 
     @Override
@@ -119,20 +119,30 @@ public class RectVal extends GeometryVal {
         return String.format(RuntimeParameters.LOCALE, "rect(%f;%f, %f, %f)", this.x, this.y, this.width, this.height);
     }
 
-    private class PointIterator implements Iterator<Value> {
+    private static class PointIterator implements Iterator<Value> {
+        int left, right, top, bottom;
         int x, y;
+
+        PointIterator(RectVal rect) {
+            this.left = (int) rect.x;
+            this.top = (int) rect.y;
+            this.right = (int) rect.right();
+            this.bottom = (int) rect.bottom();
+            this.x = this.left;
+            this.y = this.top;
+        }
 
         @Override
         public boolean hasNext() {
-            return this.y < bottom();
+            return this.y < this.bottom;
         }
 
         @Override
         public Value next() {
             final var pt = new PointVal(this.x, this.y);
             this.x++;
-            if (this.x >= right()) {
-                this.x = (int) RectVal.this.x;
+            if (this.x >= this.right) {
+                this.x = this.left;
                 this.y++;
             }
             return pt;
