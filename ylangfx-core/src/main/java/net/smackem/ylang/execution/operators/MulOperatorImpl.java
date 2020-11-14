@@ -1,6 +1,5 @@
 package net.smackem.ylang.execution.operators;
 
-import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.runtime.*;
 
 public class MulOperatorImpl extends BinaryOperatorImpl {
@@ -11,10 +10,15 @@ public class MulOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.POINT, ValueType.POINT, MulOperatorImpl::pointTimesPoint);
         implement(ValueType.RGB, ValueType.NUMBER, MulOperatorImpl::rgbTimesNumber);
         implement(ValueType.RGB, ValueType.RGB, MulOperatorImpl::rgbTimesRgb);
-        implement(ValueType.IMAGE, ValueType.IMAGE, MulOperatorImpl::imageTimesRgb);
+        implement(ValueType.IMAGE, ValueType.IMAGE, MulOperatorImpl::imageTimesImage);
+        implement(ValueType.KERNEL, ValueType.KERNEL, MulOperatorImpl::kernelTimesKernel);
     }
 
-    private static Value imageTimesRgb(Value l, Value r) {
+    private static Value kernelTimesKernel(Value l, Value r) {
+        return ((KernelVal) l).multiply((KernelVal) r);
+    }
+
+    private static Value imageTimesImage(Value l, Value r) {
         return ((ImageVal) l).multiply((ImageVal) r);
     }
 

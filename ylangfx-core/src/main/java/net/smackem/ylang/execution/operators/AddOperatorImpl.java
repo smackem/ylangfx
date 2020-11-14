@@ -13,6 +13,11 @@ class AddOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.RGB, ValueType.RGB, AddOperatorImpl::rgbPlusRgb);
         implementLeft(ValueType.STRING, AddOperatorImpl::stringPlusAny);
         implement(ValueType.IMAGE, ValueType.IMAGE, AddOperatorImpl::imagePlusImage);
+        implement(ValueType.KERNEL, ValueType.KERNEL, AddOperatorImpl::kernelPlusImage);
+    }
+
+    private static Value kernelPlusImage(Value l, Value r) {
+        return ((KernelVal) l).add((KernelVal) r);
     }
 
     private static Value imagePlusImage(Value l, Value r) {

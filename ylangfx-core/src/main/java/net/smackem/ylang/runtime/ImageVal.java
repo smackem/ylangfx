@@ -4,20 +4,14 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
-public class ImageVal extends Value {
-    private final int width;
-    private final int height;
+public class ImageVal extends MatrixVal<RgbVal> {
     private final RgbVal[] pixels;
-    private IntRect clipRect;
-    private RgbVal defaultPixel;
 
     private ImageVal(int width, int height, RgbVal[] pixels) {
-        super(ValueType.IMAGE);
+        super(ValueType.IMAGE, width, height);
         if (Objects.requireNonNull(pixels).length != width * height) {
             throw new IllegalArgumentException("pixel buffer size does not match width and height");
         }
-        this.width = width;
-        this.height = height;
         this.pixels = pixels;
     }
 
@@ -25,11 +19,9 @@ public class ImageVal extends Value {
         this(width, height, emptyPixels(width, height));
     }
 
-    @SuppressWarnings("CopyConstructorMissesField")
     public ImageVal(ImageVal original) {
-        this(original.width, original.height, clonePixels(original.pixels));
-        this.clipRect = original.clipRect;
-        this.defaultPixel = original.defaultPixel;
+        super(original);
+        this.pixels = clonePixels(original.pixels);
     }
 
     public static ImageVal fromArgbPixels(int width, int height, int[] pixels) {
@@ -60,60 +52,8 @@ public class ImageVal extends Value {
         return image;
     }
 
-    public int width() {
-        return this.width;
-    }
-
-    public int height() {
-        return this.height;
-    }
-
-    public IntRect getClipRect() {
-        return this.clipRect;
-    }
-
-    public void setClipRect(IntRect value) {
-        this.clipRect = value;
-    }
-
-    /**
-     * @return the {@link Value} to return in {{@link #getPixel(int, int)}} for coordinates that are out of bounds.
-     */
-    public RgbVal getDefaultPixel() {
-        return this.defaultPixel;
-    }
-
-    /**
-     * sets the {@link Value} to return in {{@link #getPixel(int, int)}} for coordinates that are out of bounds.
-     */
-    public void setDefaultPixel(RgbVal value) {
-        this.defaultPixel = value;
-    }
-
-    public RgbVal getPixel(int x, int y) {
-        if (y < 0 || y >= this.height || x < 0 || x >= this.width) {
-            if (this.defaultPixel != null) {
-                return this.defaultPixel;
-            }
-            throw new IllegalArgumentException("coordinates out of range " + x + "," + y);
-        }
-        final int index = y * this.width + x;
-        return this.pixels[index];
-    }
-
-    public void setPixel(int x, int y, RgbVal rgb) {
-        if (this.clipRect != null && this.clipRect.contains(x, y) == false) {
-            return;
-        }
-        if (y < 0 || y >= this.height || x < 0 || x >= this.width) {
-            throw new IllegalArgumentException("coordinates out of range " + x + "," + y);
-        }
-        final int index = y * this.width + x;
-        this.pixels[index] = rgb;
-    }
-
     public int[] toArgbPixels() {
-        final int[] buffer = new int[this.width * this.height];
+        final int[] buffer = new int[width() * height()];
         final int pixelCount = buffer.length;
         for (int i = 0; i < pixelCount; i++) {
             buffer[i] = toIntArgb(this.pixels[i]);
@@ -122,7 +62,9 @@ public class ImageVal extends Value {
     }
 
     public ImageVal convolve(KernelVal kernel) {
-        final ImageVal target = new ImageVal(this.width, this.height);
+        final int width = width();
+        final int height = height();
+        final ImageVal target = new ImageVal(width, height);
         final float kernelSum = kernel.sum().value();
         final int kernelWidth = kernel.width();
         final int kernelHeight = kernel.height();
@@ -134,8 +76,8 @@ public class ImageVal extends Value {
         for (final Value n : kernel) {
             kernelValues[i++] = ((NumberVal) n).value();
         }
-        for (int y = 0; y < this.height; y++) {
-            for (int x = 0; x < this.width; x++) {
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 float r = 0;
                 float g = 0;
                 float b = 0;
@@ -146,13 +88,13 @@ public class ImageVal extends Value {
                 int endX = startX + kernelWidth;
                 int kernelIndex = 0;
                 for (int imageY = startY; imageY < endY; imageY++) {
-                    if (imageY < 0 || imageY >= this.height) {
+                    if (imageY < 0 || imageY >= height) {
                         kernelIndex += kernelWidth;
                         continue;
                     }
-                    int imageIndex = imageY * this.width + startX;
+                    int imageIndex = imageY * width + startX;
                     for (int imageX = startX; imageX < endX; imageX++) {
-                        if (imageX >= 0 && imageX < this.width) {
+                        if (imageX >= 0 && imageX < width) {
                             final float value = kernelValues[kernelIndex];
                             final RgbVal px = this.pixels[imageIndex];
                             r += value * px.r();
@@ -176,6 +118,8 @@ public class ImageVal extends Value {
     }
 
     public RgbVal convolve(int x, int y, KernelVal kernel) {
+        final int width = width();
+        final int height = height();
         final int kernelWidth = kernel.width();
         final int kernelHeight = kernel.height();
         final int halfKernelWidth = kernelWidth / 2;
@@ -191,9 +135,9 @@ public class ImageVal extends Value {
             for (int kernelX = 0; kernelX < kernelWidth; kernelX++) {
                 final int sourceY = y - halfKernelHeight + kernelY;
                 final int sourceX = x - halfKernelWidth + kernelX;
-                if (sourceX >= 0 && sourceX < this.width && sourceY >= 0 && sourceY < this.height) {
+                if (sourceX >= 0 && sourceX < width && sourceY >= 0 && sourceY < height) {
                     final float value = kernel.get(kernelIndex).value();
-                    final RgbVal px = getPixel(sourceX, sourceY);
+                    final RgbVal px = get(sourceX, sourceY);
                     r += value * px.r();
                     g += value * px.g();
                     b += value * px.b();
@@ -213,36 +157,6 @@ public class ImageVal extends Value {
         return new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
     }
 
-    public KernelVal selectKernel(int x, int y, KernelVal kernel, ToFloatFunction<RgbVal> selector) {
-        final int kernelWidth = kernel.width();
-        final int kernelHeight = kernel.height();
-        final KernelVal result = new KernelVal(kernelWidth, kernelHeight, 0);
-        int kernelIndex = 0;
-
-        for (int kernelY = 0; kernelY < kernelHeight; kernelY++) {
-            for (int kernelX = 0; kernelX < kernelWidth; kernelX++) {
-                final int sourceY = y - (kernelHeight / 2) + kernelY;
-                final int sourceX = x - (kernelWidth / 2) + kernelX;
-                if (sourceX >= 0 && sourceX < this.width && sourceY >= 0 && sourceY < this.height) {
-                    final float value = kernel.get(kernelIndex).value();
-                    final RgbVal px = getPixel(sourceX, sourceY);
-                    final float f = selector.apply(px);
-                    result.set(kernelIndex, new NumberVal(value * f));
-                }
-                kernelIndex++;
-            }
-        }
-
-        return result;
-    }
-
-    public void plot(GeometryVal geometry, RgbVal rgb) {
-        for (final Value v : geometry) {
-            final PointVal pt = (PointVal) v;
-            this.setPixel((int) pt.x(), (int) pt.y(), rgb);
-        }
-    }
-
     public ImageVal add(ImageVal right) {
         return composeWith(right, RgbVal::add);
     }
@@ -260,14 +174,29 @@ public class ImageVal extends Value {
     }
 
     public ImageVal composeWith(ImageVal that, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
-        if (Objects.requireNonNull(that).width != this.width || that.height != this.height) {
+        if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
             throw new IllegalArgumentException("subtracted images must have the same dimensions");
         }
-        final ImageVal result = new ImageVal(this.width, this.height);
+        final ImageVal result = new ImageVal(this.width(), this.height());
         for (int i = 0; i < this.pixels.length; i++) {
             result.pixels[i] = operation.apply(this.pixels[i], that.pixels[i]);
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "image{size=%dx%d, hash=%x}".formatted(width(), height(), hashCode());
+    }
+
+    @Override
+    RgbVal internalGet(int index) {
+        return this.pixels[index];
+    }
+
+    @Override
+    void internalSet(int index, RgbVal value) {
+        this.pixels[index] = value;
     }
 
     private static RgbVal[] emptyPixels(int width, int height) {
@@ -296,7 +225,15 @@ public class ImageVal extends Value {
     }
 
     @Override
-    public String toString() {
-        return "image{size=%dx%d, hash=%x}".formatted(this.width, this.height, hashCode());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final ImageVal imageVal = (ImageVal) o;
+        return Arrays.equals(pixels, imageVal.pixels);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(pixels);
     }
 }

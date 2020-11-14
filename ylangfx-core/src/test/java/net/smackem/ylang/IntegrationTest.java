@@ -2,15 +2,12 @@ package net.smackem.ylang;
 
 import net.smackem.ylang.execution.ExecutionException;
 import net.smackem.ylang.execution.Interpreter;
-import net.smackem.ylang.execution.MissingOverloadException;
-import net.smackem.ylang.execution.StackException;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
@@ -367,7 +364,7 @@ public class IntegrationTest {
         assertThat(outputImage.height()).isEqualTo(inputImage.height());
         for (int y = 0; y < outputImage.height(); y++) {
             for (int x = 0; x < outputImage.width(); x++) {
-                assertThat(outputImage.getPixel(x, y)).isEqualTo(inputImage.getPixel(x, y).invert());
+                assertThat(outputImage.get(x, y)).isEqualTo(inputImage.get(x, y).invert());
             }
         }
     }

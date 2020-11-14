@@ -44,7 +44,7 @@ public class SpecialFunctions {
     private static Value setImageAtPoint(List<Value> args) {
         final PointVal pt = (PointVal) args.get(1);
         final RgbVal rgb = (RgbVal) args.get(2);
-        ((ImageVal) args.get(0)).setPixel((int)pt.x(), (int)pt.y(), rgb);
+        ((ImageVal) args.get(0)).set((int)pt.x(), (int)pt.y(), rgb);
         return null;
     }
 

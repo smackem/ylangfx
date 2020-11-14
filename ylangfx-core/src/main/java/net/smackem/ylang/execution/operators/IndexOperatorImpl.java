@@ -35,7 +35,7 @@ public class IndexOperatorImpl extends BinaryOperatorImpl {
 
     private static Value imageAtPoint(Value l, Value r) {
         final var pt = (PointVal) r;
-        return ((ImageVal) l).getPixel((int)(pt.x() + 0.5f), (int)(pt.y() + 0.5f));
+        return ((ImageVal) l).get((int)(pt.x() + 0.5f), (int)(pt.y() + 0.5f));
     }
 
     private static Value listAtNumber(Value l, Value r) {

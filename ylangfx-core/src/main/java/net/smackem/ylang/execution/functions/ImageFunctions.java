@@ -3,7 +3,6 @@ package net.smackem.ylang.execution.functions;
 import net.smackem.ylang.runtime.*;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class ImageFunctions {
     private ImageFunctions() {}
@@ -18,40 +17,62 @@ public class ImageFunctions {
                         ImageFunctions::imageFromWidthAndHeight),
                 FunctionOverload.function(
                         List.of(ValueType.IMAGE),
-                        ImageFunctions::imageClone)));
+                        ImageFunctions::imageClone),
+                FunctionOverload.function(
+                        List.of(ValueType.KERNEL),
+                        ImageFunctions::imageFromKernel)));
         registry.put(new FunctionGroup("bounds",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE),
+                        ImageFunctions::bounds),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL),
                         ImageFunctions::bounds)));
         registry.put(new FunctionGroup("convolve",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.KERNEL),
-                        ImageFunctions::convolveImage),
+                        ImageFunctions::convolveFullImage),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
-                        ImageFunctions::convolve)));
+                        ImageFunctions::convolveImage),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.KERNEL),
+                        ImageFunctions::convolveFullKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.POINT, ValueType.KERNEL),
+                        ImageFunctions::convolveKernel)));
+        registry.put(new FunctionGroup("select",
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.POINT, ValueType.KERNEL),
+                        ImageFunctions::selectKernelFromKernel)));
         registry.put(new FunctionGroup("selectAlpha",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
-                        args -> selectKernel(args, RgbVal::a))));
+                        args -> selectKernelFromImage(args, RgbVal::a))));
         registry.put(new FunctionGroup("selectRed",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
-                        args -> selectKernel(args, RgbVal::r))));
+                        args -> selectKernelFromImage(args, RgbVal::r))));
         registry.put(new FunctionGroup("selectGreen",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
-                        args -> selectKernel(args, RgbVal::g))));
+                        args -> selectKernelFromImage(args, RgbVal::g))));
         registry.put(new FunctionGroup("selectBlue",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
-                        args -> selectKernel(args, RgbVal::b))));
+                        args -> selectKernelFromImage(args, RgbVal::b))));
         registry.put(new FunctionGroup("default",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.RGB),
                         ImageFunctions::setDefault),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE),
+                        ImageFunctions::getDefault),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.NUMBER),
+                        ImageFunctions::setDefault),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL),
                         ImageFunctions::getDefault)));
         registry.put(new FunctionGroup("clip",
                 FunctionOverload.method(
@@ -59,72 +80,122 @@ public class ImageFunctions {
                         ImageFunctions::setClip),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE),
+                        ImageFunctions::getClip),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.RECT),
+                        ImageFunctions::setClip),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL),
                         ImageFunctions::getClip)));
         registry.put(new FunctionGroup("plot",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.RECT, ValueType.RGB),
-                        ImageFunctions::plot),
+                        ImageFunctions::plotImage),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.CIRCLE, ValueType.RGB),
-                        ImageFunctions::plot),
+                        ImageFunctions::plotImage),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.LINE, ValueType.RGB),
-                        ImageFunctions::plot),
+                        ImageFunctions::plotImage),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POLYGON, ValueType.RGB),
-                        ImageFunctions::plot)));
+                        ImageFunctions::plotImage),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.RECT, ValueType.NUMBER),
+                        ImageFunctions::plotKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.CIRCLE, ValueType.NUMBER),
+                        ImageFunctions::plotKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.LINE, ValueType.NUMBER),
+                        ImageFunctions::plotKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.POLYGON, ValueType.NUMBER),
+                        ImageFunctions::plotKernel)));
     }
 
-    private static Value convolveImage(List<Value> args) {
+    private static Value convolveKernel(List<Value> args) {
+        final KernelVal image = (KernelVal) args.get(0);
+        final PointVal pt = (PointVal) args.get(1);
+        final KernelVal kernel = (KernelVal) args.get(2);
+        return new NumberVal(image.convolve((int) pt.x(), (int) pt.y(), kernel));
+    }
+
+    private static Value convolveFullKernel(List<Value> args) {
+        final KernelVal image = (KernelVal) args.get(0);
+        final KernelVal kernel = (KernelVal) args.get(1);
+        return image.convolve(kernel);
+    }
+
+    private static Value imageFromKernel(List<Value> args) {
+        return ImageVal.fromKernel((KernelVal) args.get(0));
+    }
+
+    private static Value convolveFullImage(List<Value> args) {
         final ImageVal image = (ImageVal) args.get(0);
         final KernelVal kernel = (KernelVal) args.get(1);
         return image.convolve(kernel);
     }
 
-    private static Value selectKernel(List<Value> args, ToFloatFunction<RgbVal> selector) {
+    private static Value selectKernelFromImage(List<Value> args, ToFloatFunction<RgbVal> selector) {
         final ImageVal image = (ImageVal) args.get(0);
         final PointVal pt = (PointVal) args.get(1);
         final KernelVal kernel = (KernelVal) args.get(2);
         return image.selectKernel((int) pt.x(), (int) pt.y(), kernel, selector);
     }
 
+    private static Value selectKernelFromKernel(List<Value> args) {
+        final KernelVal image = (KernelVal) args.get(0);
+        final PointVal pt = (PointVal) args.get(1);
+        final KernelVal kernel = (KernelVal) args.get(2);
+        return image.selectKernel((int) pt.x(), (int) pt.y(), kernel, NumberVal::value);
+    }
+
     private static Value imageClone(List<Value> args) {
         return new ImageVal((ImageVal) args.get(0));
     }
 
-    private static Value plot(List<Value> args) {
-        ((ImageVal) args.get(0)).plot((GeometryVal) args.get(1), (RgbVal) args.get(2));
-        return NilVal.INSTANCE;
+    private static Value plotImage(List<Value> args) {
+        final ImageVal image = (ImageVal) args.get(0);
+        image.plot((GeometryVal) args.get(1), (RgbVal) args.get(2));
+        return image;
+    }
+
+    private static Value plotKernel(List<Value> args) {
+        final KernelVal image = (KernelVal) args.get(0);
+        image.plot((GeometryVal) args.get(1), (NumberVal) args.get(2));
+        return image;
     }
 
     private static Value getClip(List<Value> args) {
-        final IntRect clipRect = ((ImageVal) args.get(0)).getClipRect();
+        final IntRect clipRect = ((MatrixVal<?>) args.get(0)).getClipRect();
         return clipRect != null
                 ? RectVal.fromIntRect(clipRect)
                 : NilVal.INSTANCE;
     }
 
     private static Value setClip(List<Value> args) {
-        final ImageVal image = (ImageVal) args.get(0);
+        final MatrixVal<?> image = (MatrixVal<?>) args.get(0);
         final RectVal rect = (RectVal) args.get(1);
         image.setClipRect(rect.round());
         return image;
     }
 
     private static Value getDefault(List<Value> args) {
-        final RgbVal defaultRgb = ((ImageVal) args.get(0)).getDefaultPixel();
-        return defaultRgb != null
-                ? defaultRgb
+        final Value defaultElement = ((MatrixVal<?>) args.get(0)).getDefaultElement();
+        return defaultElement != null
+                ? defaultElement
                 : NilVal.INSTANCE;
     }
 
+    @SuppressWarnings("unchecked")
     private static Value setDefault(List<Value> args) {
-        final ImageVal image = (ImageVal) args.get(0);
-        image.setDefaultPixel((RgbVal) args.get(1));
+        final MatrixVal<Value> image = (MatrixVal<Value>) args.get(0);
+        image.setDefaultElement(args.get(1));
         return image;
     }
 
-    private static Value convolve(List<Value> args) {
+    private static Value convolveImage(List<Value> args) {
         final ImageVal image = (ImageVal) args.get(0);
         final PointVal pt = (PointVal) args.get(1);
         final KernelVal kernel = (KernelVal) args.get(2);
@@ -132,8 +203,8 @@ public class ImageFunctions {
     }
 
     private static Value bounds(List<Value> args) {
-        final ImageVal image = (ImageVal) args.get(0);
-        return new RectVal(0, 0, image.width(), image.height());
+        final MatrixVal<?> matrix = (MatrixVal<?>) args.get(0);
+        return new RectVal(0, 0, matrix.width(), matrix.height());
     }
 
     private static Value imageFromWidthAndHeight(List<Value> args) {

@@ -11,6 +11,11 @@ public class SubOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.RGB, ValueType.RGB, SubOperatorImpl::rgbMinusRgb);
         implement(ValueType.RGB, ValueType.NUMBER, SubOperatorImpl::rgbMinusNumber);
         implement(ValueType.IMAGE, ValueType.IMAGE, SubOperatorImpl::imageMinusImage);
+        implement(ValueType.KERNEL, ValueType.KERNEL, SubOperatorImpl::kernelMinusKernel);
+    }
+
+    private static Value kernelMinusKernel(Value l, Value r) {
+        return ((KernelVal) l).subtract((KernelVal) r);
     }
 
     private static Value imageMinusImage(Value l, Value r) {

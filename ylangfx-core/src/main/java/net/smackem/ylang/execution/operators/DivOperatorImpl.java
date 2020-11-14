@@ -9,6 +9,11 @@ public class DivOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.RGB, ValueType.NUMBER, DivOperatorImpl::rgbDividedByNumber);
         implement(ValueType.RGB, ValueType.RGB, DivOperatorImpl::rgbDividedByRgb);
         implement(ValueType.IMAGE, ValueType.IMAGE, DivOperatorImpl::imageDividedByImage);
+        implement(ValueType.KERNEL, ValueType.KERNEL, DivOperatorImpl::kernelDividedByKernel);
+    }
+
+    private static Value kernelDividedByKernel(Value l, Value r) {
+        return ((KernelVal) l).divide((KernelVal) r);
     }
 
     private static Value imageDividedByImage(Value l, Value r) {

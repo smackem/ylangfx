@@ -58,7 +58,13 @@ public class CollectionFunctions {
                         CollectionFunctions::kernelCreateWith),
                 FunctionOverload.function(
                         List.of(ValueType.KERNEL),
-                        CollectionFunctions::kernelClone)));
+                        CollectionFunctions::kernelClone),
+                FunctionOverload.function(
+                        List.of(ValueType.RECT),
+                        CollectionFunctions::kernelFromBounds),
+                FunctionOverload.function(
+                        List.of(ValueType.IMAGE),
+                        CollectionFunctions::kernelFromImage)));
         registry.put(new FunctionGroup("gaussian",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
@@ -85,6 +91,15 @@ public class CollectionFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.LIST, ValueType.FUNCTION),
                         CollectionFunctions::sortListByComparison)));
+    }
+
+    private static Value kernelFromBounds(List<Value> args) {
+        final RectVal rect = (RectVal) args.get(0);
+        return new KernelVal((int) rect.width(), (int) rect.height(), 0);
+    }
+
+    private static Value kernelFromImage(List<Value> args) {
+        return KernelVal.fromImage((ImageVal) args.get(0));
     }
 
     private static Value sortListByComparison(List<Value> args) {

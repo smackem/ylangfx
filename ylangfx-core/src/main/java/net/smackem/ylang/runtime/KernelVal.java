@@ -1,17 +1,14 @@
 package net.smackem.ylang.runtime;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public class KernelVal extends Value implements Iterable<Value> {
-    private final int width;
-    private final int height;
+public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
     private final NumberVal[] values;
 
     private KernelVal(int width, int height, NumberVal[] values) {
-        super(ValueType.KERNEL);
-        this.width = width;
-        this.height = height;
+        super(ValueType.KERNEL, width, height);
         this.values = values;
     }
 
@@ -27,9 +24,9 @@ public class KernelVal extends Value implements Iterable<Value> {
         this(quadraticLen(values), values.toArray(new NumberVal[0]));
     }
 
-    @SuppressWarnings("CopyConstructorMissesField")
     public KernelVal(KernelVal original) {
-        this(original.width, original.height, Arrays.copyOf(original.values, original.values.length));
+        super(original);
+        this.values = Arrays.copyOf(original.values, original.values.length);
     }
 
     public static KernelVal laplace(int radius) {
@@ -56,46 +53,34 @@ public class KernelVal extends Value implements Iterable<Value> {
         return kernel;
     }
 
-    // only works reasonably for radius <= 5
-    public static KernelVal simpleGauss(int radius) {
-        final int len = radius * 2 + 1;
-        final KernelVal k = new KernelVal(len, len, 0);
-        int index = 0;
-        for (int y = 0; y < len; y++) {
-            final int base = y > radius ? len - y - 1 : y;
-            for (int x = 0; x < len; x++) {
-                final double value = Math.pow(2, base + (x > radius ? len - x - 1 : x));
-                k.values[index] = new NumberVal((float) value);
-                index++;
-            }
+    public static KernelVal fromImage(ImageVal image) {
+        final KernelVal kernel = new KernelVal(image.width(), image.height(), 0);
+        for (int i = 0; i < kernel.values.length; i++) {
+            kernel.values[i] = new NumberVal(image.internalGet(i).intensity());
         }
-        return k;
+        return kernel;
     }
 
     public void sort() {
         Arrays.sort(this.values, Comparator.comparing(NumberVal::value));
     }
 
-    public NumberVal get(int x, int y) {
-        Objects.checkIndex(x, this.width);
-        Objects.checkIndex(y, this.height);
-        return this.values[y * this.width + x];
+    public NumberVal get(int index) {
+        return internalGet(index);
     }
 
-    public NumberVal get(int index) {
+    public void set(int index, NumberVal v) {
+        internalSet(index, v);
+    }
+
+    @Override
+    NumberVal internalGet(int index) {
         return this.values[index];
     }
 
-    public void set(int index, NumberVal n) {
-        this.values[index] = n;
-    }
-
-    public int width() {
-        return this.width;
-    }
-
-    public int height() {
-        return this.height;
+    @Override
+    void internalSet(int index, NumberVal value) {
+        this.values[index] = value;
     }
 
     public int size() {
@@ -137,6 +122,112 @@ public class KernelVal extends Value implements Iterable<Value> {
                 .orElse(null);
     }
 
+    @SuppressWarnings("DuplicatedCode")
+    public KernelVal convolve(KernelVal kernel) {
+        final int width = width();
+        final int height = height();
+        final KernelVal target = new KernelVal(width, height, 0);
+        final float kernelSum = kernel.sum().value();
+        final int kernelWidth = kernel.width();
+        final int kernelHeight = kernel.height();
+        final int halfKernelWidth = kernelWidth / 2;
+        final int halfKernelHeight = kernelHeight / 2;
+        final float[] kernelValues = new float[kernel.size()];
+        int targetIndex = 0;
+        int i = 0;
+        for (final Value n : kernel) {
+            kernelValues[i++] = ((NumberVal) n).value();
+        }
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                float acc = 0;
+                int startY = y - halfKernelHeight;
+                int endY = startY + kernelHeight;
+                int startX = x - halfKernelWidth;
+                int endX = startX + kernelWidth;
+                int kernelIndex = 0;
+                for (int imageY = startY; imageY < endY; imageY++) {
+                    if (imageY < 0 || imageY >= height) {
+                        kernelIndex += kernelWidth;
+                        continue;
+                    }
+                    int imageIndex = imageY * width + startX;
+                    for (int imageX = startX; imageX < endX; imageX++) {
+                        if (imageX >= 0 && imageX < width) {
+                            final float value = kernelValues[kernelIndex];
+                            final NumberVal px = this.values[imageIndex];
+                            acc += value * px.value();
+                        }
+                        kernelIndex++;
+                        imageIndex++;
+                    }
+                }
+                target.values[targetIndex] = new NumberVal(kernelSum == 0 ? acc : acc / kernelSum);
+                targetIndex++;
+            }
+        }
+        return target;
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    public float convolve(int x, int y, KernelVal kernel) {
+        final int width = width();
+        final int height = height();
+        final int kernelWidth = kernel.width();
+        final int kernelHeight = kernel.height();
+        final int halfKernelWidth = kernelWidth / 2;
+        final int halfKernelHeight = kernelHeight / 2;
+        float kernelSum = 0;
+        float acc = 0;
+        int kernelIndex = 0;
+
+        for (int kernelY = 0; kernelY < kernelHeight; kernelY++) {
+            for (int kernelX = 0; kernelX < kernelWidth; kernelX++) {
+                final int sourceY = y - halfKernelHeight + kernelY;
+                final int sourceX = x - halfKernelWidth + kernelX;
+                if (sourceX >= 0 && sourceX < width && sourceY >= 0 && sourceY < height) {
+                    final float value = kernel.values[kernelIndex].value();
+                    final NumberVal n = get(sourceX, sourceY);
+                    acc += value * n.value();
+                    kernelSum += value;
+                }
+                kernelIndex++;
+            }
+        }
+        if (kernelSum == 0) {
+            return acc;
+        }
+
+        return acc / kernelSum;
+    }
+
+    public KernelVal add(KernelVal right) {
+        return composeWith(right, (a, b) -> new NumberVal(a.value() + b.value()));
+    }
+
+    public KernelVal subtract(KernelVal right) {
+        return composeWith(right, (a, b) -> new NumberVal(a.value() - b.value()));
+    }
+
+    public KernelVal multiply(KernelVal right) {
+        return composeWith(right, (a, b) -> new NumberVal(a.value() * b.value()));
+    }
+
+    public KernelVal divide(KernelVal right) {
+        return composeWith(right, (a, b) -> new NumberVal(a.value() / b.value()));
+    }
+
+    public KernelVal composeWith(KernelVal that, BiFunction<NumberVal, NumberVal, NumberVal> operation) {
+        if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
+            throw new IllegalArgumentException("subtracted images must have the same dimensions");
+        }
+        final KernelVal result = new KernelVal(this.width(), this.height(), 0);
+        for (int i = 0; i < this.values.length; i++) {
+            result.values[i] = operation.apply(this.values[i], that.values[i]);
+        }
+        return result;
+    }
+
     @SuppressWarnings("NullableProblems")
     @Override
     public Iterator<Value> iterator() {
@@ -174,21 +265,20 @@ public class KernelVal extends Value implements Iterable<Value> {
             return false;
         }
         final KernelVal values1 = (KernelVal) o;
-        return width == values1.width &&
-               height == values1.height &&
+        return super.equals(o) &&
                Arrays.equals(values, values1.values);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(width, height, values);
+        return Arrays.hashCode(this.values);
     }
 
     @Override
     public String toString() {
         return "KernelVal{" +
-               "width=" + width +
-               ", height=" + height +
+               "width=" + width() +
+               ", height=" + height() +
                ", values=" + Arrays.toString(values) +
                '}';
     }
