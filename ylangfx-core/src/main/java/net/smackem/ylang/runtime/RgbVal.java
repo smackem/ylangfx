@@ -66,12 +66,20 @@ public class RgbVal extends Value {
         return new RgbVal(this.r + other.r, this.g + other.g, this.b + other.b, this.a);
     }
 
+    public RgbVal subtract(RgbVal other) {
+        return new RgbVal(this.r - other.r, this.g - other.g, this.b - other.b, this.a);
+    }
+
     public RgbVal multiplyWith(float number) {
         return new RgbVal(this.r * number, this.g * number, this.b * number, this.a);
     }
 
     public RgbVal multiplyWith(RgbVal other) {
         return new RgbVal(r01() * other.r, g01() * other.g, b01() * other.b, this.a);
+    }
+
+    public RgbVal divideBy(RgbVal other) {
+        return new RgbVal(this.r / other.r01(), this.g / other.g01(), this.b / other.b01(), this.a);
     }
 
     public RgbVal invert() {

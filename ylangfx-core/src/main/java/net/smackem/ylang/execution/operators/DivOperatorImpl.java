@@ -8,6 +8,11 @@ public class DivOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.NUMBER, ValueType.NUMBER, DivOperatorImpl::numberDividedByNumber);
         implement(ValueType.RGB, ValueType.NUMBER, DivOperatorImpl::rgbDividedByNumber);
         implement(ValueType.RGB, ValueType.RGB, DivOperatorImpl::rgbDividedByRgb);
+        implement(ValueType.IMAGE, ValueType.IMAGE, DivOperatorImpl::imageDividedByImage);
+    }
+
+    private static Value imageDividedByImage(Value l, Value r) {
+        return ((ImageVal) l).divide((ImageVal) r);
     }
 
     private static Value numberDividedByNumber(Value l, Value r) {
@@ -23,6 +28,6 @@ public class DivOperatorImpl extends BinaryOperatorImpl {
     private static Value rgbDividedByRgb(Value l, Value r) {
         final var lrgb = (RgbVal) l;
         final var rrgb = ((RgbVal) r);
-        return new RgbVal(lrgb.r() / rrgb.r01(), lrgb.g() / rrgb.g01(), lrgb.b() / rrgb.b01(), lrgb.a());
+        return lrgb.divideBy(rrgb);
     }
 }

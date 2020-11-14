@@ -12,6 +12,11 @@ class AddOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.RGB, ValueType.NUMBER, AddOperatorImpl::rgbPlusNumber);
         implement(ValueType.RGB, ValueType.RGB, AddOperatorImpl::rgbPlusRgb);
         implementLeft(ValueType.STRING, AddOperatorImpl::stringPlusAny);
+        implement(ValueType.IMAGE, ValueType.IMAGE, AddOperatorImpl::imagePlusImage);
+    }
+
+    private static Value imagePlusImage(Value l, Value r) {
+        return ((ImageVal) l).add((ImageVal) r);
     }
 
     private static Value numberPlusNumber(Value l, Value r) {

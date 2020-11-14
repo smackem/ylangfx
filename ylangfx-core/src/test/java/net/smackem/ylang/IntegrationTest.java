@@ -999,4 +999,43 @@ public class IntegrationTest {
                 new MapVal(List.of(new MapEntryVal(new StringVal("x"), new NumberVal(100))))
         )));
     }
+
+    @Test
+    public void benchmarkConvolveImage() throws ExecutionException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                K := kernel(11, 11, 1)
+                inp := image(300, 300)
+                out := image(inp)
+                for i in 0 .. 10 {
+                    for p in inp.bounds {
+                        out[p] = inp.convolve(p, K)
+                    }
+                }
+                return nil
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        new Interpreter(program, null, Writer.nullWriter()).execute();
+    }
+
+    @Test
+    public void benchmarkConvolveImage2() throws ExecutionException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                K := kernel(11, 11, 1)
+                inp := image(300, 300)
+                for i in 0 .. 10 {
+                    out := inp.convolve(K)
+                }
+                return nil
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        new Interpreter(program, null, Writer.nullWriter()).execute();
+    }
 }

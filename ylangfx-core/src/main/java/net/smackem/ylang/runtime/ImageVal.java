@@ -2,6 +2,7 @@ package net.smackem.ylang.runtime;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 public class ImageVal extends Value {
     private final int width;
@@ -47,6 +48,16 @@ public class ImageVal extends Value {
             rgbPixels[i] = new RgbVal(pixel >> 16 & 0xff, pixel >> 8 & 0xff, pixel & 0xff, pixel >> 24 & 0xff);
         }
         return new ImageVal(width, height, rgbPixels);
+    }
+
+    public static ImageVal fromKernel(KernelVal kernel) {
+        Objects.requireNonNull(kernel);
+        final ImageVal image = new ImageVal(kernel.width(), kernel.height());
+        for (int i = 0; i < image.pixels.length; i++) {
+            final float value = RgbVal.clamp(kernel.get(i).value());
+            image.pixels[i] = new RgbVal(value, value, value, 255);
+        }
+        return image;
     }
 
     public int width() {
@@ -110,9 +121,65 @@ public class ImageVal extends Value {
         return buffer;
     }
 
+    public ImageVal convolve(KernelVal kernel) {
+        final ImageVal target = new ImageVal(this.width, this.height);
+        final float kernelSum = kernel.sum().value();
+        final int kernelWidth = kernel.width();
+        final int kernelHeight = kernel.height();
+        final int halfKernelWidth = kernelWidth / 2;
+        final int halfKernelHeight = kernelHeight / 2;
+        final float[] kernelValues = new float[kernel.size()];
+        int targetIndex = 0;
+        int i = 0;
+        for (final Value n : kernel) {
+            kernelValues[i++] = ((NumberVal) n).value();
+        }
+        for (int y = 0; y < this.height; y++) {
+            for (int x = 0; x < this.width; x++) {
+                float r = 0;
+                float g = 0;
+                float b = 0;
+                float a = 255;
+                int startY = y - halfKernelHeight;
+                int endY = startY + kernelHeight;
+                int startX = x - halfKernelWidth;
+                int endX = startX + kernelWidth;
+                int kernelIndex = 0;
+                for (int imageY = startY; imageY < endY; imageY++) {
+                    if (imageY < 0 || imageY >= this.height) {
+                        kernelIndex += kernelWidth;
+                        continue;
+                    }
+                    int imageIndex = imageY * this.width + startX;
+                    for (int imageX = startX; imageX < endX; imageX++) {
+                        if (imageX >= 0 && imageX < this.width) {
+                            final float value = kernelValues[kernelIndex];
+                            final RgbVal px = this.pixels[imageIndex];
+                            r += value * px.r();
+                            g += value * px.g();
+                            b += value * px.b();
+                            if (imageX == x && imageY == y) {
+                                a = px.a();
+                            }
+                        }
+                        kernelIndex++;
+                        imageIndex++;
+                    }
+                }
+                target.pixels[targetIndex] = kernelSum == 0
+                        ? new RgbVal(r, g, b, a)
+                        : new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
+                targetIndex++;
+            }
+        }
+        return target;
+    }
+
     public RgbVal convolve(int x, int y, KernelVal kernel) {
         final int kernelWidth = kernel.width();
         final int kernelHeight = kernel.height();
+        final int halfKernelWidth = kernelWidth / 2;
+        final int halfKernelHeight = kernelHeight / 2;
         float kernelSum = 0;
         float r = 0;
         float g = 0;
@@ -122,8 +189,8 @@ public class ImageVal extends Value {
 
         for (int kernelY = 0; kernelY < kernelHeight; kernelY++) {
             for (int kernelX = 0; kernelX < kernelWidth; kernelX++) {
-                final int sourceY = y - (kernelHeight / 2) + kernelY;
-                final int sourceX = x - (kernelWidth / 2) + kernelX;
+                final int sourceY = y - halfKernelHeight + kernelY;
+                final int sourceX = x - halfKernelWidth + kernelX;
                 if (sourceX >= 0 && sourceX < this.width && sourceY >= 0 && sourceY < this.height) {
                     final float value = kernel.get(kernelIndex).value();
                     final RgbVal px = getPixel(sourceX, sourceY);
@@ -174,6 +241,33 @@ public class ImageVal extends Value {
             final PointVal pt = (PointVal) v;
             this.setPixel((int) pt.x(), (int) pt.y(), rgb);
         }
+    }
+
+    public ImageVal add(ImageVal right) {
+        return composeWith(right, RgbVal::add);
+    }
+
+    public ImageVal subtract(ImageVal right) {
+        return composeWith(right, RgbVal::subtract);
+    }
+
+    public ImageVal multiply(ImageVal right) {
+        return composeWith(right, RgbVal::multiplyWith);
+    }
+
+    public ImageVal divide(ImageVal right) {
+        return composeWith(right, RgbVal::divideBy);
+    }
+
+    public ImageVal composeWith(ImageVal that, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
+        if (Objects.requireNonNull(that).width != this.width || that.height != this.height) {
+            throw new IllegalArgumentException("subtracted images must have the same dimensions");
+        }
+        final ImageVal result = new ImageVal(this.width, this.height);
+        for (int i = 0; i < this.pixels.length; i++) {
+            result.pixels[i] = operation.apply(this.pixels[i], that.pixels[i]);
+        }
+        return result;
     }
 
     private static RgbVal[] emptyPixels(int width, int height) {

@@ -25,6 +25,9 @@ public class ImageFunctions {
                         ImageFunctions::bounds)));
         registry.put(new FunctionGroup("convolve",
                 FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.KERNEL),
+                        ImageFunctions::convolveImage),
+                FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
                         ImageFunctions::convolve)));
         registry.put(new FunctionGroup("selectAlpha",
@@ -70,6 +73,12 @@ public class ImageFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POLYGON, ValueType.RGB),
                         ImageFunctions::plot)));
+    }
+
+    private static Value convolveImage(List<Value> args) {
+        final ImageVal image = (ImageVal) args.get(0);
+        final KernelVal kernel = (KernelVal) args.get(1);
+        return image.convolve(kernel);
     }
 
     private static Value selectKernel(List<Value> args, ToFloatFunction<RgbVal> selector) {

@@ -10,6 +10,11 @@ public class SubOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.POINT, ValueType.POINT, SubOperatorImpl::pointMinusPoint);
         implement(ValueType.RGB, ValueType.RGB, SubOperatorImpl::rgbMinusRgb);
         implement(ValueType.RGB, ValueType.NUMBER, SubOperatorImpl::rgbMinusNumber);
+        implement(ValueType.IMAGE, ValueType.IMAGE, SubOperatorImpl::imageMinusImage);
+    }
+
+    private static Value imageMinusImage(Value l, Value r) {
+        return ((ImageVal) l).subtract((ImageVal) r);
     }
 
     private static Value rgbMinusNumber(Value l, Value r) {
@@ -21,7 +26,7 @@ public class SubOperatorImpl extends BinaryOperatorImpl {
     private static Value rgbMinusRgb(Value l, Value r) {
         final RgbVal lc = (RgbVal) l;
         final RgbVal rc = (RgbVal) r;
-        return new RgbVal(lc.r() - rc.r(), lc.g() - rc.g(), lc.b() - rc.b(), lc.a());
+        return lc.subtract(rc);
     }
 
     private static Value numberMinusNumber(Value l, Value r) {

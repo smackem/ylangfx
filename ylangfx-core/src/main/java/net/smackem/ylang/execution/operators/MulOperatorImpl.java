@@ -11,6 +11,11 @@ public class MulOperatorImpl extends BinaryOperatorImpl {
         implement(ValueType.POINT, ValueType.POINT, MulOperatorImpl::pointTimesPoint);
         implement(ValueType.RGB, ValueType.NUMBER, MulOperatorImpl::rgbTimesNumber);
         implement(ValueType.RGB, ValueType.RGB, MulOperatorImpl::rgbTimesRgb);
+        implement(ValueType.IMAGE, ValueType.IMAGE, MulOperatorImpl::imageTimesRgb);
+    }
+
+    private static Value imageTimesRgb(Value l, Value r) {
+        return ((ImageVal) l).multiply((ImageVal) r);
     }
 
     private static Value numberTimesNumber(Value l, Value r) {
