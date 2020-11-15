@@ -956,6 +956,40 @@ public class IntegrationTest {
     }
 
     @Test
+    public void functionReferencesRepeated() throws ExecutionException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compile("""
+                fn doIt(x) {
+                    return x*2
+                }
+                fun := @doIt
+                list := []
+                for i in 0 .. 10 {
+                    list.push(fun@(i))
+                }
+                return list
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Interpreter interpreter = new Interpreter(program, null, Writer.nullWriter());
+        final Value retVal = interpreter.execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new NumberVal(0),
+                new NumberVal(2),
+                new NumberVal(4),
+                new NumberVal(6),
+                new NumberVal(8),
+                new NumberVal(10),
+                new NumberVal(12),
+                new NumberVal(14),
+                new NumberVal(16),
+                new NumberVal(18)
+        )));
+    }
+
+    @Test
     public void sortList() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();

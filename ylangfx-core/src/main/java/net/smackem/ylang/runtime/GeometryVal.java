@@ -3,7 +3,6 @@ package net.smackem.ylang.runtime;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;

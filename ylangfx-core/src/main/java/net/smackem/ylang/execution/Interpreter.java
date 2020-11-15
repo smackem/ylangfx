@@ -333,6 +333,7 @@ public class Interpreter {
                 executeInstr(this.instructions[this.pc]);
                 this.pc++;
             }
+            this.pc--;
             return stack.pop();
         } catch (IOException | StackException | MissingOverloadException e) {
             log.error("error executing function", e);
