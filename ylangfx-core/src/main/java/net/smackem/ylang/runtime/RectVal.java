@@ -7,7 +7,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class RectVal extends GeometryVal {
+public class RectVal extends GeometryVal<PointVal> {
     private final float x, y, width, height;
 
     public static final RectVal EMPTY = new RectVal(0f, 0f, 0f, 0f);
@@ -79,7 +79,7 @@ public class RectVal extends GeometryVal {
     }
 
     @Override
-    public GeometryVal translate(PointVal pt) {
+    public GeometryVal<PointVal> translate(PointVal pt) {
         return new RectVal(this.x + pt.x(), this.y + pt.y(), this.width, this.height);
     }
 
@@ -110,7 +110,7 @@ public class RectVal extends GeometryVal {
 
     @SuppressWarnings("NullableProblems")
     @Override
-    public Iterator<Value> iterator() {
+    public Iterator<PointVal> iterator() {
         return new PointIterator(this);
     }
 
@@ -119,8 +119,8 @@ public class RectVal extends GeometryVal {
         return String.format(RuntimeParameters.LOCALE, "rect(%f;%f, %f, %f)", this.x, this.y, this.width, this.height);
     }
 
-    private static class PointIterator implements Iterator<Value> {
-        int left, right, top, bottom;
+    private static class PointIterator implements Iterator<PointVal> {
+        final int left, right, top, bottom;
         int x, y;
 
         PointIterator(RectVal rect) {
@@ -138,7 +138,7 @@ public class RectVal extends GeometryVal {
         }
 
         @Override
-        public Value next() {
+        public PointVal next() {
             final var pt = new PointVal(this.x, this.y);
             this.x++;
             if (this.x >= this.right) {

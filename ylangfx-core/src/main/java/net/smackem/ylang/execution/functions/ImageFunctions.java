@@ -16,6 +16,9 @@ public class ImageFunctions {
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
                         ImageFunctions::imageFromWidthAndHeight),
                 FunctionOverload.function(
+                        List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.RGB),
+                        ImageFunctions::imageCreateWith),
+                FunctionOverload.function(
                         List.of(ValueType.IMAGE),
                         ImageFunctions::imageClone),
                 FunctionOverload.function(
@@ -114,6 +117,12 @@ public class ImageFunctions {
                         ImageFunctions::plotKernel)));
     }
 
+    private static Value imageCreateWith(List<Value> args) {
+        final NumberVal width = (NumberVal) args.get(0);
+        final NumberVal height = (NumberVal) args.get(1);
+        return new ImageVal((int)(width.value() + 0.5f), (int)(height.value() + 0.5f), (RgbVal) args.get(2));
+    }
+
     private static Value convolveKernel(List<Value> args) {
         final KernelVal image = (KernelVal) args.get(0);
         final PointVal pt = (PointVal) args.get(1);
@@ -157,13 +166,15 @@ public class ImageFunctions {
 
     private static Value plotImage(List<Value> args) {
         final ImageVal image = (ImageVal) args.get(0);
-        image.plot((GeometryVal) args.get(1), (RgbVal) args.get(2));
+        //noinspection unchecked
+        image.plot((GeometryVal<PointVal>) args.get(1), (RgbVal) args.get(2));
         return image;
     }
 
     private static Value plotKernel(List<Value> args) {
         final KernelVal image = (KernelVal) args.get(0);
-        image.plot((GeometryVal) args.get(1), (NumberVal) args.get(2));
+        //noinspection unchecked
+        image.plot((GeometryVal<PointVal>) args.get(1), (NumberVal) args.get(2));
         return image;
     }
 

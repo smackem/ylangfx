@@ -1,6 +1,5 @@
 package net.smackem.ylang.execution.operators;
 
-import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.runtime.*;
 
 import java.util.ArrayList;

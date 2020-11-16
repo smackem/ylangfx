@@ -2,7 +2,6 @@ package net.smackem.ylang.execution.functions;
 
 import net.smackem.ylang.runtime.ValueType;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 

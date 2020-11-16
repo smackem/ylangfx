@@ -88,15 +88,17 @@ public class GeometryFunctions {
         registry.put(new FunctionGroup("distance", distanceOverloads));
     }
 
+    @SuppressWarnings("unchecked")
     private static Value distance(List<Value> args) {
-        final GeometryVal lg = (GeometryVal) args.get(0);
-        final GeometryVal rg = (GeometryVal) args.get(1);
+        final GeometryVal<PointVal> lg = (GeometryVal<PointVal>) args.get(0);
+        final GeometryVal<PointVal> rg = (GeometryVal<PointVal>) args.get(1);
         return new NumberVal(GeometryVal.distance(lg, rg));
     }
 
+    @SuppressWarnings("unchecked")
     private static Value intersect(List<Value> args) {
-        final GeometryVal lg = (GeometryVal) args.get(0);
-        final GeometryVal rg = (GeometryVal) args.get(1);
+        final GeometryVal<PointVal> lg = (GeometryVal<PointVal>) args.get(0);
+        final GeometryVal<PointVal> rg = (GeometryVal<PointVal>) args.get(1);
         return new ListVal(GeometryVal.intersect(lg, rg));
     }
 

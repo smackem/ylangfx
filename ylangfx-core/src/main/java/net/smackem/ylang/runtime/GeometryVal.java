@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public abstract class GeometryVal extends Value implements Iterable<Value> {
+public abstract class GeometryVal<T extends Value> extends Value implements Iterable<T> {
 
     private Geometry geometry;
 
@@ -15,7 +15,7 @@ public abstract class GeometryVal extends Value implements Iterable<Value> {
         super(type);
     }
 
-    public abstract GeometryVal translate(PointVal pt);
+    public abstract GeometryVal<T> translate(PointVal pt);
 
     public abstract RectVal bounds();
 
@@ -28,7 +28,7 @@ public abstract class GeometryVal extends Value implements Iterable<Value> {
 
     abstract Geometry createGeometry();
 
-    public static List<PointVal> intersect(GeometryVal g1, GeometryVal g2) {
+    public static <T extends Value> List<PointVal> intersect(GeometryVal<T> g1, GeometryVal<T> g2) {
         Objects.requireNonNull(g1);
         Objects.requireNonNull(g2);
         final Geometry intersection = g1.geometry().intersection(g2.geometry());
@@ -37,7 +37,7 @@ public abstract class GeometryVal extends Value implements Iterable<Value> {
                 .collect(Collectors.toList());
     }
 
-    public static float distance(GeometryVal g1, GeometryVal g2) {
+    public static <T extends Value> float distance(GeometryVal<T> g1, GeometryVal<T> g2) {
         Objects.requireNonNull(g1);
         Objects.requireNonNull(g2);
         return (float) g1.geometry().distance(g2.geometry);

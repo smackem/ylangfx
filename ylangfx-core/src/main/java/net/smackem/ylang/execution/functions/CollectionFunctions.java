@@ -54,14 +54,17 @@ public class CollectionFunctions {
                         CollectionFunctions::mapSize)));
         registry.put(new FunctionGroup("kernel",
                 FunctionOverload.function(
+                        List.of(ValueType.RECT),
+                        CollectionFunctions::kernelFromBounds),
+                FunctionOverload.function(
+                        List.of(ValueType.NUMBER, ValueType.NUMBER),
+                        CollectionFunctions::kernelCreateFromWidthAndHeight),
+                FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
                         CollectionFunctions::kernelCreateWith),
                 FunctionOverload.function(
                         List.of(ValueType.KERNEL),
                         CollectionFunctions::kernelClone),
-                FunctionOverload.function(
-                        List.of(ValueType.RECT),
-                        CollectionFunctions::kernelFromBounds),
                 FunctionOverload.function(
                         List.of(ValueType.IMAGE),
                         CollectionFunctions::kernelFromImage)));
@@ -91,6 +94,12 @@ public class CollectionFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.LIST, ValueType.FUNCTION),
                         CollectionFunctions::sortListByComparison)));
+    }
+
+    private static Value kernelCreateFromWidthAndHeight(List<Value> args) {
+        final NumberVal width = (NumberVal) args.get(0);
+        final NumberVal height = (NumberVal) args.get(1);
+        return new KernelVal((int) (width.value() + 0.5f), (int) (height.value() + 0.5f), 0);
     }
 
     private static Value kernelFromBounds(List<Value> args) {

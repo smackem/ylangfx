@@ -89,7 +89,7 @@ public class RemoteImageProcService implements AutoCloseable {
         }
     }
 
-    private final class ProcessImageResponseReader implements StreamObserver<ProcessImageResponse> {
+    private static final class ProcessImageResponseReader implements StreamObserver<ProcessImageResponse> {
         private final CompletableFuture<ProcessImageResponse> future;
         private final ProcessImageResponse.Builder builder = ProcessImageResponse.newBuilder();
         private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();

@@ -7,7 +7,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import java.util.Iterator;
 import java.util.Objects;
 
-public final class PointVal extends GeometryVal {
+public final class PointVal extends GeometryVal<PointVal> {
     private final float x;
     private final float y;
 
@@ -89,7 +89,7 @@ public final class PointVal extends GeometryVal {
     }
 
     @Override
-    public Iterator<Value> iterator() {
+    public Iterator<PointVal> iterator() {
         return new Iterator<>() {
             private boolean hasReturned;
 
@@ -99,7 +99,7 @@ public final class PointVal extends GeometryVal {
             }
 
             @Override
-            public Value next() {
+            public PointVal next() {
                 this.hasReturned = true;
                 return PointVal.this;
             }

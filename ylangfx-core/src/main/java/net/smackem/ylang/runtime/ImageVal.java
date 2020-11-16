@@ -16,7 +16,11 @@ public class ImageVal extends MatrixVal<RgbVal> {
     }
 
     public ImageVal(int width, int height) {
-        this(width, height, emptyPixels(width, height));
+        this(width, height, getPixels(width, height, RgbVal.EMPTY));
+    }
+
+    public ImageVal(int width, int height, RgbVal initialValue) {
+        this(width, height, getPixels(width, height, initialValue));
     }
 
     public ImageVal(ImageVal original) {
@@ -61,6 +65,7 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return buffer;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public ImageVal convolve(KernelVal kernel) {
         final int width = width();
         final int height = height();
@@ -117,6 +122,7 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return target;
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public RgbVal convolve(int x, int y, KernelVal kernel) {
         final int width = width();
         final int height = height();
@@ -199,15 +205,16 @@ public class ImageVal extends MatrixVal<RgbVal> {
         this.pixels[index] = value;
     }
 
-    private static RgbVal[] emptyPixels(int width, int height) {
+    private static RgbVal[] getPixels(int width, int height, RgbVal initialValue) {
         if (width <= 0) {
             throw new IllegalArgumentException("image width must be > 0");
         }
         if (height <= 0) {
             throw new IllegalArgumentException("image height must be > 0");
         }
+        Objects.requireNonNull(initialValue);
         final RgbVal[] pixels = new RgbVal[width * height];
-        Arrays.fill(pixels, RgbVal.EMPTY);
+        Arrays.fill(pixels, initialValue);
         return pixels;
     }
 

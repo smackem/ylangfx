@@ -1,6 +1,5 @@
 package net.smackem.ylang.runtime;
 
-import java.util.Locale;
 import java.util.Objects;
 
 public class HsvVal extends Value {
@@ -27,7 +26,6 @@ public class HsvVal extends Value {
         return this.value;
     }
 
-    @SuppressWarnings("DuplicateExpressions")
     public static HsvVal fromRgb(RgbVal rgb) {
         final float r = rgb.r01();
         final float g = rgb.g01();

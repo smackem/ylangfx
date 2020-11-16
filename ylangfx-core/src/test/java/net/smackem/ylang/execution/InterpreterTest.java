@@ -6,7 +6,6 @@ import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 

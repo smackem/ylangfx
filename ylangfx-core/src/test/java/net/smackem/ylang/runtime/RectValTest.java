@@ -1,6 +1,5 @@
 package net.smackem.ylang.runtime;
 
-import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import org.junit.Test;

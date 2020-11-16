@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class CircleVal extends GeometryVal {
+public class CircleVal extends GeometryVal<PointVal> {
 
     private final PointVal center;
     private final float radius;
@@ -41,7 +41,7 @@ public class CircleVal extends GeometryVal {
     }
 
     @Override
-    public GeometryVal translate(PointVal pt) {
+    public GeometryVal<PointVal> translate(PointVal pt) {
         return new CircleVal(this.center.translate(pt), this.radius);
     }
 
@@ -87,8 +87,8 @@ public class CircleVal extends GeometryVal {
 
     @SuppressWarnings("NullableProblems")
     @Override
-    public Iterator<Value> iterator() {
-        final Collection<Value> points = new ArrayList<>();
+    public Iterator<PointVal> iterator() {
+        final Collection<PointVal> points = new ArrayList<>();
         final float x0 = this.center.x();
         final float y0 = this.center.y();
         final int radius = (int) (this.radius + 0.5f);

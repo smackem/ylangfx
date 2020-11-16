@@ -1,10 +1,7 @@
 package net.smackem.ylang.execution.operators;
 
-import net.smackem.ylang.execution.Context;
 import net.smackem.ylang.execution.MissingOverloadException;
-import net.smackem.ylang.runtime.NilVal;
 import net.smackem.ylang.runtime.NumberVal;
-import net.smackem.ylang.runtime.RectVal;
 import net.smackem.ylang.runtime.RgbVal;
 import org.junit.Test;
 

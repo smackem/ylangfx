@@ -93,9 +93,8 @@ public abstract class MatrixVal<T extends Value> extends Value {
         return result;
     }
 
-    public final void plot(GeometryVal geometry, T value) {
-        for (final Value v : geometry) {
-            final PointVal pt = (PointVal) v;
+    public final void plot(GeometryVal<PointVal> geometry, T value) {
+        for (final PointVal pt : geometry) {
             set((int) pt.x(), (int) pt.y(), value);
         }
     }

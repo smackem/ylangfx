@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Objects;
 
-public class LineVal extends GeometryVal {
+public class LineVal extends GeometryVal<PointVal> {
     private final float x1, y1;
     private final float x2, y2;
 
@@ -50,7 +50,7 @@ public class LineVal extends GeometryVal {
     }
 
     @Override
-    public GeometryVal translate(PointVal pt) {
+    public GeometryVal<PointVal> translate(PointVal pt) {
         return new LineVal(this.x1 + pt.x(), this.y1 + pt.y(), this.x2 + pt.x(), this.y2 + pt.y());
     }
 
@@ -65,7 +65,7 @@ public class LineVal extends GeometryVal {
 
     @SuppressWarnings("NullableProblems")
     @Override
-    public Iterator<Value> iterator() {
+    public Iterator<PointVal> iterator() {
         return new PointIterator();
     }
 
@@ -100,7 +100,7 @@ public class LineVal extends GeometryVal {
         return String.format(Locale.ROOT, "line(%f;%f, %f;%f)", this.x1, this.y1, this.x2, this.y2);
     }
 
-    private class PointIterator implements Iterator<Value> {
+    private class PointIterator implements Iterator<PointVal> {
         final float stepX, stepY;
         final int steps;
         float x, y;
@@ -122,7 +122,7 @@ public class LineVal extends GeometryVal {
         }
 
         @Override
-        public Value next() {
+        public PointVal next() {
             final PointVal pt = new PointVal(this.x, this.y);
             this.index++;
             this.x += this.stepX;
