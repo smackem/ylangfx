@@ -73,19 +73,51 @@ public class GeometryFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.CIRCLE),
                         GeometryFunctions::circleRadius)));
+        registry.put(new FunctionGroup("polygon",
+                FunctionOverload.function(
+                        List.of(ValueType.LIST),
+                        GeometryFunctions::polygon)));
         final Collection<ValueType> geometryTypes = ValueType.publicValues().stream()
                 .filter(ValueType::isGeometry)
                 .collect(Collectors.toList());
         final List<FunctionOverload> intersectOverloads = new ArrayList<>();
         final List<FunctionOverload> distanceOverloads = new ArrayList<>();
+        final List<FunctionOverload> translateOverloads = new ArrayList<>();
         for (final ValueType left : geometryTypes) {
             for (final ValueType right : geometryTypes) {
                 intersectOverloads.add(FunctionOverload.method(List.of(left, right), GeometryFunctions::intersect));
                 distanceOverloads.add(FunctionOverload.method(List.of(left, right), GeometryFunctions::distance));
             }
+            translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.POINT), GeometryFunctions::translateByPoint));
+            translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.NUMBER, ValueType.NUMBER), GeometryFunctions::translateByXY));
         }
         registry.put(new FunctionGroup("intersect", intersectOverloads));
         registry.put(new FunctionGroup("distance", distanceOverloads));
+        registry.put(new FunctionGroup("translate", translateOverloads));
+    }
+
+    private static Value translateByPoint(List<Value> args) {
+        //noinspection unchecked
+        return ((GeometryVal<PointVal>) args.get(0)).translate((PointVal) args.get(1));
+    }
+
+    private static Value translateByXY(List<Value> args) {
+        final float x = ((NumberVal) args.get(1)).value();
+        final float y = ((NumberVal) args.get(2)).value();
+        //noinspection unchecked
+        return ((GeometryVal<PointVal>) args.get(0)).translate(new PointVal(x, y));
+    }
+
+    private static Value polygon(List<Value> args) {
+        final ListVal list = (ListVal) args.get(0);
+        final List<PointVal> vertices = new ArrayList<>();
+        for (final Value v : list) {
+            if (v instanceof PointVal == false) {
+                throw new IllegalArgumentException("polygon vertices must be of type POINT");
+            }
+            vertices.add((PointVal) v);
+        }
+        return new PolygonVal(vertices);
     }
 
     @SuppressWarnings("unchecked")

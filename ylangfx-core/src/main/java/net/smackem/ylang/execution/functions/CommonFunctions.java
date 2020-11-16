@@ -13,6 +13,9 @@ public class CommonFunctions {
                         List.of(ValueType.RECT),
                         CommonFunctions::rectWidth),
                 FunctionOverload.method(
+                        List.of(ValueType.IMAGE),
+                        CommonFunctions::imageWidth),
+                FunctionOverload.method(
                         List.of(ValueType.KERNEL),
                         CommonFunctions::kernelWidth)));
         registry.put(new FunctionGroup("height",
@@ -20,8 +23,21 @@ public class CommonFunctions {
                         List.of(ValueType.RECT),
                         CommonFunctions::rectHeight),
                 FunctionOverload.method(
+                        List.of(ValueType.IMAGE),
+                        CommonFunctions::imageHeight),
+                FunctionOverload.method(
                         List.of(ValueType.KERNEL),
                         CommonFunctions::kernelHeight)));
+    }
+
+    private static Value imageHeight(List<Value> args) {
+        final ImageVal image = (ImageVal) args.get(0);
+        return new NumberVal(image.height());
+    }
+
+    private static Value imageWidth(List<Value> args) {
+        final ImageVal image = (ImageVal) args.get(0);
+        return new NumberVal(image.width());
     }
 
     private static Value kernelHeight(List<Value> args) {

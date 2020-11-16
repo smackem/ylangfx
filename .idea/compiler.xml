@@ -16,4 +16,10 @@
       <module name="ylangfx-core" target="15" />
     </bytecodeTargetLevel>
   </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="ylangfx-app" options="-Xlint:all" />
+      <module name="ylangfx-core" options="-Xlint:all" />
+    </option>
+  </component>
 </project>
