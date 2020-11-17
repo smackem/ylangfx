@@ -120,7 +120,10 @@ public class Interpreter {
         final LinkedList<Integer> stackFrameOffsets = new LinkedList<>(this.stackFrames);
         while (stackFrameOffsets.isEmpty() == false) {
             final Integer stackFrameOffset = stackFrameOffsets.pop();
-            final Value val = this.ctx.stack().get(stackFrameOffset);
+            if (stackFrameOffset == 0) {
+                break;
+            }
+            final Value val = this.ctx.stack().get(stackFrameOffset - 1);
             final int pc = val instanceof NumberVal ?  (int) ((NumberVal) val).value() - 1 : 0; // navigate to CALL instruction
             instructions.add(this.instructions[pc].instruction);
         }
