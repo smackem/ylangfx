@@ -139,6 +139,7 @@ public class ImageProcController {
                 loadImageFromFile(new File(imagePath));
             }
         });
+        this.messageTextArea.maxWidthProperty().bind(this.targetTab.getTabPane().widthProperty());
     }
 
     @FXML
@@ -228,7 +229,7 @@ public class ImageProcController {
                 .append("    ").append(e.getCause().getMessage());
         if (e.stackTrace() != null) {
             for (final Instruction instr : e.stackTrace()) {
-                sb.append(System.lineSeparator()).append("    @ ").append(instr).append(instr.debugInfo());
+                sb.append(System.lineSeparator()).append("    ").append(instr.debugInfo()).append(" ").append(instr);
             }
         }
         return sb.toString();

@@ -40,6 +40,7 @@
                      <ImageView fx:id="targetImageView" preserveRatio="true"
                                 StackPane.alignment="TOP_LEFT" />
                      <Label fx:id="messageTextArea"
+                            wrapText="true"
                             StackPane.alignment="TOP_LEFT" />
                   </StackPane>
                </ScrollPane>

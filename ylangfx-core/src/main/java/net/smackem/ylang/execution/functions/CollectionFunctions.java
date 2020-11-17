@@ -1,5 +1,6 @@
 package net.smackem.ylang.execution.functions;
 
+import net.smackem.ylang.execution.ExecutionException;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.runtime.*;
@@ -114,6 +115,9 @@ public class CollectionFunctions {
     private static Value sortListByComparison(List<Value> args) {
         final ListVal list = (ListVal) args.get(0);
         final FunctionVal compare = (FunctionVal) args.get(1);
+        if (compare.parameterCount() != 2) {
+            throw new IllegalArgumentException("the compare function must accept two arguments!");
+        }
         list.sort((a, b) -> {
             final NumberVal result = (NumberVal) compare.invoke(List.of(a, b));
             return (int) result.value();

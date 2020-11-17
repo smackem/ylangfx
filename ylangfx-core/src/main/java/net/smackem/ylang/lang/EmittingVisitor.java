@@ -540,7 +540,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     }
 
     private void logSemanticError(ParserRuleContext ctx, String message) {
-        final String text = String.format("line %d, char %d: %s",
+        final String text = String.format("line %d:%d: %s",
                 ctx.start.getLine(), ctx.start.getCharPositionInLine(), message);
         log.info(text);
         this.semanticErrors.add(text);
