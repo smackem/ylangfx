@@ -4,6 +4,7 @@ import net.smackem.ylang.execution.functions.Func;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.execution.operators.UnaryOperator;
+import net.smackem.ylang.lang.DebugInfo;
 import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
@@ -16,6 +17,7 @@ import java.io.Writer;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Interpreter {
     private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
@@ -86,9 +88,11 @@ public class Interpreter {
             try {
                 executeInstr(taggedInstr);
             } catch (Exception e) {
-                final String message = "execution error @pc=%d instruction=%s debugInfo=%s".formatted(this.pc, taggedInstr.instruction, taggedInstr.instruction.debugInfo());
+                final String message = "execution error @pc=%d instruction=%s debugInfo=%s".formatted(
+                        this.pc, taggedInstr.instruction, taggedInstr.instruction.debugInfo());
+                final Collection<Instruction> stackTrace = collectStackTrace(taggedInstr.instruction);
                 log.error(message, e);
-                throw new ExecutionException(message, taggedInstr.instruction.debugInfo(), e);
+                throw new ExecutionException(message, stackTrace, e);
             }
             this.pc++;
         }
@@ -108,6 +112,19 @@ public class Interpreter {
                 duration.toSeconds(), duration.toMillisPart(),
                 retVal.toLangString()));
         return retVal;
+    }
+
+    private Collection<Instruction> collectStackTrace(Instruction currentInstr) {
+        final List<Instruction> instructions = new ArrayList<>();
+        instructions.add(currentInstr);
+        final LinkedList<Integer> stackFrameOffsets = new LinkedList<>(this.stackFrames);
+        while (stackFrameOffsets.isEmpty() == false) {
+            final Integer stackFrameOffset = stackFrameOffsets.pop();
+            final Value val = this.ctx.stack().get(stackFrameOffset);
+            final int pc = val instanceof NumberVal ?  (int) ((NumberVal) val).value() - 1 : 0; // navigate to CALL instruction
+            instructions.add(this.instructions[pc].instruction);
+        }
+        return instructions;
     }
 
     private void writeLogMessageGuarded(String message) throws ExecutionException {

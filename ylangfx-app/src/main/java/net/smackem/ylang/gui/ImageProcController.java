@@ -21,6 +21,7 @@ import net.smackem.ylang.execution.ExecutionException;
 import net.smackem.ylang.execution.Interpreter;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
+import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.model.ScriptLibrary;
 import net.smackem.ylang.runtime.ImageVal;
@@ -225,8 +226,10 @@ public class ImageProcController {
         sb.append(e.getMessage()).append(System.lineSeparator())
                 .append("caused by ").append(e.getCause().getClass()).append(": ").append(System.lineSeparator())
                 .append("    ").append(e.getCause().getMessage());
-        if (e.debugInfo() != null) {
-            sb.append(System.lineSeparator()).append("    ").append(e.debugInfo());
+        if (e.stackTrace() != null) {
+            for (final Instruction instr : e.stackTrace()) {
+                sb.append(System.lineSeparator()).append("    @ ").append(instr).append(instr.debugInfo());
+            }
         }
         return sb.toString();
     }

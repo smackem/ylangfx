@@ -1,17 +1,19 @@
 package net.smackem.ylang.execution;
 
-import net.smackem.ylang.lang.DebugInfo;
+import net.smackem.ylang.lang.Instruction;
+
+import java.util.Collection;
 
 public class ExecutionException extends Exception {
 
-    private final DebugInfo debugInfo;
+    private final Collection<Instruction> stackTrace;
 
-    ExecutionException(String message, DebugInfo debugInfo, Exception cause) {
+    ExecutionException(String message, Collection<Instruction> stackTrace, Exception cause) {
         super(message, cause);
-        this.debugInfo = debugInfo;
+        this.stackTrace = stackTrace;
     }
 
-    public DebugInfo debugInfo() {
-        return this.debugInfo;
+    public Collection<Instruction> stackTrace() {
+        return this.stackTrace;
     }
 }
