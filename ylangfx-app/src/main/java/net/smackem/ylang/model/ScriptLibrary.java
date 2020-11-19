@@ -1,9 +1,11 @@
 package net.smackem.ylang.model;
 
+import net.smackem.ylang.lang.FileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -13,7 +15,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class ScriptLibrary {
+public class ScriptLibrary implements FileProvider {
     private static final Logger log = LoggerFactory.getLogger(ScriptLibrary.class);
     private final Path basePath;
 
@@ -46,5 +48,14 @@ public class ScriptLibrary {
         return Files.walk(this.basePath, 1, FileVisitOption.FOLLOW_LINKS)
                 .filter(p -> p.toString().endsWith(".ylang"))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BufferedReader open(String fileName) throws IOException {
+        if (fileName.endsWith(".ylang") == false) {
+            fileName += ".ylang";
+        }
+        final Path path = Paths.get(this.basePath.toString(), fileName);
+        return Files.newBufferedReader(path);
     }
 }

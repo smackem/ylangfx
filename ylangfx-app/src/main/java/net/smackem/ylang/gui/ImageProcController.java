@@ -191,7 +191,7 @@ public class ImageProcController {
         final List<String> errors = new ArrayList<>();
         final Program program;
         try {
-            program = compiler.compile(this.codeEditor.getText(), FunctionRegistry.INSTANCE, errors);
+            program = compiler.compile(this.codeEditor.getText(), FunctionRegistry.INSTANCE, this.scriptLibrary, errors);
         } catch (Exception e) {
             this.message.setValue(e.getMessage());
             return;

@@ -4,6 +4,9 @@
 .keyword {
     -fx-fill: #c6c;
 }
+.preprocessor {
+    -fx-fill: #c6c;
+}
 .at {
     -fx-fill: darkorange;
     -fx-font-weight: bold;

@@ -4,13 +4,26 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
+import java.util.Objects;
 
 public class Compiler {
 
-    public Program compile(String source, FunctionTable functionTable, Collection<String> outErrors) {
+    public Program compile(String source, FunctionTable functionTable, FileProvider fileProvider, Collection<String> outErrors) {
+        final Preprocessor preprocessor = new Preprocessor(source, Objects.requireNonNull(fileProvider));
+        try {
+            source = preprocessor.preprocess();
+        } catch (IOException e) {
+            outErrors.add("%s: %s".formatted(e.getClass().getName(), e.getMessage()));
+            return null;
+        }
+        return compileWithoutPreprocessing(source, functionTable, outErrors);
+    }
+
+    Program compileWithoutPreprocessing(String source, FunctionTable functionTable, Collection<String> outErrors) {
         if (source.endsWith("\n") == false) {
             source += "\n";
         }

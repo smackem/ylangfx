@@ -34,6 +34,7 @@ public class CodeEditor extends CodeArea {
     private static final String NUMBER_PATTERN = "\\b\\d+(\\.\\d*)?\\b";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
     private static final String COMMENT_PATTERN = "//[^\n]*";
+    private static final String PREPROCESSOR_PATTERN = "#\\w+";
 
     private static final Pattern PATTERN = Pattern.compile(
             "(?<AT>" + AT_PATTERN + ")"
@@ -44,6 +45,7 @@ public class CodeEditor extends CodeArea {
             + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
             + "|(?<STRING>" + STRING_PATTERN + ")"
             + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
+            + "|(?<PREPROC>" + PREPROCESSOR_PATTERN + ")"
     );
 
     public CodeEditor() {
@@ -99,6 +101,7 @@ public class CodeEditor extends CodeArea {
                     matcher.group("NUMBER") != null ? "number" :
                     matcher.group("STRING") != null ? "string" :
                     matcher.group("COMMENT") != null ? "comment" :
+                    matcher.group("PREPROC") != null ? "preprocessor" :
                     null; // never happens
             assert styleClass != null;
             spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);

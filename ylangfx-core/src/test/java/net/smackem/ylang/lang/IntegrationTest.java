@@ -1,4 +1,4 @@
-package net.smackem.ylang;
+package net.smackem.ylang.lang;
 
 import net.smackem.ylang.execution.ExecutionException;
 import net.smackem.ylang.execution.Interpreter;
@@ -20,7 +20,7 @@ public class IntegrationTest {
     public void assignments() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 1
                 b := 2
                 c := a + b
@@ -37,7 +37,7 @@ public class IntegrationTest {
     public void compoundAtoms() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := #ffcc88@40
                 b := |0 1 -1 2|
                 c := 120;240
@@ -58,7 +58,7 @@ public class IntegrationTest {
     public void ternaryExpr() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 100 < 200 ? 1 : 0
                 b := 100 > 200 ? 1 : 0
                 return [a, b]
@@ -77,7 +77,7 @@ public class IntegrationTest {
     public void ifStmt() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := nil
                 if 100 < 200 {
                     a = 1
@@ -95,7 +95,7 @@ public class IntegrationTest {
     public void ifElseStmt() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := nil
                 if 100 > 200 {
                     a = 1
@@ -115,7 +115,7 @@ public class IntegrationTest {
     public void ifElseIfStmt() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := nil
                 if 1 == 2 {
                     a = 2
@@ -141,7 +141,7 @@ public class IntegrationTest {
     public void whileStmt() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 0
                 b := 10
                 while a < 10 {
@@ -164,7 +164,7 @@ public class IntegrationTest {
     public void prematureReturn() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 while 1 < 10 {
                     return 666
                 }
@@ -181,7 +181,7 @@ public class IntegrationTest {
     public void forStmt() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 n := 0
                 for x in |1 2 3 4| {
                     n = n + x
@@ -199,7 +199,7 @@ public class IntegrationTest {
     public void multipleForStmts() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 n := 0
                 for x in |1 2 3 4| {
                     n = n + x
@@ -224,7 +224,7 @@ public class IntegrationTest {
     public void forStmtWithWhereClause() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 n := 0
                 for x in |1 2 3 4| where x > 2 {
                     n = n + x
@@ -242,7 +242,7 @@ public class IntegrationTest {
     public void indexedAtom() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 l := [1, 2, 3, 4]
                 k := |1 2 3 4|
                 return [l[0], k[1;1]]
@@ -261,7 +261,7 @@ public class IntegrationTest {
     public void invocations() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := b(#a0b0c0)
                 c := #a0b0c0
                 d := [c][0].r
@@ -286,7 +286,7 @@ public class IntegrationTest {
     public void invocationStmts() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 #a0b0c0.b()
                 [#aabbcc][0].r()
                 return nil
@@ -302,7 +302,7 @@ public class IntegrationTest {
     public void indexAssignment() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 c := [1, 2, 3]
                 c[0] = 4
                 c[1] = #ffffff
@@ -323,7 +323,7 @@ public class IntegrationTest {
     public void compoundIndexAssignment() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 k := |1 2 3 4|
                 p := 0;0
                 k[p.x;p.y] = 100
@@ -345,7 +345,7 @@ public class IntegrationTest {
     public void invertImage() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 inp := $in
                 out := image(inp.bounds())
                 for p in inp.bounds {
@@ -373,7 +373,7 @@ public class IntegrationTest {
     public void points() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 pt := 100;200
                 return [pt.x, pt.y]
                 """, FunctionRegistry.INSTANCE, errors);
@@ -391,7 +391,7 @@ public class IntegrationTest {
     public void rectangles() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 rc1 := rect(100;200, 100, 50)
                 rc2 := rect(0;10, 20;30)
                 return [rc1, rc2, rc1.right, rc2.bottom]
@@ -412,7 +412,7 @@ public class IntegrationTest {
     public void ranges() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 contains1 := 5 in 1 .. 10
                 contains2 := 5 in 10 .. -1 .. -100
                 n1 := 0
@@ -441,7 +441,7 @@ public class IntegrationTest {
     public void swap() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 1
                 b := 2
                 a <=> b
@@ -461,7 +461,7 @@ public class IntegrationTest {
     public void throwsOnIdentDuplicate() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 1
                 a := 2
                 return a
@@ -474,7 +474,7 @@ public class IntegrationTest {
     public void throwsOnIdentDuplicateNested() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 if true {
                     a := 1
                     a := 2
@@ -489,7 +489,7 @@ public class IntegrationTest {
     public void identOverrides() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 1
                 if true {
                     a := 2
@@ -507,7 +507,7 @@ public class IntegrationTest {
     public void assignIdentNested() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 1
                 if true {
                     a = 0
@@ -525,7 +525,7 @@ public class IntegrationTest {
     public void complexIdentNesting() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 1
                 if true {
                     b := 2
@@ -548,7 +548,7 @@ public class IntegrationTest {
     public void nestedForLoopsWithSameIteratorIdent() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := 0
                 for i in 0 .. 3 {
                     for i in 0 .. 2 {
@@ -568,7 +568,7 @@ public class IntegrationTest {
     public void declarationOrder() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 if true {
                     b := a // a not declared
                     a := 1
@@ -585,7 +585,7 @@ public class IntegrationTest {
     public void minMax() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := min(100, 120)
                 b := max(100, 120)
                 list := [1, -10, 404.5, 123]
@@ -614,7 +614,7 @@ public class IntegrationTest {
     public void log() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 log("a: ", 1, " b: ", 2, " c: ", 3)
                 return nil
                 """, FunctionRegistry.INSTANCE, errors);
@@ -628,7 +628,7 @@ public class IntegrationTest {
     public void lists() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := []
                 a.push(1).push(2).push(3)
                 b := list(a)
@@ -663,7 +663,7 @@ public class IntegrationTest {
     public void lists2() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := [1,2,3]
                 return a.reverse()
                 """, FunctionRegistry.INSTANCE, errors);
@@ -680,7 +680,7 @@ public class IntegrationTest {
     public void kernels() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := |1 2 3 4|
                 a[0] = 100
                 b := |2 4 3 1|.sort()
@@ -704,7 +704,7 @@ public class IntegrationTest {
     public void filters() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 log("gauss")
                 log(gaussian(1))
                 log(gaussian(2))
@@ -727,7 +727,7 @@ public class IntegrationTest {
     public void maps() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 a := {
                     loc: 1;2,
                     col: #ff0000,
@@ -765,7 +765,7 @@ public class IntegrationTest {
     public void chainedInvocations() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 inp := image(rect(0;0, 10, 10)).clip(rect(0;0, 10, 10)).default(#ffffff)
                 return 0
                 """, FunctionRegistry.INSTANCE, errors);
@@ -779,7 +779,7 @@ public class IntegrationTest {
     public void ignoredFunctions() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 fn ignored1(x) {
                     return x
                 }
@@ -805,7 +805,7 @@ public class IntegrationTest {
     public void callFunctionWithOneParameter() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 fn timesTwo(x) {
                     return x * 2
                 }
@@ -822,7 +822,7 @@ public class IntegrationTest {
     public void callFunctionWithoutParameters() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 fn ret100() {
                     return 100
                 }
@@ -839,7 +839,7 @@ public class IntegrationTest {
     public void callFunctionWithMultipleParameters() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 fn add(a, b) {
                     return a + b
                 }
@@ -856,7 +856,7 @@ public class IntegrationTest {
     public void callFunctionsRecursively() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 count := 0
                 fn recurse(x) {
                     if x > 0 {
@@ -878,7 +878,7 @@ public class IntegrationTest {
     public void callFunctionsInReverseDeclOrder() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 count := 0
                 fn ping(x) {
                     return pong(x + 1)
@@ -899,7 +899,7 @@ public class IntegrationTest {
     public void functionReferencesWithoutArguments() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 count := 0
                 fn doIt() {
                     count = 1
@@ -919,7 +919,7 @@ public class IntegrationTest {
     public void functionReferencesWithArguments() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 count := 0
                 fn doIt(x, y) {
                     count = y - x
@@ -939,7 +939,7 @@ public class IntegrationTest {
     public void functionReferencesWithWrongArguments() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 count := 0
                 fn doIt(x, y) {
                     count = y - x
@@ -959,7 +959,7 @@ public class IntegrationTest {
     public void functionReferencesRepeated() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 fn doIt(x) {
                     return x*2
                 }
@@ -993,7 +993,7 @@ public class IntegrationTest {
     public void sortList() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 list := [4, 3, 100, -1]
                 return list.sort()
                 """, FunctionRegistry.INSTANCE, errors);
@@ -1013,7 +1013,7 @@ public class IntegrationTest {
     public void sortListWithCompareCallback() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 list := [{x: 100}, {x: -1}, {x: 23}]
                 fn compare(a, b) {
                     return a["x"] ~ b["x"]
@@ -1035,7 +1035,7 @@ public class IntegrationTest {
     public void benchmarkConvolveImage() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 K := kernel(11, 11, 1)
                 inp := image(300, 300)
                 out := image(inp)
@@ -1056,7 +1056,7 @@ public class IntegrationTest {
     public void benchmarkConvolveImage2() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final Program program = compiler.compile("""
+        final Program program = compiler.compileWithoutPreprocessing("""
                 K := kernel(11, 11, 1)
                 inp := image(300, 300)
                 for i in 0 .. 10 {
