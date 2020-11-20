@@ -13,15 +13,16 @@ public class AllocVisitorTest {
     public void stackDepth1() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne(""" 
                 a := 1
                 b := 2
                 c := a + b
                 return c
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final AllocVisitor visitor = new AllocVisitor();
+        final AllocVisitor visitor = new AllocVisitor(codeMap);
         final Integer allocCount = ast.accept(visitor);
         assertThat(allocCount).isEqualTo(3);
     }
@@ -30,17 +31,18 @@ public class AllocVisitorTest {
     public void stackDepth2() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne(""" 
                 a := 1
                 if true {
                     b := 2
                     c := 3
                 }
                 return a
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final AllocVisitor visitor = new AllocVisitor();
+        final AllocVisitor visitor = new AllocVisitor(codeMap);
         final Integer allocCount = ast.accept(visitor);
         assertThat(allocCount).isEqualTo(3);
     }
@@ -49,7 +51,7 @@ public class AllocVisitorTest {
     public void stackDepth3() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne(""" 
                 a := 1      // 1
                 if true {
                     b := 2  // 2
@@ -59,10 +61,11 @@ public class AllocVisitorTest {
                     c := 3  // 3
                 }           // 1
                 return a
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final AllocVisitor visitor = new AllocVisitor();
+        final AllocVisitor visitor = new AllocVisitor(codeMap);
         final Integer allocCount = ast.accept(visitor);
         assertThat(allocCount).isEqualTo(3);
     }
@@ -71,7 +74,7 @@ public class AllocVisitorTest {
     public void stackDepth4() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne(""" 
                 a := 1              // 1
                 if true {
                     b := 2          // 2
@@ -95,10 +98,11 @@ public class AllocVisitorTest {
                     }
                 }                   // 1
                 return a
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final AllocVisitor visitor = new AllocVisitor();
+        final AllocVisitor visitor = new AllocVisitor(codeMap);
         final Integer allocCount = ast.accept(visitor);
         assertThat(allocCount).isEqualTo(5);
     }
@@ -107,7 +111,7 @@ public class AllocVisitorTest {
     public void stackDepth5() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne(""" 
                 a := 1                  // 1
                 for p in 1..2 {         // 2,3
                     b := 2              // 4
@@ -123,10 +127,11 @@ public class AllocVisitorTest {
                     e := 5              // 2
                 }                       // 1
                 return a
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final AllocVisitor visitor = new AllocVisitor();
+        final AllocVisitor visitor = new AllocVisitor(codeMap);
         final Integer allocCount = ast.accept(visitor);
         assertThat(allocCount).isEqualTo(8);
     }
@@ -135,13 +140,14 @@ public class AllocVisitorTest {
     public void errorOnDuplicateIdent1() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne(""" 
                 a := 1
                 a := 2
                 return a
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
-        final AllocVisitor visitor = new AllocVisitor();
+        final AllocVisitor visitor = new AllocVisitor(codeMap);
         ast.accept(visitor);
         assertThat(visitor.semanticErrors())
                 .hasSize(1)
@@ -152,16 +158,17 @@ public class AllocVisitorTest {
     public void errorOnDuplicateIdent2() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne(""" 
                 a := 1
                 if true {
                     a := 2 // no error
                 }
                 a := 3     // error
                 return a
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
-        final AllocVisitor visitor = new AllocVisitor();
+        final AllocVisitor visitor = new AllocVisitor(codeMap);
         ast.accept(visitor);
         assertThat(visitor.semanticErrors())
                 .hasSize(1)

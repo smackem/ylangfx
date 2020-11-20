@@ -6,6 +6,7 @@ import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.Writer;
@@ -1032,6 +1033,7 @@ public class IntegrationTest {
     }
 
     @Test
+    @Ignore
     public void benchmarkConvolveImage() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
@@ -1053,6 +1055,7 @@ public class IntegrationTest {
     }
 
     @Test
+    @Ignore
     public void benchmarkConvolveImage2() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();

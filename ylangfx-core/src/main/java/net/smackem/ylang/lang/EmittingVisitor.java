@@ -1,21 +1,16 @@
 package net.smackem.ylang.lang;
 
 import net.smackem.ylang.runtime.*;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-class EmittingVisitor extends YLangBaseVisitor<Program> {
+class EmittingVisitor extends BaseVisitor<Program> {
 
-    private static final Logger log = LoggerFactory.getLogger(EmittingVisitor.class);
     private static final String endLabel = "@end";
     private final FunctionTable functionTable;
     private final Emitter emitter = new Emitter();
-    private final List<String> semanticErrors = new ArrayList<>();
     private final LinkedList<Scope> scopes = new LinkedList<>();
     private final AllocationTable mainAllocationTable;
     private final Map<String, FunctionDef> functions = new HashMap<>();
@@ -24,7 +19,8 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
     private FunctionDef currentFunction;
     private int labelNumber = 1;
 
-    public EmittingVisitor(ModuleDecl module, FunctionTable functionTable) {
+    public EmittingVisitor(CodeMap codeMap, ModuleDecl module, FunctionTable functionTable) {
+        super(codeMap);
         Objects.requireNonNull(module);
         this.functionTable = Objects.requireNonNull(functionTable);
         this.mainAllocationTable = new AllocationTable(module.mainBody().localCount());
@@ -32,10 +28,6 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
             this.functions.put(functionDecl.name(), new FunctionDef(functionDecl));
         }
         this.mainFunction = new FunctionDef(module.mainBody());
-    }
-
-    public List<String> semanticErrors() {
-        return Collections.unmodifiableList(this.semanticErrors);
     }
 
     @Override
@@ -122,7 +114,7 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
             @Override
             public Program visitMemberSuffix(YLangParser.MemberSuffixContext ctx) {
                 if (ctx.invocationSuffix() != null) {
-                    semanticErrors.add("cannot assign to invocation");
+                    logSemanticError(ctx, "cannot assign to invocation");
                     return null;
                 }
                 emitter.emit(ctx, OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
@@ -537,13 +529,6 @@ class EmittingVisitor extends YLangBaseVisitor<Program> {
         }
         this.emitter.emit(ctx, OpCode.LD_FUNC, 0, ident, new NumberVal(function.decl.parameterCount()));
         return null;
-    }
-
-    private void logSemanticError(ParserRuleContext ctx, String message) {
-        final String text = String.format("line %d:%d: %s",
-                ctx.start.getLine(), ctx.start.getCharPositionInLine(), message);
-        log.info(text);
-        this.semanticErrors.add(text);
     }
 
     private void emitStringLiteral(TerminalNode str) {

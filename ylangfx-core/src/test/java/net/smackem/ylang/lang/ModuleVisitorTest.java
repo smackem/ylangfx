@@ -12,12 +12,13 @@ public class ModuleVisitorTest {
     public void minimalProgram() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne("""
                 return nil
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final ModuleVisitor visitor = new ModuleVisitor();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
         final ModuleDecl module = ast.accept(visitor);
         assertThat(module).isNotNull();
         assertThat(visitor.semanticErrors()).isEmpty();
@@ -30,15 +31,16 @@ public class ModuleVisitorTest {
     public void singleMainBody() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne("""
                 a := 1
                 b := 2
                 c := a + b
                 return c
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final ModuleVisitor visitor = new ModuleVisitor();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
         final ModuleDecl module = ast.accept(visitor);
         assertThat(module).isNotNull();
         assertThat(visitor.semanticErrors()).isEmpty();
@@ -51,14 +53,15 @@ public class ModuleVisitorTest {
     public void simpleFunction() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne("""
                 fn doIt() {
                 }
                 return nil
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final ModuleVisitor visitor = new ModuleVisitor();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
         final ModuleDecl module = ast.accept(visitor);
         assertThat(module).isNotNull();
         assertThat(visitor.semanticErrors()).isEmpty();
@@ -76,16 +79,17 @@ public class ModuleVisitorTest {
     public void complexFunction() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne("""
                 fn add(a, b) {
                     result := a + b
                     return result
                 }
                 return nil
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final ModuleVisitor visitor = new ModuleVisitor();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
         final ModuleDecl module = ast.accept(visitor);
         assertThat(module).isNotNull();
         assertThat(visitor.semanticErrors()).isEmpty();
@@ -103,7 +107,7 @@ public class ModuleVisitorTest {
     public void multipleFunctionsAndMainBody() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne("""
                 fn withOneParam(a) {
                     return a
                 }
@@ -122,10 +126,11 @@ public class ModuleVisitorTest {
                     top = top + 1
                 }
                 return nil
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final ModuleVisitor visitor = new ModuleVisitor();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
         final ModuleDecl module = ast.accept(visitor);
         assertThat(module).isNotNull();
         assertThat(visitor.semanticErrors()).isEmpty();
@@ -151,7 +156,7 @@ public class ModuleVisitorTest {
     public void mixedFunctionsAndDeclStmts() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne("""
                 globA := 1
                 fn func1() {
                 }
@@ -162,10 +167,11 @@ public class ModuleVisitorTest {
                     // some body stmt
                 }
                 return nil
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final ModuleVisitor visitor = new ModuleVisitor();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
         final ModuleDecl module = ast.accept(visitor);
         assertThat(module).isNotNull();
         assertThat(visitor.semanticErrors()).isEmpty();
@@ -179,7 +185,7 @@ public class ModuleVisitorTest {
     public void errorOnFunctionDeclInBody() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
-        final YLangParser.ProgramContext ast = compiler.compileToAst("""
+        final CodeMap codeMap = CodeMap.oneToOne("""
                 globA := 1
                 fn func1() {
                 }
@@ -189,10 +195,11 @@ public class ModuleVisitorTest {
                     // this function decl is not allowed in main body
                 }
                 return nil
-                """, errors);
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
         assertThat(ast).isNotNull();
         assertThat(errors).isEmpty();
-        final ModuleVisitor visitor = new ModuleVisitor();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
         final ModuleDecl module = ast.accept(visitor);
         assertThat(module).isNull();
         assertThat(visitor.semanticErrors())

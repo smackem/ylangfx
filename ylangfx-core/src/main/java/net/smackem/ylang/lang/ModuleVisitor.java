@@ -7,13 +7,17 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
 
     private final List<FunctionDecl> functions = new ArrayList<>();
 
+    public ModuleVisitor(CodeMap codeMap) {
+        super(codeMap);
+    }
+
     @Override
     public ModuleDecl visitProgram(YLangParser.ProgramContext ctx) {
         if (checkProgramStructure(ctx) == false) {
             return null;
         }
         super.visitProgram(ctx);
-        final AllocVisitor allocVisitor = new AllocVisitor();
+        final AllocVisitor allocVisitor = new AllocVisitor(codeMap());
         final int allocCount = ctx.accept(allocVisitor);
         if (logSemanticErrors(allocVisitor.semanticErrors())) {
             return null;
@@ -47,7 +51,7 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
 
     @Override
     public ModuleDecl visitFunctionDecl(YLangParser.FunctionDeclContext ctx) {
-        final AllocVisitor allocVisitor = new AllocVisitor();
+        final AllocVisitor allocVisitor = new AllocVisitor(codeMap());
         final int allocCount = ctx.block().accept(allocVisitor);
         if (logSemanticErrors(allocVisitor.semanticErrors())) {
             return null;

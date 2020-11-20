@@ -13,7 +13,8 @@ class AllocVisitor extends BaseVisitor<Integer> {
     private int stackDepth;
     private int uniqueVariableCount;
 
-    AllocVisitor() {
+    AllocVisitor(CodeMap codeMap) {
+        super(codeMap);
         this.scopes.push(new DeclScope());
     }
 
