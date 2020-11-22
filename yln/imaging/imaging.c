@@ -75,6 +75,16 @@ void freeImage(ImageRgba *pImage) {
     }
 }
 
+void invertImage(ImageRgba *pImage) {
+    assert(pImage != NULL);
+    i32 size = getPixelCount(pImage);
+    rgba *pPixel = pImage->pixels;
+    for ( ; size > 0; size--, pPixel++) {
+        rgba col = *pPixel;
+        *pPixel = RGBA(255 - R(col), 255 - G(col), 255 - B(col), A(col));
+    }
+}
+
 void initKernel(Kernel *pKernel, i32 width, i32 height, float value) {
     assert(pKernel != NULL);
     i32 size = width * height;

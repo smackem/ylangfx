@@ -9,11 +9,11 @@
 
 #define MAX_IMAGE_PIXELS (64 * 1024 * 1024)
 #define ONCE while (0)
-#define R(color) ((color >> 16u) & 0xff)
-#define G(color) ((color >> 8u) & 0xff)
-#define B(color) (color & 0xff)
-#define A(color) ((color >> 24u) & 0xff)
-#define RGBA(r, g, b, a) (((a & 0xff) << 24u) | ((r & 0xff) << 16u) | ((g & 0xff) << 8u) | (b & 0xff))
+#define R(color) ((color >> 16u) & 0xffu)
+#define G(color) ((color >> 8u) & 0xffu)
+#define B(color) (color & 0xffu)
+#define A(color) ((color >> 24u) & 0xffu)
+#define RGBA(r, g, b, a) (((a & 0xffu) << 24u) | ((r & 0xffu) << 16u) | ((g & 0xffu) << 8u) | (b & 0xffu))
 
 typedef struct imageRgba {
     i32 width;
