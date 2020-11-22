@@ -1,0 +1,2 @@
+#define yln_VERSION_MAJOR @yln_VERSION_MAJOR@
+#define yln_VERSION_MINOR @yln_VERSION_MINOR@

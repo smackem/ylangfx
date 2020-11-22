@@ -1033,7 +1033,7 @@ public class IntegrationTest {
     }
 
     @Test
-    @Ignore
+    //@Ignore
     public void benchmarkConvolveImage() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
@@ -1055,7 +1055,7 @@ public class IntegrationTest {
     }
 
     @Test
-    @Ignore
+    //@Ignore
     public void benchmarkConvolveImage2() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
