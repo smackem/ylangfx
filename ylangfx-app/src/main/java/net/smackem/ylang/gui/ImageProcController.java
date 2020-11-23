@@ -23,6 +23,7 @@ import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.lang.Program;
+import net.smackem.ylang.model.Yli;
 import net.smackem.ylang.model.ScriptLibrary;
 import net.smackem.ylang.runtime.ImageVal;
 import net.smackem.ylang.runtime.Value;
@@ -33,7 +34,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.prefs.Preferences;
@@ -179,6 +179,9 @@ public class ImageProcController {
 
     private static Image loadImage(File file) throws IOException {
         try (final InputStream is = new FileInputStream(file.getAbsolutePath())) {
+            if (file.getName().endsWith(Yli.FILE_EXTENSION)) {
+                return Yli.loadImage(file.toPath());
+            }
             return new Image(is);
         }
     }
@@ -280,18 +283,6 @@ public class ImageProcController {
         return wImage;
     }
 
-    private static void saveCopy(Image image, Path path) {
-        final PixelReader pixelReader = image.getPixelReader();
-        final int width = (int) image.getWidth();
-        final int height = (int) image.getHeight();
-        final byte[] buffer = new byte[width * height * 4];
-        pixelReader.getPixels(0, 0, width, height, PixelFormat.getByteBgraInstance(), buffer, 0, width);
-        try (final OutputStream os = Files.newOutputStream(path, StandardOpenOption.CREATE)) {
-            os.write(buffer);
-        } catch (IOException ignored) {
-        }
-    }
-
     @FXML
     private void takeImage(ActionEvent actionEvent) {
         this.sourceImage.setValue(this.targetImage.getValue());
@@ -309,7 +300,7 @@ public class ImageProcController {
             final BufferedImage bimg = SwingFXUtils.fromFXImage(this.targetImage.get(), null);
             try {
                 ImageIO.write(bimg, "png", file);
-                saveCopy(this.targetImage.get(), Paths.get(file.getAbsolutePath() + ".img"));
+                Yli.saveImage(this.targetImage.get(), Paths.get(file.getAbsolutePath() + Yli.FILE_EXTENSION));
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             }

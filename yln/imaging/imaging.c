@@ -3,7 +3,9 @@
 //
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
+#include <netinet/in.h>
 #include "imaging.h"
 
 #define IMAGE_HEADER_SIZE (16)
@@ -12,6 +14,8 @@ error loadImage(ImageRgba *pImage, cstr pPath) {
     assert(pImage != NULL);
     FILE *file = fopen(pPath, "rb");
     error err = 0;
+    rgba *pixels = NULL;
+
     do {
         byte header[IMAGE_HEADER_SIZE];
         size_t count = fread(header, 1, IMAGE_HEADER_SIZE, file);
@@ -20,35 +24,35 @@ error loadImage(ImageRgba *pImage, cstr pPath) {
         }
         i32 width = ntohl(*(u32 *) &header[0]);
         i32 height = ntohl(*(i32 *) &header[4]);
-        i32 pixelCount = pImage->width * pImage->height;
+        i32 pixelCount = width * height;
         if (pixelCount < 0 || pixelCount > MAX_IMAGE_PIXELS) {
             err = 1; break;
         }
-        rgba *pixels = newarr(rgba, pixelCount);
-        if (fread(pImage->pixels, sizeof(rgba), pixelCount, file) < pixelCount) {
-            err = 1;
-            free(pixels);
-            break;
+        pixels = newarr(rgba, pixelCount);
+        if (fread(pixels, sizeof(rgba), pixelCount, file) < pixelCount) {
+            err = 1; break;
         }
         pImage->width = width;
         pImage->height = height;
         pImage->pixels = pixels;
     } ONCE;
+
     fclose(file);
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "DanglingPointers"
+    if (err != OK && pixels != NULL) {
+        free(pixels);
+    }
     return err;
-#pragma clang diagnostic pop
 }
 
 error saveImage(const ImageRgba *pImage, cstr pPath) {
     assert(pImage != NULL);
     byte header[IMAGE_HEADER_SIZE];
-    *(u32 *)&header[0] = htonl(pImage->width);
-    *(u32 *)&header[4] = htonl(pImage->height);
     i32 pixelCount = getPixelCount(pImage);
     error err = 0;
     FILE *file = fopen(pPath, "wb");
+
+    *(u32 *)&header[0] = htonl(pImage->width);
+    *(u32 *)&header[4] = htonl(pImage->height);
     do {
         if (fwrite(header, 1, IMAGE_HEADER_SIZE, file) < IMAGE_HEADER_SIZE) {
             err = 1; break;
@@ -57,6 +61,7 @@ error saveImage(const ImageRgba *pImage, cstr pPath) {
             err = 1; break;
         }
     } ONCE;
+
     fclose(file);
     return err;
 }
@@ -101,4 +106,9 @@ void freeKernel(Kernel *pKernel) {
     if (pKernel->values != NULL) {
         free(pKernel->values);
     }
+}
+
+inline i32 getPixelCount(const ImageRgba *pImage) {
+    assert(pImage != NULL);
+    return pImage->width * pImage->height;
 }

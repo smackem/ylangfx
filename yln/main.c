@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <wchar.h>
 #include <build_config.h>
 #include <imaging.h>

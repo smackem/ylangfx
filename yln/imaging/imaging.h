@@ -36,9 +36,6 @@ void cloneImage(ImageRgba *pDest, const ImageRgba *pOriginal);
 void convolveImage(ImageRgba *pDest, const ImageRgba *pSource, const Kernel *pKernel);
 void initKernel(Kernel *pKernel, i32 width, i32 height, float value);
 void freeKernel(Kernel *pKernel);
-
-i32 getPixelCount(const ImageRgba *pImage) {
-    return pImage->width * pImage->height;
-}
+i32 getPixelCount(const ImageRgba *pImage);
 
 #endif //YLN_IMAGING_H
