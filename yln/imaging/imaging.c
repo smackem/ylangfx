@@ -5,69 +5,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <netinet/in.h>
 #include "imaging.h"
-
-#define IMAGE_HEADER_SIZE (16)
-
-error loadImage(ImageRgba *pImage, cstr pPath) {
-    assert(pImage != NULL);
-    FILE *file = fopen(pPath, "rb");
-    error err = 0;
-    rgba *pixels = NULL;
-
-    do {
-        byte header[IMAGE_HEADER_SIZE];
-        size_t count = fread(header, 1, IMAGE_HEADER_SIZE, file);
-        if (count < IMAGE_HEADER_SIZE) {
-            err = 1; break;
-        }
-        i32 width = ntohl(*(u32 *) &header[0]);
-        i32 height = ntohl(*(i32 *) &header[4]);
-        i32 pixelCount = width * height;
-        if (pixelCount < 0 || pixelCount > MAX_IMAGE_PIXELS) {
-            err = 1; break;
-        }
-        pixels = newarr(rgba, pixelCount);
-        if (fread(pixels, sizeof(rgba), pixelCount, file) < pixelCount) {
-            err = 1; break;
-        }
-        pImage->width = width;
-        pImage->height = height;
-        pImage->pixels = pixels;
-    } ONCE;
-
-    fclose(file);
-    if (err != OK && pixels != NULL) {
-        free(pixels);
-    }
-    return err;
-}
-
-error saveImage(const ImageRgba *pImage, cstr pPath) {
-    assert(pImage != NULL);
-    byte header[IMAGE_HEADER_SIZE];
-    i32 pixelCount = getPixelCount(pImage);
-    error err = 0;
-    FILE *file = fopen(pPath, "wb");
-
-    *(u32 *)&header[0] = htonl(pImage->width);
-    *(u32 *)&header[4] = htonl(pImage->height);
-    do {
-        if (fwrite(header, 1, IMAGE_HEADER_SIZE, file) < IMAGE_HEADER_SIZE) {
-            err = 1; break;
-        }
-        if (fwrite(pImage->pixels, sizeof(rgba), pixelCount, file) < pixelCount) {
-            err = 1; break;
-        }
-    } ONCE;
-
-    fclose(file);
-    return err;
-}
 
 void initImage(ImageRgba *pImage, i32 width, i32 height) {
     assert(pImage != NULL);
+    assert(width > 0);
+    assert(height > 0);
     pImage->width = width;
     pImage->height = height;
     pImage->pixels = newarr(rgba, getPixelCount(pImage));
@@ -78,6 +21,7 @@ void freeImage(ImageRgba *pImage) {
     if (pImage->pixels != NULL) {
         free(pImage->pixels);
     }
+    bzero(pImage, sizeof(ImageRgba));
 }
 
 void invertImage(ImageRgba *pImage) {
@@ -88,6 +32,32 @@ void invertImage(ImageRgba *pImage) {
         rgba col = *pPixel;
         *pPixel = RGBA(255 - R(col), 255 - G(col), 255 - B(col), A(col));
     }
+}
+
+void cloneImage(ImageRgba *pDest, const ImageRgba *pOriginal) {
+    assert(pDest != NULL);
+    memcpy(pDest, pOriginal, sizeof(ImageRgba));
+    size_t size = getPixelCount(pOriginal);
+    pDest->pixels = newarr(rgba, size);
+    memcpy(pDest->pixels, pOriginal->pixels, size * sizeof(rgba));
+}
+
+void convolveImage(ImageRgba *pDest, const ImageRgba *pSource, const Kernel *pKernel) {
+    assert(pDest != NULL);
+    assert(pSource != NULL);
+    assert(pDest->width == pSource->width);
+    assert(pDest->height == pSource->height);
+    assert(pDest->pixels != NULL);
+    assert(pSource->pixels != NULL);
+    assert(pKernel != NULL);
+    assert(pKernel->width > 0);
+    assert(pKernel->height > 0);
+
+}
+
+inline i32 getPixelCount(const ImageRgba *pImage) {
+    assert(pImage != NULL);
+    return pImage->width * pImage->height;
 }
 
 void initKernel(Kernel *pKernel, i32 width, i32 height, float value) {
@@ -106,9 +76,5 @@ void freeKernel(Kernel *pKernel) {
     if (pKernel->values != NULL) {
         free(pKernel->values);
     }
-}
-
-inline i32 getPixelCount(const ImageRgba *pImage) {
-    assert(pImage != NULL);
-    return pImage->width * pImage->height;
+    bzero(pKernel, sizeof(Kernel));
 }

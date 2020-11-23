@@ -1,6 +1,7 @@
 #include <wchar.h>
 #include <build_config.h>
 #include <imaging.h>
+#include "imageio.h"
 
 int main(int argc, char **argv) {
     ImageRgba image;
@@ -21,7 +22,7 @@ int main(int argc, char **argv) {
         if (err != OK) {
             break;
         }
-    } ONCE;
+    } once;
     freeImage(&image);
     return err;
 }

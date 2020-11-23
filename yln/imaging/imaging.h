@@ -8,7 +8,6 @@
 #include "types.h"
 
 #define MAX_IMAGE_PIXELS (64 * 1024 * 1024)
-#define ONCE while (0)
 #define R(color) ((color >> 16u) & 0xffu)
 #define G(color) ((color >> 8u) & 0xffu)
 #define B(color) (color & 0xffu)
@@ -27,8 +26,6 @@ typedef struct kernel {
     float *values;
 } Kernel;
 
-error loadImage(ImageRgba *pImage, cstr pPath);
-error saveImage(const ImageRgba *pImage, cstr pPath);
 void initImage(ImageRgba *pImage, i32 width, i32 height);
 void freeImage(ImageRgba *pImage);
 void invertImage(ImageRgba *pImage);

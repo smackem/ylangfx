@@ -13,6 +13,8 @@
 #define newobj(type) ((type *)calloc(sizeof(type), 1))
 #define newarr(type, size) ((type *)calloc(sizeof(type), size))
 
+#define once while (0)
+
 typedef int i32;
 typedef unsigned int u32;
 typedef unsigned char byte;

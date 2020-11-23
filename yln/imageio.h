@@ -5,6 +5,9 @@
 #ifndef YLN_IMAGEIO_H
 #define YLN_IMAGEIO_H
 
+#include <imaging.h>
 
+error loadImage(ImageRgba *pImage, cstr pPath);
+error saveImage(const ImageRgba *pImage, cstr pPath);
 
 #endif //YLN_IMAGEIO_H
