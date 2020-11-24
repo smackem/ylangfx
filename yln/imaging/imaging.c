@@ -19,7 +19,7 @@ inline rgba makeRgba_d(double r, double g, double b, double a) {
     return makeRgba((byte) (r + 0.5), (byte) (g + 0.5), (byte) (b + 0.5), (byte) (a + 0.5));
 }
 
-void initImage(ImageRgba *pImage, i32 width, i32 height) {
+void initImage(ImageRgba *pImage, int width, int height) {
     assert(pImage != NULL);
     assert(width > 0);
     assert(height > 0);
@@ -38,7 +38,7 @@ void freeImage(ImageRgba *pImage) {
 
 void invertImage(ImageRgba *pImage) {
     assert(pImage != NULL);
-    i32 size = getPixelCount(pImage);
+    int size = getPixelCount(pImage);
     rgba *pPixel = pImage->pixels;
     for ( ; size > 0; size--, pPixel++) {
         rgba col = *pPixel;
@@ -64,30 +64,33 @@ void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKern
     assert(pKernel != NULL);
     assert(pKernel->width > 0);
     assert(pKernel->height > 0);
-    i32 width = pDest->width;
-    i32 height = pDest->height;
+    int width = pDest->width;
+    int height = pDest->height;
     float kernelSum = getKernelSum(pKernel);
-    i32 kernelWidth = pKernel->width;
-    i32 kernelHeight = pKernel->height;
-    i32 halfKernelWidth = kernelWidth / 2;
-    i32 halfKernelHeight = kernelHeight / 2;
-    i32 targetIndex = 0;
-    for (i32 y = 0; y < height; y++) {
-        for (i32 x = 0; x < width; x++) {
+    int kernelWidth = pKernel->width;
+    int kernelHeight = pKernel->height;
+    int halfKernelWidth = kernelWidth / 2;
+    int halfKernelHeight = kernelHeight / 2;
+    int targetIndex = 0;
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             float r = 0;
             float g = 0;
             float b = 0;
             float a = 255;
-            i32 startY = y - halfKernelHeight;
-            i32 endY = startY + kernelHeight;
-            i32 startX = x - halfKernelWidth;
-            i32 endX = startX + kernelWidth;
-            i32 kernelIndex = 0;
+            int startY = y - halfKernelHeight;
+            int endY = startY + kernelHeight;
+            int startX = x - halfKernelWidth;
+            int endX = startX + kernelWidth;
+            int kernelIndex = 0;
+
             for (int imageY = startY; imageY < endY; imageY++) {
                 if (imageY < 0 || imageY >= height) {
                     kernelIndex += kernelWidth;
                     continue;
                 }
+
                 int imageIndex = imageY * width + startX;
                 for (int imageX = startX; imageX < endX; imageX++) {
                     if (imageX >= 0 && imageX < width) {
@@ -96,14 +99,13 @@ void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKern
                         r += value * R(px);
                         g += value * G(px);
                         b += value * B(px);
-                        if (imageX == x && imageY == y) {
-                            a = A(px);
-                        }
                     }
                     kernelIndex++;
                     imageIndex++;
                 }
             }
+
+            a = A(pOrig->pixels[y * width + x]);
             pDest->pixels[targetIndex] = kernelSum == 0
                     ? RGBA(r, g, b, a)
                     : RGBA(r / kernelSum, g / kernelSum, b / kernelSum, a);
@@ -112,14 +114,14 @@ void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKern
     }
 }
 
-inline i32 getPixelCount(const ImageRgba *pImage) {
+inline int getPixelCount(const ImageRgba *pImage) {
     assert(pImage != NULL);
     return pImage->width * pImage->height;
 }
 
 float getKernelSum(const Kernel *pKernel) {
     assert(pKernel != NULL);
-    i32 size = pKernel->width * pKernel->height;
+    int size = pKernel->width * pKernel->height;
     const float *pValue = pKernel->values;
     float sum = 0;
     for ( ; size > 0; size--, pValue++) {
@@ -128,9 +130,9 @@ float getKernelSum(const Kernel *pKernel) {
     return sum;
 }
 
-void initKernel(Kernel *pKernel, i32 width, i32 height, float value) {
+void initKernel(Kernel *pKernel, int width, int height, float value) {
     assert(pKernel != NULL);
-    i32 size = width * height;
+    int size = width * height;
     pKernel->width = width;
     pKernel->height = height;
     pKernel->values = newarr(float, size);

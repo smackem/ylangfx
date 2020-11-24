@@ -19,25 +19,25 @@ rgba makeRgba_f(float r, float g, float b, float a);
 rgba makeRgba_d(double r, double g, double b, double a);
 
 typedef struct imageRgba {
-    i32 width;
-    i32 height;
+    int width;
+    int height;
     rgba *pixels;
 } ImageRgba;
 
 typedef struct kernel {
-    i32 width;
-    i32 height;
+    int width;
+    int height;
     float *values;
 } Kernel;
 
-void initImage(ImageRgba *pImage, i32 width, i32 height);
+void initImage(ImageRgba *pImage, int width, int height);
 void freeImage(ImageRgba *pImage);
 void invertImage(ImageRgba *pImage);
 void cloneImage(ImageRgba *pDest, const ImageRgba *pOrig);
 void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKernel);
-void initKernel(Kernel *pKernel, i32 width, i32 height, float value);
+void initKernel(Kernel *pKernel, int width, int height, float value);
 void freeKernel(Kernel *pKernel);
 float getKernelSum(const Kernel *pKernel);
-i32 getPixelCount(const ImageRgba *pImage);
+int getPixelCount(const ImageRgba *pImage);
 
 #endif //YLN_IMAGING_H

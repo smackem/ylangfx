@@ -6,7 +6,7 @@
 
 static void smoothenImage(ImageRgba *pDest, const ImageRgba *pOrig, int radius) {
     Kernel kernel;
-    i32 diameter = radius * 2 + 1;
+    int diameter = radius * 2 + 1;
     initKernel(&kernel, diameter, diameter, 1);
     convolveImage(pDest, pOrig, &kernel);
     freeKernel(&kernel);
@@ -24,7 +24,15 @@ int main(int argc, char **argv) {
     ImageRgba dest;
     bzero(&dest, sizeof(dest));
     error err = 0;
-    wprintf(L"yln v%d.%d\n", yln_VERSION_MAJOR, yln_VERSION_MINOR);
+
+    wprintf(L"yln v%d.%d\nsizeof int = %d bit | pointer = %d bit\n",
+            yln_VERSION_MAJOR,
+            yln_VERSION_MINOR,
+            sizeof(int) * 8,
+            sizeof(void *) * 8);
+    const rgba col = RGBA(0xff, 0x20, 0x10, 10.3);
+    wprintf(L"red = %02x %02x %02x %02x\n", R(col), G(col), B(col), A(col));
+
     do {
         if (argc < 2) {
             wprintf(L"USAGE: yln IMAGE_FILE\n");
@@ -39,12 +47,13 @@ int main(int argc, char **argv) {
         long start = currentMillis();
         smoothenImage(&dest, &orig, 11);
         long end = currentMillis();
-        wprintf(L"elapsed: %Ld ms", end - start);
+        wprintf(L"elapsed: %Ld ms\n", end - start);
         err = saveImage(&dest, argv[1]);
         if (err != OK) {
             break;
         }
     } once;
+
     freeImage(&orig);
     freeImage(&dest);
     return err;
