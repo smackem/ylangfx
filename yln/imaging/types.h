@@ -9,16 +9,17 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #define newobj(type) ((type *)calloc(sizeof(type), 1))
 #define newarr(type, size) ((type *)calloc(sizeof(type), size))
 
 #define once while (0)
 
-typedef int i32;
-typedef unsigned int u32;
-typedef unsigned char byte;
-typedef unsigned int rgba;
+typedef int32_t i32;
+typedef uint32_t u32;
+typedef uint8_t byte;
+typedef uint32_t rgba;
 typedef wchar_t *wstr;
 typedef const wchar_t *cwstr;
 typedef char *str;

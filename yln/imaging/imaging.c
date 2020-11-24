@@ -7,6 +7,18 @@
 #include <assert.h>
 #include "imaging.h"
 
+inline rgba makeRgba(byte r, byte g, byte b, byte a) {
+    return (((a & 0xffu) << 24u) | ((r & 0xffu) << 16u) | ((g & 0xffu) << 8u) | (b & 0xffu));
+}
+
+inline rgba makeRgba_f(float r, float g, float b, float a) {
+    return makeRgba((byte) (r + 0.5), (byte) (g + 0.5), (byte) (b + 0.5), (byte) (a + 0.5));
+}
+
+inline rgba makeRgba_d(double r, double g, double b, double a) {
+    return makeRgba((byte) (r + 0.5), (byte) (g + 0.5), (byte) (b + 0.5), (byte) (a + 0.5));
+}
+
 void initImage(ImageRgba *pImage, i32 width, i32 height) {
     assert(pImage != NULL);
     assert(width > 0);
@@ -42,22 +54,78 @@ void cloneImage(ImageRgba *pDest, const ImageRgba *pOriginal) {
     memcpy(pDest->pixels, pOriginal->pixels, size * sizeof(rgba));
 }
 
-void convolveImage(ImageRgba *pDest, const ImageRgba *pSource, const Kernel *pKernel) {
+void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKernel) {
     assert(pDest != NULL);
-    assert(pSource != NULL);
-    assert(pDest->width == pSource->width);
-    assert(pDest->height == pSource->height);
+    assert(pOrig != NULL);
+    assert(pDest->width == pOrig->width);
+    assert(pDest->height == pOrig->height);
     assert(pDest->pixels != NULL);
-    assert(pSource->pixels != NULL);
+    assert(pOrig->pixels != NULL);
     assert(pKernel != NULL);
     assert(pKernel->width > 0);
     assert(pKernel->height > 0);
-
+    i32 width = pDest->width;
+    i32 height = pDest->height;
+    float kernelSum = getKernelSum(pKernel);
+    i32 kernelWidth = pKernel->width;
+    i32 kernelHeight = pKernel->height;
+    i32 halfKernelWidth = kernelWidth / 2;
+    i32 halfKernelHeight = kernelHeight / 2;
+    i32 targetIndex = 0;
+    for (i32 y = 0; y < height; y++) {
+        for (i32 x = 0; x < width; x++) {
+            float r = 0;
+            float g = 0;
+            float b = 0;
+            float a = 255;
+            i32 startY = y - halfKernelHeight;
+            i32 endY = startY + kernelHeight;
+            i32 startX = x - halfKernelWidth;
+            i32 endX = startX + kernelWidth;
+            i32 kernelIndex = 0;
+            for (int imageY = startY; imageY < endY; imageY++) {
+                if (imageY < 0 || imageY >= height) {
+                    kernelIndex += kernelWidth;
+                    continue;
+                }
+                int imageIndex = imageY * width + startX;
+                for (int imageX = startX; imageX < endX; imageX++) {
+                    if (imageX >= 0 && imageX < width) {
+                        float value = pKernel->values[kernelIndex];
+                        rgba px = pOrig->pixels[imageIndex];
+                        r += value * R(px);
+                        g += value * G(px);
+                        b += value * B(px);
+                        if (imageX == x && imageY == y) {
+                            a = A(px);
+                        }
+                    }
+                    kernelIndex++;
+                    imageIndex++;
+                }
+            }
+            pDest->pixels[targetIndex] = kernelSum == 0
+                    ? RGBA(r, g, b, a)
+                    : RGBA(r / kernelSum, g / kernelSum, b / kernelSum, a);
+            targetIndex++;
+        }
+    }
 }
 
 inline i32 getPixelCount(const ImageRgba *pImage) {
     assert(pImage != NULL);
     return pImage->width * pImage->height;
+}
+
+float getKernelSum(const Kernel *pKernel) {
+    assert(pKernel != NULL);
+    i32 size = pKernel->width * pKernel->height;
+    const float *pValue = pKernel->values;
+    float sum = 0;
+    for ( ; size > 0; size--, pValue++) {
+        sum += *pValue;
+    }
+    return sum;
 }
 
 void initKernel(Kernel *pKernel, i32 width, i32 height, float value) {

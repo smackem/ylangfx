@@ -12,7 +12,11 @@
 #define G(color) ((color >> 8u) & 0xffu)
 #define B(color) (color & 0xffu)
 #define A(color) ((color >> 24u) & 0xffu)
-#define RGBA(r, g, b, a) (((a & 0xffu) << 24u) | ((r & 0xffu) << 16u) | ((g & 0xffu) << 8u) | (b & 0xffu))
+#define RGBA(r, g, b, a) _Generic((r)+(g)+(b)+(a), default: makeRgba, double: makeRgba_d, float: makeRgba_f)(r, g, b, a)
+
+rgba makeRgba(byte r, byte g, byte b, byte a);
+rgba makeRgba_f(float r, float g, float b, float a);
+rgba makeRgba_d(double r, double g, double b, double a);
 
 typedef struct imageRgba {
     i32 width;
@@ -29,10 +33,11 @@ typedef struct kernel {
 void initImage(ImageRgba *pImage, i32 width, i32 height);
 void freeImage(ImageRgba *pImage);
 void invertImage(ImageRgba *pImage);
-void cloneImage(ImageRgba *pDest, const ImageRgba *pOriginal);
-void convolveImage(ImageRgba *pDest, const ImageRgba *pSource, const Kernel *pKernel);
+void cloneImage(ImageRgba *pDest, const ImageRgba *pOrig);
+void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKernel);
 void initKernel(Kernel *pKernel, i32 width, i32 height, float value);
 void freeKernel(Kernel *pKernel);
+float getKernelSum(const Kernel *pKernel);
 i32 getPixelCount(const ImageRgba *pImage);
 
 #endif //YLN_IMAGING_H
