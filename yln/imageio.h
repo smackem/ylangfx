@@ -7,7 +7,7 @@
 
 #include <imaging.h>
 
-error loadImage(ImageRgba *pImage, cstr pPath);
-error saveImage(const ImageRgba *pImage, cstr pPath);
+error load_image(struct image_rgba *image, const char *path);
+error save_image(const struct image_rgba *image, const char *path);
 
 #endif //YLN_IMAGEIO_H

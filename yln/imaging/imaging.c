@@ -7,68 +7,68 @@
 #include <assert.h>
 #include "imaging.h"
 
-inline rgba makeRgba(byte r, byte g, byte b, byte a) {
+inline rgba make_rgba(byte r, byte g, byte b, byte a) {
     return (((a & 0xffu) << 24u) | ((r & 0xffu) << 16u) | ((g & 0xffu) << 8u) | (b & 0xffu));
 }
 
-inline rgba makeRgba_f(float r, float g, float b, float a) {
-    return makeRgba((byte) (r + 0.5), (byte) (g + 0.5), (byte) (b + 0.5), (byte) (a + 0.5));
+inline rgba make_rgba_f(float r, float g, float b, float a) {
+    return make_rgba((byte) (r + 0.5), (byte) (g + 0.5), (byte) (b + 0.5), (byte) (a + 0.5));
 }
 
-inline rgba makeRgba_d(double r, double g, double b, double a) {
-    return makeRgba((byte) (r + 0.5), (byte) (g + 0.5), (byte) (b + 0.5), (byte) (a + 0.5));
+inline rgba make_rgba_d(double r, double g, double b, double a) {
+    return make_rgba((byte) (r + 0.5), (byte) (g + 0.5), (byte) (b + 0.5), (byte) (a + 0.5));
 }
 
-void initImage(ImageRgba *pImage, int width, int height) {
-    assert(pImage != NULL);
+void init_image(struct image_rgba *image, int width, int height) {
+    assert(image != NULL);
     assert(width > 0);
     assert(height > 0);
-    pImage->width = width;
-    pImage->height = height;
-    pImage->pixels = newarr(rgba, getPixelCount(pImage));
+    image->width = width;
+    image->height = height;
+    image->pixels = newarr(rgba, get_pixel_count(image));
 }
 
-void freeImage(ImageRgba *pImage) {
-    assert(pImage != NULL);
-    if (pImage->pixels != NULL) {
-        free(pImage->pixels);
+void free_image(struct image_rgba *image) {
+    assert(image != NULL);
+    if (image->pixels != NULL) {
+        free(image->pixels);
     }
-    bzero(pImage, sizeof(ImageRgba));
+    bzero(image, sizeof(struct image_rgba));
 }
 
-void invertImage(ImageRgba *pImage) {
-    assert(pImage != NULL);
-    int size = getPixelCount(pImage);
-    rgba *pPixel = pImage->pixels;
-    for ( ; size > 0; size--, pPixel++) {
-        rgba col = *pPixel;
-        *pPixel = RGBA(255 - R(col), 255 - G(col), 255 - B(col), A(col));
+void invert_image(struct image_rgba *image) {
+    assert(image != NULL);
+    int size = get_pixel_count(image);
+    rgba *pixel_ptr = image->pixels;
+    for ( ; size > 0; size--, pixel_ptr++) {
+        rgba col = *pixel_ptr;
+        *pixel_ptr = RGBA(255 - R(col), 255 - G(col), 255 - B(col), A(col));
     }
 }
 
-void cloneImage(ImageRgba *pDest, const ImageRgba *pOriginal) {
-    assert(pDest != NULL);
-    memcpy(pDest, pOriginal, sizeof(ImageRgba));
-    size_t size = getPixelCount(pOriginal);
-    pDest->pixels = newarr(rgba, size);
-    memcpy(pDest->pixels, pOriginal->pixels, size * sizeof(rgba));
+void clone_image(struct image_rgba *dest, const struct image_rgba *orig) {
+    assert(dest != NULL);
+    memcpy(dest, orig, sizeof(struct image_rgba));
+    size_t size = get_pixel_count(orig);
+    dest->pixels = newarr(rgba, size);
+    memcpy(dest->pixels, orig->pixels, size * sizeof(rgba));
 }
 
-void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKernel) {
-    assert(pDest != NULL);
-    assert(pOrig != NULL);
-    assert(pDest->width == pOrig->width);
-    assert(pDest->height == pOrig->height);
-    assert(pDest->pixels != NULL);
-    assert(pOrig->pixels != NULL);
-    assert(pKernel != NULL);
-    assert(pKernel->width > 0);
-    assert(pKernel->height > 0);
-    int width = pDest->width;
-    int height = pDest->height;
-    float kernelSum = getKernelSum(pKernel);
-    int kernelWidth = pKernel->width;
-    int kernelHeight = pKernel->height;
+void convolve_image(struct image_rgba *dest, const struct image_rgba *orig, const struct kernel *kernel) {
+    assert(dest != NULL);
+    assert(orig != NULL);
+    assert(dest->width == orig->width);
+    assert(dest->height == orig->height);
+    assert(dest->pixels != NULL);
+    assert(orig->pixels != NULL);
+    assert(kernel != NULL);
+    assert(kernel->width > 0);
+    assert(kernel->height > 0);
+    int width = dest->width;
+    int height = dest->height;
+    float kernelSum = get_kernel_sum(kernel);
+    int kernelWidth = kernel->width;
+    int kernelHeight = kernel->height;
     int halfKernelWidth = kernelWidth / 2;
     int halfKernelHeight = kernelHeight / 2;
     int targetIndex = 0;
@@ -78,7 +78,6 @@ void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKern
             float r = 0;
             float g = 0;
             float b = 0;
-            float a = 255;
             int startY = y - halfKernelHeight;
             int endY = startY + kernelHeight;
             int startX = x - halfKernelWidth;
@@ -94,8 +93,8 @@ void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKern
                 int imageIndex = imageY * width + startX;
                 for (int imageX = startX; imageX < endX; imageX++) {
                     if (imageX >= 0 && imageX < width) {
-                        float value = pKernel->values[kernelIndex];
-                        rgba px = pOrig->pixels[imageIndex];
+                        float value = kernel->values[kernelIndex];
+                        rgba px = orig->pixels[imageIndex];
                         r += value * R(px);
                         g += value * G(px);
                         b += value * B(px);
@@ -105,8 +104,8 @@ void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKern
                 }
             }
 
-            a = A(pOrig->pixels[y * width + x]);
-            pDest->pixels[targetIndex] = kernelSum == 0
+            float a = A(orig->pixels[y * width + x]);
+            dest->pixels[targetIndex] = kernelSum == 0
                     ? RGBA(r, g, b, a)
                     : RGBA(r / kernelSum, g / kernelSum, b / kernelSum, a);
             targetIndex++;
@@ -114,15 +113,15 @@ void convolveImage(ImageRgba *pDest, const ImageRgba *pOrig, const Kernel *pKern
     }
 }
 
-inline int getPixelCount(const ImageRgba *pImage) {
-    assert(pImage != NULL);
-    return pImage->width * pImage->height;
+inline int get_pixel_count(const struct image_rgba *image) {
+    assert(image != NULL);
+    return image->width * image->height;
 }
 
-float getKernelSum(const Kernel *pKernel) {
-    assert(pKernel != NULL);
-    int size = pKernel->width * pKernel->height;
-    const float *pValue = pKernel->values;
+float get_kernel_sum(const struct kernel *kernel) {
+    assert(kernel != NULL);
+    int size = kernel->width * kernel->height;
+    const float *pValue = kernel->values;
     float sum = 0;
     for ( ; size > 0; size--, pValue++) {
         sum += *pValue;
@@ -130,21 +129,21 @@ float getKernelSum(const Kernel *pKernel) {
     return sum;
 }
 
-void initKernel(Kernel *pKernel, int width, int height, float value) {
-    assert(pKernel != NULL);
+void init_kernel(struct kernel *kernel, int width, int height, float value) {
+    assert(kernel != NULL);
     int size = width * height;
-    pKernel->width = width;
-    pKernel->height = height;
-    pKernel->values = newarr(float, size);
+    kernel->width = width;
+    kernel->height = height;
+    kernel->values = newarr(float, size);
     for (int i = 0; i < size; i++) {
-        pKernel->values[i] = value;
+        kernel->values[i] = value;
     }
 }
 
-void freeKernel(Kernel *pKernel) {
-    assert(pKernel != NULL);
-    if (pKernel->values != NULL) {
-        free(pKernel->values);
+void free_kernel(struct kernel *kernel) {
+    assert(kernel != NULL);
+    if (kernel->values != NULL) {
+        free(kernel->values);
     }
-    bzero(pKernel, sizeof(Kernel));
+    bzero(kernel, sizeof(struct kernel));
 }

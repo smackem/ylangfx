@@ -4,24 +4,24 @@
 #include <time.h>
 #include "imageio.h"
 
-static void smoothenImage(ImageRgba *pDest, const ImageRgba *pOrig, int radius) {
-    Kernel kernel;
+static void smoothen_image(struct image_rgba *dest, const struct image_rgba *orig, int radius) {
+    struct kernel kernel;
     int diameter = radius * 2 + 1;
-    initKernel(&kernel, diameter, diameter, 1);
-    convolveImage(pDest, pOrig, &kernel);
-    freeKernel(&kernel);
+    init_kernel(&kernel, diameter, diameter, 1);
+    convolve_image(dest, orig, &kernel);
+    free_kernel(&kernel);
 }
 
-static long currentMillis() {
+static long current_millis() {
     struct timespec ts;
     timespec_get(&ts, TIME_UTC);
     return ts.tv_sec * 1000 + ts.tv_nsec / (1000 * 1000);
 }
 
 int main(int argc, char **argv) {
-    ImageRgba orig;
+    struct image_rgba orig;
     bzero(&orig, sizeof(orig));
-    ImageRgba dest;
+    struct image_rgba dest;
     bzero(&dest, sizeof(dest));
     error err = 0;
 
@@ -38,23 +38,23 @@ int main(int argc, char **argv) {
             wprintf(L"USAGE: yln IMAGE_FILE\n");
             break;
         }
-        err = loadImage(&orig, argv[1]);
+        err = load_image(&orig, argv[1]);
         if (err != OK) {
             break;
         }
-        invertImage(&orig);
-        cloneImage(&dest, &orig);
-        long start = currentMillis();
-        smoothenImage(&dest, &orig, 11);
-        long end = currentMillis();
+        invert_image(&orig);
+        clone_image(&dest, &orig);
+        long start = current_millis();
+        smoothen_image(&dest, &orig, 11);
+        long end = current_millis();
         wprintf(L"elapsed: %Ld ms\n", end - start);
-        err = saveImage(&dest, argv[1]);
+        err = save_image(&dest, argv[1]);
         if (err != OK) {
             break;
         }
     } once;
 
-    freeImage(&orig);
-    freeImage(&dest);
+    free_image(&orig);
+    free_image(&dest);
     return err;
 }

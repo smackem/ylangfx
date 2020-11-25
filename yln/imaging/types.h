@@ -16,14 +16,8 @@
 
 #define once while (0)
 
-typedef int32_t i32;
-typedef uint32_t u32;
 typedef uint8_t byte;
 typedef uint32_t rgba;
-typedef wchar_t *wstr;
-typedef const wchar_t *cwstr;
-typedef char *str;
-typedef const char *cstr;
 
 typedef int error;
 #define OK (0)

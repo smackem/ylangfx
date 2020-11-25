@@ -10,9 +10,9 @@
 
 #define IMAGE_HEADER_SIZE (16)
 
-error loadImage(ImageRgba *pImage, cstr pPath) {
-    assert(pImage != NULL);
-    FILE *file = fopen(pPath, "rb");
+error load_image(struct image_rgba *image, const char *path) {
+    assert(image != NULL);
+    FILE *file = fopen(path, "rb");
     error err = 0;
     rgba *pixels = NULL;
 
@@ -22,19 +22,19 @@ error loadImage(ImageRgba *pImage, cstr pPath) {
         if (count < IMAGE_HEADER_SIZE) {
             err = 1; break;
         }
-        i32 width = ntohl(*(u32 *) &header[0]);
-        i32 height = ntohl(*(i32 *) &header[4]);
-        i32 pixelCount = width * height;
-        if (pixelCount < 0 || pixelCount > MAX_IMAGE_PIXELS) {
+        int width = ntohl(*(uint32_t *) &header[0]);
+        int height = ntohl(*(uint32_t *) &header[4]);
+        int pixel_count = width * height;
+        if (pixel_count < 0 || pixel_count > MAX_IMAGE_PIXELS) {
             err = 1; break;
         }
-        pixels = newarr(rgba, pixelCount);
-        if (fread(pixels, sizeof(rgba), pixelCount, file) < pixelCount) {
+        pixels = newarr(rgba, pixel_count);
+        if (fread(pixels, sizeof(rgba), pixel_count, file) < pixel_count) {
             err = 1; break;
         }
-        pImage->width = width;
-        pImage->height = height;
-        pImage->pixels = pixels;
+        image->width = width;
+        image->height = height;
+        image->pixels = pixels;
     } once;
 
     fclose(file);
@@ -44,20 +44,20 @@ error loadImage(ImageRgba *pImage, cstr pPath) {
     return err;
 }
 
-error saveImage(const ImageRgba *pImage, cstr pPath) {
-    assert(pImage != NULL);
+error save_image(const struct image_rgba *image, const char *path) {
+    assert(image != NULL);
     byte header[IMAGE_HEADER_SIZE];
-    i32 pixelCount = getPixelCount(pImage);
+    int pixel_count = get_pixel_count(image);
     error err = 0;
-    FILE *file = fopen(pPath, "wb");
+    FILE *file = fopen(path, "wb");
 
-    *(u32 *)&header[0] = htonl(pImage->width);
-    *(u32 *)&header[4] = htonl(pImage->height);
+    *(uint32_t *)&header[0] = htonl(image->width);
+    *(uint32_t *)&header[4] = htonl(image->height);
     do {
         if (fwrite(header, 1, IMAGE_HEADER_SIZE, file) < IMAGE_HEADER_SIZE) {
             err = 1; break;
         }
-        if (fwrite(pImage->pixels, sizeof(rgba), pixelCount, file) < pixelCount) {
+        if (fwrite(image->pixels, sizeof(rgba), pixel_count, file) < pixel_count) {
             err = 1; break;
         }
     } once;
