@@ -18,26 +18,26 @@ rgba make_rgba(byte r, byte g, byte b, byte a);
 rgba make_rgba_f(float r, float g, float b, float a);
 rgba make_rgba_d(double r, double g, double b, double a);
 
-struct image_rgba {
+typedef struct image_rgba {
     int width;
     int height;
     rgba *pixels;
-};
+} ImageRgba;
 
-struct kernel {
+typedef struct kernel {
     int width;
     int height;
     float *values;
-};
+} Kernel;
 
-void init_image(struct image_rgba *image, int width, int height);
-void free_image(struct image_rgba *image);
-void invert_image(struct image_rgba *image);
-void clone_image(struct image_rgba *dest, const struct image_rgba *orig);
-void convolve_image(struct image_rgba *dest, const struct image_rgba *orig, const struct kernel *kernel);
-void init_kernel(struct kernel *kernel, int width, int height, float value);
-void free_kernel(struct kernel *kernel);
-float get_kernel_sum(const struct kernel *kernel);
-int get_pixel_count(const struct image_rgba *image);
+void init_image(ImageRgba *image, int width, int height);
+void free_image(ImageRgba *image);
+void invert_image(ImageRgba *image);
+void clone_image(ImageRgba *dest, const ImageRgba *orig);
+void convolve_image(ImageRgba *dest, const ImageRgba *orig, const Kernel *kernel);
+void init_kernel(Kernel *kernel, int width, int height, float value);
+void free_kernel(Kernel *kernel);
+float get_kernel_sum(const Kernel *kernel);
+int get_pixel_count(const ImageRgba *image);
 
 #endif //YLN_IMAGING_H

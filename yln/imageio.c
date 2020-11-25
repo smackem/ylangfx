@@ -6,11 +6,13 @@
 #include <stdio.h>
 #include <assert.h>
 #include <netinet/in.h>
+#include <png.h>
+#include <pngconf.h>
 #include "imageio.h"
 
 #define IMAGE_HEADER_SIZE (16)
 
-error load_image(struct image_rgba *image, const char *path) {
+error load_image(ImageRgba *image, const char *path) {
     assert(image != NULL);
     FILE *file = fopen(path, "rb");
     error err = 0;
@@ -28,14 +30,14 @@ error load_image(struct image_rgba *image, const char *path) {
         if (pixel_count < 0 || pixel_count > MAX_IMAGE_PIXELS) {
             err = 1; break;
         }
-        pixels = newarr(rgba, pixel_count);
+        pixels = NEW_ARR(rgba, pixel_count);
         if (fread(pixels, sizeof(rgba), pixel_count, file) < pixel_count) {
             err = 1; break;
         }
         image->width = width;
         image->height = height;
         image->pixels = pixels;
-    } once;
+    } ONCE;
 
     fclose(file);
     if (err != OK && pixels != NULL) {
@@ -44,7 +46,7 @@ error load_image(struct image_rgba *image, const char *path) {
     return err;
 }
 
-error save_image(const struct image_rgba *image, const char *path) {
+error save_image(const ImageRgba *image, const char *path) {
     assert(image != NULL);
     byte header[IMAGE_HEADER_SIZE];
     int pixel_count = get_pixel_count(image);
@@ -60,9 +62,27 @@ error save_image(const struct image_rgba *image, const char *path) {
         if (fwrite(image->pixels, sizeof(rgba), pixel_count, file) < pixel_count) {
             err = 1; break;
         }
-    } once;
+    } ONCE;
 
     fclose(file);
     return err;
 }
 
+error load_png(ImageRgba *image, const char *path) {
+    png_image png;
+    bzero(&png, sizeof(png));
+    png.version = PNG_IMAGE_VERSION;
+    if (png_image_begin_read_from_file(&png, path) == 0) {
+        return 1;
+    }
+    png.format = PNG_FORMAT_ARGB;
+    byte *buffer = NEW_ARR(byte, PNG_IMAGE_SIZE(png));
+    if (png_image_finish_read(&png, NULL, buffer, 0, NULL) == 0) {
+        free(buffer);
+        return 1;
+    }
+    image->width = png.width;
+    image->height = png.height;
+    image->pixels = (rgba *)buffer;
+    return OK;
+}

@@ -4,8 +4,8 @@
 #include <time.h>
 #include "imageio.h"
 
-static void smoothen_image(struct image_rgba *dest, const struct image_rgba *orig, int radius) {
-    struct kernel kernel;
+static void smoothen_image(ImageRgba *dest, const ImageRgba *orig, int radius) {
+    Kernel kernel;
     int diameter = radius * 2 + 1;
     init_kernel(&kernel, diameter, diameter, 1);
     convolve_image(dest, orig, &kernel);
@@ -19,9 +19,9 @@ static long current_millis() {
 }
 
 int main(int argc, char **argv) {
-    struct image_rgba orig;
+    ImageRgba orig;
     bzero(&orig, sizeof(orig));
-    struct image_rgba dest;
+    ImageRgba dest;
     bzero(&dest, sizeof(dest));
     error err = 0;
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
         if (err != OK) {
             break;
         }
-    } once;
+    } ONCE;
 
     free_image(&orig);
     free_image(&dest);
