@@ -71,7 +71,7 @@ error save_image(const ImageRgba *image, const char *path) {
 error load_png(ImageRgba *image, const char *path) {
     assert(image != NULL);
     png_image png;
-    bzero(&png, sizeof(png));
+    ZERO(png);
     png.version = PNG_IMAGE_VERSION;
     if (png_image_begin_read_from_file(&png, path) == 0) {
         return 1;
@@ -92,7 +92,7 @@ error load_png(ImageRgba *image, const char *path) {
 error save_png(const ImageRgba *image, const char *path) {
     assert(image != NULL);
     png_image png;
-    bzero(&png, sizeof(png));
+    ZERO(png);
     png.version = PNG_IMAGE_VERSION;
     png.format = PNG_FORMAT_BGRA;
     png.width = image->width;
