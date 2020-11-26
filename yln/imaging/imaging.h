@@ -5,7 +5,7 @@
 #ifndef YLN_IMAGING_H
 #define YLN_IMAGING_H
 
-#include "types.h"
+#include <types.h>
 
 #define MAX_IMAGE_PIXELS (64 * 1024 * 1024)
 #define R(color) ((color >> 16u) & 0xffu)

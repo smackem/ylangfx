@@ -1,8 +1,13 @@
 #include <wchar.h>
 #include <build_config.h>
 #include <imaging.h>
-#include <time.h>
+#include <util.h>
+#include <limits.h>
+#include <lua.h>
 #include "imageio.h"
+
+static void test_lua() {
+}
 
 static void smoothen_image(ImageRgba *dest, const ImageRgba *orig, int radius) {
     Kernel kernel;
@@ -12,10 +17,18 @@ static void smoothen_image(ImageRgba *dest, const ImageRgba *orig, int radius) {
     free_kernel(&kernel);
 }
 
-static long current_millis() {
-    struct timespec ts;
-    timespec_get(&ts, TIME_UTC);
-    return ts.tv_sec * 1000 + ts.tv_nsec / (1000 * 1000);
+static error load_image_from_file(ImageRgba *image, const char *path) {
+    if (str_endswith(path, ".png")) {
+        return load_png(image, path);
+    }
+    return load_image(image, path);
+}
+
+static error save_image_to_file(const ImageRgba *image, const char *path) {
+    if (str_endswith(path, ".png")) {
+        return save_png(image, path);
+    }
+    return save_image(image, path);
 }
 
 int main(int argc, char **argv) {
@@ -24,6 +37,7 @@ int main(int argc, char **argv) {
     ImageRgba dest;
     bzero(&dest, sizeof(dest));
     error err = 0;
+    char dest_path[PATH_MAX];
 
     wprintf(L"yln v%d.%d\nsizeof int = %d bit | pointer = %d bit\n",
             yln_VERSION_MAJOR,
@@ -38,20 +52,21 @@ int main(int argc, char **argv) {
             wprintf(L"USAGE: yln IMAGE_FILE\n");
             break;
         }
-        err = load_image(&orig, argv[1]);
+
+        err = load_image_from_file(&orig, argv[1]);
         if (err != OK) {
             break;
         }
-        invert_image(&orig);
+
+        //invert_image(&orig);
         clone_image(&dest, &orig);
         long start = current_millis();
-        smoothen_image(&dest, &orig, 11);
+        smoothen_image(&dest, &orig, 3);
         long end = current_millis();
         wprintf(L"elapsed: %Ld ms\n", end - start);
-        err = save_image(&dest, argv[1]);
-        if (err != OK) {
-            break;
-        }
+
+        replace_extension(dest_path, PATH_MAX, argv[1], ".yli.png");
+        err = save_image_to_file(&dest, dest_path);
     } ONCE;
 
     free_image(&orig);

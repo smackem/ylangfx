@@ -7,33 +7,43 @@ configure_file(build_config.h.in build_config.h)
 
 # language level
 set(CMAKE_C_STANDARD 11)
-#set(USR_LOCAL_DIR /usr/local)
 
-# add imaging library
+# add child projects
 add_subdirectory(imaging)
+add_subdirectory(util)
 
 # main target with libraries
 add_executable(yln main.c imageio.c)
 
 # reference libraries
-find_library(LIBPNG_LIB NAMES libpng.a)
-message(STATUS ${LIBPNG_LIB})
+find_library(LIBPNG_LIB NAMES png)
+message(STATUS ${LIBPNG_LIB}) # on linux and macos: /usr/local/lib/libpng.a
 
-find_library(ZLIB_LIB NAMES libz.a)
+find_library(ZLIB_LIB NAMES z)
 message(STATUS ${ZLIB_LIB})
+
+find_library(LUA_LIB NAMES lua)
+message(STATUS ${LUA_LIB})
 
 target_link_libraries(yln PUBLIC
         imaging
+        util
         ${LIBPNG_LIB}
         ${ZLIB_LIB}
+        ${LUA_LIB}
         )
 
 # add include directories
 find_path(LIBPNG_INCLUDE NAMES png.h)
 message(STATUS ${LIBPNG_INCLUDE})
 
+find_path(LIBLUA_INCLUDE NAMES lua.h)
+message(STATUS ${LIBLUA_INCLUDE})
+
 target_include_directories(yln PUBLIC
         "${PROJECT_BINARY_DIR}"
         "${PROJECT_SOURCE_DIR}/imaging"
+        "${PROJECT_SOURCE_DIR}/util"
         "${LIBPNG_INCLUDE}"
+        "${LIBLUA_INCLUDE}"
         )

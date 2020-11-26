@@ -10,5 +10,6 @@
 error load_image(ImageRgba *image, const char *path);
 error save_image(const ImageRgba *image, const char *path);
 error load_png(ImageRgba *image, const char *path);
+error save_png(const ImageRgba *image, const char *path);
 
 #endif //YLN_IMAGEIO_H
