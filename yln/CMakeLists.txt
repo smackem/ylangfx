@@ -11,6 +11,7 @@ set(CMAKE_C_STANDARD 11)
 # add child projects
 add_subdirectory(imaging)
 add_subdirectory(util)
+add_subdirectory(luabind)
 
 # main target with libraries
 add_executable(yln main.c imageio.c)
@@ -28,6 +29,7 @@ message(STATUS ${LUA_LIB})
 target_link_libraries(yln PUBLIC
         imaging
         util
+        luabind
         ${LIBPNG_LIB}
         ${ZLIB_LIB}
         ${LUA_LIB}
@@ -44,6 +46,7 @@ target_include_directories(yln PUBLIC
         "${PROJECT_BINARY_DIR}"
         "${PROJECT_SOURCE_DIR}/imaging"
         "${PROJECT_SOURCE_DIR}/util"
+        "${PROJECT_SOURCE_DIR}/luabind"
         "${LIBPNG_INCLUDE}"
         "${LIBLUA_INCLUDE}"
         )

@@ -6,9 +6,6 @@
 #include <lua.h>
 #include "imageio.h"
 
-static void test_lua() {
-}
-
 static void smoothen_image(ImageRgba *dest, const ImageRgba *orig, int radius) {
     Kernel kernel;
     int diameter = radius * 2 + 1;
@@ -33,11 +30,11 @@ static error save_image_to_file(const ImageRgba *image, const char *path) {
 
 int main(int argc, char **argv) {
     ImageRgba orig;
-    bzero(&orig, sizeof(orig));
     ImageRgba dest;
-    bzero(&dest, sizeof(dest));
     error err = 0;
     char dest_path[PATH_MAX];
+    ZERO(orig);
+    ZERO(dest);
 
     wprintf(L"yln v%d.%d\nsizeof int = %d bit | pointer = %d bit\n",
             yln_VERSION_MAJOR,
