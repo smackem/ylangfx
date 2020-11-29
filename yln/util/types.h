@@ -15,9 +15,9 @@
 #define NEW_ARR(type, size) ((type *)calloc(sizeof(type), size))
 #define ZERO(item) bzero(&item, sizeof(item))
 #define ONCE while (0)
+#define TRACE(...) fprintf(stderr, __VA_ARGS__)
 
 typedef uint8_t byte;
-typedef uint32_t rgba;
 
 typedef int error;
 #define OK (0)

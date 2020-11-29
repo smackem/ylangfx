@@ -1,10 +1,9 @@
 #include <wchar.h>
 #include <build_config.h>
+#include <limits.h>
 #include <imaging.h>
 #include <util.h>
-#include <limits.h>
-#include <lua.h>
-#include "imageio.h"
+#include <luabind.h>
 
 static void smoothen_image(ImageRgba *dest, const ImageRgba *orig, int radius) {
     Kernel kernel;
@@ -43,6 +42,7 @@ int main(int argc, char **argv) {
             sizeof(void *) * 8);
     const rgba col = RGBA(0xff, 0x20, 0x10, 10.3);
     wprintf(L"red = %02x %02x %02x %02x\n", R(col), G(col), B(col), A(col));
+    test_lua();
 
     do {
         if (argc < 2) {

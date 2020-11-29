@@ -14,7 +14,7 @@ add_subdirectory(util)
 add_subdirectory(luabind)
 
 # main target with libraries
-add_executable(yln main.c imageio.c)
+add_executable(yln main.c)
 
 # reference libraries
 find_library(LIBPNG_LIB NAMES png)
