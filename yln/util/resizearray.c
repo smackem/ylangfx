@@ -62,3 +62,14 @@ void array_clear(ResizeArray *array) {
     assert(array != NULL);
     array->size = 0;
 }
+
+void array_remove_impl(ResizeArray *array, int index) {
+    assert(array != NULL);
+    assert(index < array->size);
+    assert(index >= 0);
+    if (index < array->size - 1) {
+        byte *dest = &((byte *) array->items)[index * array->sizeof_item];
+        memcpy(dest, dest + array->sizeof_item, array->sizeof_item);
+    }
+    array->size--;
+}

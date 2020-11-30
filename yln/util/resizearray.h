@@ -28,7 +28,7 @@ void *array_get_ptr_grow(ResizeArray *array, size_t sizeof_item, int index);
 
 void array_clear(ResizeArray *array);
 
-void array_remove_impl(ResizeArray *array, size_t sizeof_item, int index);
+void array_remove_impl(ResizeArray *array, int index);
 #define array_remove(array_ptr, type, index) (array_remove_impl(array_ptr, sizeof(type), index))
 
 #endif //YLN_RESIZEARRAY_H
