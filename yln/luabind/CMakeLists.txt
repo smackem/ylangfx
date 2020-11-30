@@ -1,6 +1,10 @@
 add_library(luabind luabind.c)
 
+set(EXTRA_LIBS m dl) # standard libs that explicity need to be linked ('gcc -lm -ldl ...')
+message(STATUS ${EXTRA_LIBS})
+
 target_link_libraries(luabind PUBLIC
+        ${EXTRA_LIBS}
         util
         imaging
         )

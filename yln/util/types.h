@@ -10,9 +10,10 @@
 #include <memory.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define NEW_OBJ(type) ((type *)calloc(sizeof(type), 1))
-#define NEW_ARR(type, size) ((type *)calloc(sizeof(type), size))
+#define NEW_ARR(type, size) ((type *)calloc(size, sizeof(type)))
 #define ZERO(item) bzero(&item, sizeof(item))
 #define ONCE while (0)
 #define TRACE(...) fprintf(stderr, __VA_ARGS__)

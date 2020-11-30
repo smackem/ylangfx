@@ -18,7 +18,7 @@ add_executable(yln main.c)
 
 # reference libraries
 find_library(LIBPNG_LIB NAMES png)
-message(STATUS ${LIBPNG_LIB}) # on linux and macos: /usr/local/lib/libpng.a
+message(STATUS ${LIBPNG_LIB})
 
 find_library(ZLIB_LIB NAMES z)
 message(STATUS ${ZLIB_LIB})

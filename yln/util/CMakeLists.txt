@@ -1,1 +1,1 @@
-add_library(util util.c)
+add_library(util util.c resizearray.c)
