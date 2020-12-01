@@ -27,6 +27,39 @@ static error save_image_to_file(const ImageRgba *image, const char *path) {
     return save_image(image, path);
 }
 
+static void report_array(const ResizeArray *array, const wchar_t *category) {
+    wprintf(L"ResizeArray@%p [%ls]\n  size: %u\n  capacity: %u\n  sizeof_item: %u\n",
+            array, category, array->size, array->capacity, array->sizeof_item);
+    wprintf(L"  ");
+    for (int i = 0; i < array->size; i++) {
+        wprintf(L"%d ", array_get(array, int, i));
+    }
+    wprintf(L"\n");
+}
+
+static void test_resize_array() {
+    ResizeArray array;
+    array_init(&array, int, 0);
+    report_array(&array, L"initialized");
+    array_push(&array, int, 100);
+    report_array(&array, L"pushed 1 item");
+    array_push(&array, int, 101);
+    report_array(&array, L"pushed 1 item");
+    int popped = array_pop(&array, int);
+    wprintf(L"popped %d\n", popped);
+    report_array(&array, L"popped 1 item");
+    for (int n = 0; n < 20; n++) {
+        array_push(&array, int, n + 101);
+    }
+    report_array(&array, L"pushed 20 items");
+    array_remove(&array, 0);
+    report_array(&array, L"removed first item");
+    array_clear(&array);
+    report_array(&array, L"cleared");
+    array_free(&array);
+    report_array(&array, L"freed");
+}
+
 int main(int argc, char **argv) {
     ImageRgba orig;
     ImageRgba dest;
@@ -42,7 +75,9 @@ int main(int argc, char **argv) {
             sizeof(void *) * 8);
     const rgba col = RGBA(0xff, 0x20, 0x10, 10.3);
     wprintf(L"red = %02x %02x %02x %02x\n", R(col), G(col), B(col), A(col));
+
     test_lua();
+    test_resize_array();
 
     do {
         if (argc < 2) {
