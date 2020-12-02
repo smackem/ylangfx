@@ -7,10 +7,10 @@
 
 static size_t get_new_capacity(const ResizeArray *array, size_t required_capacity) {
     size_t increment = required_capacity / 2;
-    if (increment < 16) {
-        increment = 16;
-    } else if (increment > 256) {
-        increment = 256;
+    if (increment < 15) {
+        increment = 15;
+    } else if (increment > 255) {
+        increment = 255;
     }
     return required_capacity + increment;
 }

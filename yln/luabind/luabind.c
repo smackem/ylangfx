@@ -4,15 +4,21 @@
 
 #include <lualib.h>
 #include <lauxlib.h>
-#include <imaging.h>
+#include <types.h>
 #include "luabind.h"
+
+static void register_libs(lua_State *L) {
+    luaL_requiref(L, "image", luaopen_image, true);
+    lua_pop(L, 1);
+}
 
 void test_lua() {
     int error;
     lua_State *L = luaL_newstate();   // opens Lua
     luaL_openlibs(L);
-    const char *source = "print(\"hello from lua!\")\n"
-                         "return 100\n";
+    register_libs(L);
+    const char *source = "i = image.new(100, 200)\n"
+                         "return image.at(i, 10, 11)\n";
 
     do {
         error = luaL_loadbuffer(L, source, strlen(source), "line") ||

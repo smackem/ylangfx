@@ -5,13 +5,7 @@
 #ifndef YLN_LUABIND_H
 #define YLN_LUABIND_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-#include <lua.h>
-#ifdef __cplusplus
-}
-#endif
+#include "luaimage.h"
 
 void test_lua();
 

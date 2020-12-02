@@ -1,4 +1,4 @@
-add_library(luabind luabind.c)
+add_library(luabind luabind.c luaimage.c luaimage.h)
 
 set(EXTRA_LIBS m dl) # standard libs that explicity need to be linked ('gcc -lm -ldl ...')
 message(STATUS ${EXTRA_LIBS})
