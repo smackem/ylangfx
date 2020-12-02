@@ -13,10 +13,7 @@ add_subdirectory(imaging)
 add_subdirectory(util)
 add_subdirectory(luabind)
 
-# main target with libraries
-add_executable(yln main.c)
-
-# reference libraries
+# reference libraries for all targets
 find_library(LIBPNG_LIB NAMES png)
 message(STATUS ${LIBPNG_LIB})
 
@@ -26,7 +23,7 @@ message(STATUS ${ZLIB_LIB})
 find_library(LUA_LIB NAMES lua)
 message(STATUS ${LUA_LIB})
 
-target_link_libraries(yln PUBLIC
+link_libraries(
         imaging
         util
         luabind
@@ -35,18 +32,31 @@ target_link_libraries(yln PUBLIC
         ${LUA_LIB}
         )
 
-# add include directories
+# add include directories for all targets
 find_path(LIBPNG_INCLUDE NAMES png.h)
 message(STATUS ${LIBPNG_INCLUDE})
 
 find_path(LIBLUA_INCLUDE NAMES lua.h)
 message(STATUS ${LIBLUA_INCLUDE})
 
-target_include_directories(yln PUBLIC
+include_directories(
         "${PROJECT_BINARY_DIR}"
         "${PROJECT_SOURCE_DIR}/imaging"
         "${PROJECT_SOURCE_DIR}/util"
-        "${PROJECT_SOURCE_DIR}/luabind"
         "${LIBPNG_INCLUDE}"
+        )
+
+# main target with libraries
+add_executable(yln main.c)
+add_executable(yln_test test.c)
+
+# libraries specific to yln_test
+target_link_libraries(yln_test PUBLIC
+        luabind
+        ${LUA_LIB}
+        )
+
+target_include_directories(yln_test PUBLIC
+        "${PROJECT_SOURCE_DIR}/luabind"
         "${LIBLUA_INCLUDE}"
         )

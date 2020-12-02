@@ -7,6 +7,6 @@
 
 #include "luaimage.h"
 
-void test_lua();
+void run_lua_script(const char *script_path);
 
 #endif //YLN_LUABIND_H
