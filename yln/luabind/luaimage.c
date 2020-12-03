@@ -21,7 +21,7 @@ static int new_image(lua_State *L) {
     return 1;
 }
 
-static ImageRgba *to_image (lua_State *L) {
+static ImageRgba *to_image(lua_State *L) {
     void *userdata = luaL_checkudata(L, 1, YLN_IMAGE);
     luaL_argcheck(L, userdata != NULL, 1, "`image` expected");
     return (ImageRgba *)userdata;
@@ -37,26 +37,25 @@ static int get_image_height(lua_State *L) {
     return 1;
 }
 
-static int get_image_pixel(lua_State *L) {
+static rgba *get_image_pixel_addr(lua_State *L) {
     ImageRgba *image = to_image(L);
-    int x = luaL_checkinteger(L, 2);
-    int y = luaL_checkinteger(L, 3);
+    lua_Integer x = luaL_checkinteger(L, 2) - 1; // ranges from 1..width] as usual in lua
+    lua_Integer y = luaL_checkinteger(L, 3) - 1;
     luaL_argcheck(L, image->pixels != NULL, 1, "image is uninitialized");
-    luaL_argcheck(L, x < image->width, 2, "x is out of range");
-    luaL_argcheck(L, y < image->height, 3, "y is out of range");
-    lua_pushinteger(L, image->pixels[y * image->width + x]);
+    luaL_argcheck(L, 0 <= x && x < image->width, 2, "x is out of range");
+    luaL_argcheck(L, 0 <= y && y < image->height, 3, "y is out of range");
+    return &image->pixels[y * image->width + x];
+}
+
+static int get_image_pixel(lua_State *L) {
+    lua_pushinteger(L, *get_image_pixel_addr(L));
     return 1;
 }
 
 static int set_image_pixel(lua_State *L) {
-    ImageRgba *image = to_image(L);
-    int x = luaL_checkinteger(L, 2);
-    int y = luaL_checkinteger(L, 3);
+    rgba *pixel_ptr = get_image_pixel_addr(L);
     int color = luaL_checkinteger(L, 4);
-    luaL_argcheck(L, image->pixels != NULL, 1, "image is uninitialized");
-    luaL_argcheck(L, x < image->width, 2, "x is out of range");
-    luaL_argcheck(L, y < image->height, 3, "y is out of range");
-    image->pixels[y * image->width + x] = color;
+    *pixel_ptr = color;
     return 0;
 }
 
