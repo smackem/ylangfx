@@ -13,7 +13,7 @@ add_subdirectory(imaging)
 add_subdirectory(util)
 add_subdirectory(luabind)
 
-# reference libraries for all targets
+# reference libraries common to all targets
 find_library(LIBPNG_LIB NAMES png)
 message(STATUS ${LIBPNG_LIB})
 
@@ -46,8 +46,10 @@ include_directories(
         "${LIBPNG_INCLUDE}"
         )
 
-# main target with libraries
+# main target
 add_executable(yln main.c)
+
+# test target
 add_executable(yln_test test.c)
 
 # libraries specific to yln_test
