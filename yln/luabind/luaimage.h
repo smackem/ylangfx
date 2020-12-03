@@ -13,6 +13,14 @@ extern "C" {
 #include <lua.h>
 #endif
 
+#include <imaging.h>
+
+/**
+ * The name of the lua image type
+ */
+#define YLN_IMAGE "Yln.image"
+
+ImageRgba *to_image(lua_State *L, int arg);
 int luaopen_image(lua_State *L);
 
 #endif //YLN_LUAIMAGE_H

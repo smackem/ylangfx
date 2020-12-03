@@ -2,11 +2,16 @@ function trace(s)
     io.stderr:write(s)
 end
 
+function randomCh()
+    return math.random(0, 255)
+end
+
 function createRandomImage(width, height)
     img = image.new(width, height)
     for y = 1, height do
         for x = 1, width do
-            img:set(x, y, math.random(0, 1))
+            local color = rgba.rgb(randomCh(), randomCh(), randomCh())
+            img:set(x, y, color)
         end
     end
     return img

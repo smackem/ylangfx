@@ -5,11 +5,16 @@
 #include <lualib.h>
 #include <lauxlib.h>
 #include <types.h>
+#include "luargba.h"
+#include "luaimage.h"
+#include "luakernel.h"
 #include "luabind.h"
 
 static void register_libs(lua_State *L) {
+    luaL_requiref(L, "rgba", luaopen_rgba, true);
     luaL_requiref(L, "image", luaopen_image, true);
-    lua_pop(L, 1);
+    luaL_requiref(L, "kernel", luaopen_kernel, true);
+    lua_pop(L, 2);
 }
 
 void run_lua_script(const char *script_path) {
