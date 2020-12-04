@@ -14,21 +14,32 @@ static void register_libs(lua_State *L) {
     luaL_requiref(L, "rgba", luaopen_rgba, true);
     luaL_requiref(L, "image", luaopen_image, true);
     luaL_requiref(L, "kernel", luaopen_kernel, true);
-    lua_pop(L, 2);
+    lua_pop(L, 3);
 }
 
-void run_lua_script(const char *script_path) {
+error run_lua_script(const char *script_path, ImageRgba *dest, const ImageRgba *orig) {
     lua_State *L = luaL_newstate();   // opens Lua
+    int error = OK;
     luaL_openlibs(L);
     register_libs(L);
-    int error = luaL_dofile(L, script_path);
+    // store input image in global variable 'in'
+    push_image(L, orig);
+    lua_setglobal(L, "inp");
 
-    if (error) {
-        TRACE("%s\n", lua_tostring(L, -1));
-    } else {
-        lua_Integer result = luaL_checkinteger(L, -1);
-        wprintf(L"lua result: %d\n", result);
-    }
+    do {
+        error = luaL_dofile(L, script_path);
+        if (error) {
+            trace("%s\n", lua_tostring(L, -1));
+            break;
+        }
+        const ImageRgba *result = luaL_testudata(L, -1, YLN_IMAGE);
+        if (result == NULL) {
+            error = 1;
+            break;
+        }
+        clone_image(dest, result);
+    } ONCE;
 
     lua_close(L);
+    return error;
 }

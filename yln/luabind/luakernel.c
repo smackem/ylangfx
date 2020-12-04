@@ -11,11 +11,35 @@
 static int new_kernel(lua_State *L) {
     int width = luaL_checkinteger(L, 1);
     int height = luaL_checkinteger(L, 2);
+    float value = luaL_checknumber(L, 3);
     luaL_argcheck(L, width > 0, 1, "width must be positive");
     luaL_argcheck(L, height > 0, 2, "height must be positive");
     Kernel *kernel = lua_newuserdata(L, sizeof(Kernel));
     luaL_setmetatable(L, YLN_KERNEL);
+    init_kernel(kernel, width, height, value);
+    return 1;
+}
+
+static int new_kernel_of_values(lua_State *L) {
+    int width = luaL_checkinteger(L, 1);
+    int height = luaL_checkinteger(L, 2);
+
+    lua_len(L, 3); // push table len
+    int table_len = lua_tointeger(L, -1);
+    lua_pop(L, 1); // pop table len
+
+    luaL_argcheck(L, width > 0, 1, "width must be positive");
+    luaL_argcheck(L, width * height == table_len, 3, "table must have width * height elements");
+
+    Kernel *kernel = (Kernel *)lua_newuserdata(L, sizeof(Kernel));
+    luaL_setmetatable(L, YLN_KERNEL);
     init_kernel(kernel, width, height, 0);
+
+    lua_pushnil(L);  // push initial (dummy) key
+    for (float *value_ptr = kernel->values; lua_next(L, 3) != 0; value_ptr++) {
+        *value_ptr = lua_tonumber(L, -1); // 'key' is at index -2 and 'value' is at index -1
+        lua_pop(L, 1); // removes 'value'; keeps 'key' for next iteration */
+    }
     return 1;
 }
 
@@ -52,6 +76,7 @@ static int set_kernel_value(lua_State *L) {
 
 static const struct luaL_Reg function_lib[] = {
         {"new",    new_kernel},
+        {"of",     new_kernel_of_values},
         {NULL, NULL},
 };
 

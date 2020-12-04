@@ -31,16 +31,14 @@ int main(int argc, char **argv) {
     ImageRgba dest;
     error err = 0;
     char dest_path[PATH_MAX];
-    ZERO(orig);
-    ZERO(dest);
+    zero(orig);
+    zero(dest);
 
     wprintf(L"yln v%d.%d\nsizeof int = %d bit | pointer = %d bit\n",
             yln_VERSION_MAJOR,
             yln_VERSION_MINOR,
             sizeof(int) * 8,
             sizeof(void *) * 8);
-    const rgba col = RGBA(0xff, 0x20, 0x10, 10.3);
-    wprintf(L"red = %02x %02x %02x %02x\n", R(col), G(col), B(col), A(col));
 
     do {
         if (argc < 2) {

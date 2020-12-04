@@ -12,11 +12,12 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define NEW_OBJ(type) ((type *)calloc(sizeof(type), 1))
-#define NEW_ARR(type, size) ((type *)calloc(size, sizeof(type)))
-#define ZERO(item) bzero(&item, sizeof(item))
+#define new_obj(type) ((type *)calloc(sizeof(type), 1))
+#define new_arr(type, size) ((type *)calloc(size, sizeof(type)))
+#define zero(item) bzero(&item, sizeof(item))
+#define trace(...) fprintf(stderr, __VA_ARGS__)
+
 #define ONCE while (0)
-#define TRACE(...) fprintf(stderr, __VA_ARGS__)
 
 typedef uint8_t byte;
 

@@ -1,3 +1,4 @@
+#include <limits.h>
 #include <imaging.h>
 #include <util.h>
 #include <luabind.h>
@@ -35,12 +36,43 @@ static void test_resize_array() {
     report_array(&array, L"freed");
 }
 
+static void laplace(ImageRgba *dest, const ImageRgba *orig) {
+    Kernel kernel;
+    init_kernel(&kernel, 3, 3, -1.0);
+    kernel.values[4] = (float)8.0;
+    convolve_image(dest, orig, &kernel);
+}
+
 int main(int argc, char **argv) {
-    test_resize_array();
-    if (argc < 2) {
-        TRACE("USAGE: yln_test LUA_FILE\n");
-        return 1;
-    }
-    run_lua_script(argv[1]);
-    return 0;
+    ImageRgba orig;
+    ImageRgba dest;
+    error err = 0;
+    char dest_path[PATH_MAX];
+    zero(orig);
+    zero(dest);
+
+    do {
+        if (argc < 3) {
+            trace("USAGE: yln_test LUA_FILE PNG_FILE\n");
+            break;
+        }
+        err = load_png(&orig, argv[2]);
+        if (err != OK) {
+            break;
+        }
+        err = run_lua_script(argv[1], &dest, &orig);
+        if (err != OK) {
+            break;
+        }
+//        init_image(&dest, orig.width, orig.height);
+//        laplace(&dest, &orig);
+        replace_extension(dest_path, PATH_MAX, argv[2], ".processed.png");
+        err = save_png(&dest, dest_path);
+        if (err != OK) {
+            break;
+        }
+        trace("image written to %s\n", dest_path);
+    } ONCE;
+
+    return err;
 }

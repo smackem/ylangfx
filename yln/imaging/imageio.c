@@ -30,7 +30,7 @@ error load_image(ImageRgba *image, const char *path) {
         if (pixel_count < 0 || pixel_count > MAX_IMAGE_PIXELS) {
             err = 1; break;
         }
-        pixels = NEW_ARR(rgba, pixel_count);
+        pixels = new_arr(rgba, pixel_count);
         if (fread(pixels, sizeof(rgba), pixel_count, file) < pixel_count) {
             err = 1; break;
         }
@@ -71,14 +71,14 @@ error save_image(const ImageRgba *image, const char *path) {
 error load_png(ImageRgba *image, const char *path) {
     assert(image != NULL);
     png_image png;
-    ZERO(png);
+    zero(png);
     png.version = PNG_IMAGE_VERSION;
     if (png_image_begin_read_from_file(&png, path) == 0) {
         return 1;
     }
     png.format = PNG_FORMAT_BGRA;
     size_t size = PNG_IMAGE_SIZE(png);
-    byte *buffer = NEW_ARR(byte, size);
+    byte *buffer = new_arr(byte, size);
     if (png_image_finish_read(&png, NULL, buffer, 0, NULL) == 0) {
         free(buffer);
         return 1;
@@ -92,7 +92,7 @@ error load_png(ImageRgba *image, const char *path) {
 error save_png(const ImageRgba *image, const char *path) {
     assert(image != NULL);
     png_image png;
-    ZERO(png);
+    zero(png);
     png.version = PNG_IMAGE_VERSION;
     png.format = PNG_FORMAT_BGRA;
     png.width = image->width;

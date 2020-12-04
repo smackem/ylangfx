@@ -22,5 +22,6 @@ extern "C" {
 
 ImageRgba *to_image(lua_State *L, int arg);
 int luaopen_image(lua_State *L);
+void push_image(lua_State *L, const ImageRgba *image);
 
 #endif //YLN_LUAIMAGE_H

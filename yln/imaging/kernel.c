@@ -22,7 +22,7 @@ void init_kernel(Kernel *kernel, int width, int height, float value) {
     int size = width * height;
     kernel->width = width;
     kernel->height = height;
-    kernel->values = NEW_ARR(float, size);
+    kernel->values = new_arr(float, size);
     for (int i = 0; i < size; i++) {
         kernel->values[i] = value;
     }

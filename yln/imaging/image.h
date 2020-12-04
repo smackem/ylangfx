@@ -21,6 +21,7 @@ void free_image(ImageRgba *image);
 void invert_image(ImageRgba *image);
 void clone_image(ImageRgba *dest, const ImageRgba *orig);
 void convolve_image(ImageRgba *dest, const ImageRgba *orig, const Kernel *kernel);
+rgba convolve_image_pixel(const ImageRgba *orig, const Kernel *kernel, int x, int y);
 int get_pixel_count(const ImageRgba *image);
 
 #endif //YLN_IMAGE_H
