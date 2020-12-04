@@ -64,8 +64,6 @@ int main(int argc, char **argv) {
         if (err != OK) {
             break;
         }
-//        init_image(&dest, orig.width, orig.height);
-//        laplace(&dest, &orig);
         replace_extension(dest_path, PATH_MAX, argv[2], ".processed.png");
         err = save_png(&dest, dest_path);
         if (err != OK) {
@@ -74,5 +72,8 @@ int main(int argc, char **argv) {
         trace("image written to %s\n", dest_path);
     } ONCE;
 
+    if (err != OK) {
+        perror(NULL);
+    }
     return err;
 }
