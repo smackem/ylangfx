@@ -5,10 +5,10 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 
 @SuppressWarnings("DuplicatedCode")
-public class ImageVal extends MatrixVal<RgbVal> {
-    private final RgbVal[] pixels;
+public class ImageVal_IntArgb extends MatrixVal<RgbVal> {
+    private final int[] pixels;
 
-    private ImageVal(int width, int height, RgbVal[] pixels) {
+    private ImageVal_IntArgb(int width, int height, int[] pixels) {
         super(ValueType.IMAGE, width, height);
         if (Objects.requireNonNull(pixels).length != width * height) {
             throw new IllegalArgumentException("pixel buffer size does not match width and height");
@@ -16,20 +16,20 @@ public class ImageVal extends MatrixVal<RgbVal> {
         this.pixels = pixels;
     }
 
-    public ImageVal(int width, int height) {
-        this(width, height, getPixels(width, height, RgbVal.EMPTY));
+    public ImageVal_IntArgb(int width, int height) {
+        this(width, height, getPixels(width, height, 0));
     }
 
-    public ImageVal(int width, int height, RgbVal initialValue) {
-        this(width, height, getPixels(width, height, initialValue));
+    public ImageVal_IntArgb(int width, int height, RgbVal initialValue) {
+        this(width, height, getPixels(width, height, toIntArgb(initialValue)));
     }
 
-    public ImageVal(ImageVal original) {
+    public ImageVal_IntArgb(ImageVal_IntArgb original) {
         super(original);
         this.pixels = clonePixels(original.pixels);
     }
 
-    public static ImageVal fromArgbPixels(int width, int height, int[] pixels) {
+    public static ImageVal_IntArgb fromArgbPixels(int width, int height, int[] pixels) {
         if (width <= 0) {
             throw new IllegalArgumentException("image width must be > 0");
         }
@@ -39,37 +39,27 @@ public class ImageVal extends MatrixVal<RgbVal> {
         if (width * height != pixels.length) {
             throw new IllegalArgumentException("width and height do not match number of pixels");
         }
-        final RgbVal[] rgbPixels = new RgbVal[pixels.length];
-        for (int i = 0; i < pixels.length; i++) {
-            final int pixel = pixels[i];
-            rgbPixels[i] = new RgbVal(pixel >> 16 & 0xff, pixel >> 8 & 0xff, pixel & 0xff, pixel >> 24 & 0xff);
-        }
-        return new ImageVal(width, height, rgbPixels);
+        return new ImageVal_IntArgb(width, height, pixels);
     }
 
-    public static ImageVal fromKernel(KernelVal kernel) {
+    public static ImageVal_IntArgb fromKernel(KernelVal kernel) {
         Objects.requireNonNull(kernel);
-        final ImageVal image = new ImageVal(kernel.width(), kernel.height());
+        final ImageVal_IntArgb image = new ImageVal_IntArgb(kernel.width(), kernel.height());
         for (int i = 0; i < image.pixels.length; i++) {
-            final float value = RgbVal.clamp(kernel.get(i).value());
-            image.pixels[i] = new RgbVal(value, value, value, 255);
+            final int value = (int) RgbVal.clamp(kernel.get(i).value());
+            image.pixels[i] = 255 << 24 | value << 16 | value << 8 | value;
         }
         return image;
     }
 
     public int[] toArgbPixels() {
-        final int[] buffer = new int[width() * height()];
-        final int pixelCount = buffer.length;
-        for (int i = 0; i < pixelCount; i++) {
-            buffer[i] = toIntArgb(this.pixels[i]);
-        }
-        return buffer;
+        return this.pixels;
     }
 
-    public ImageVal convolve(KernelVal kernel) {
+    public ImageVal_IntArgb convolve(KernelVal kernel) {
         final int width = width();
         final int height = height();
-        final ImageVal target = new ImageVal(width, height);
+        final ImageVal_IntArgb target = new ImageVal_IntArgb(width, height);
         final float kernelSum = kernel.sum().value();
         final int kernelWidth = kernel.width();
         final int kernelHeight = kernel.height();
@@ -101,12 +91,12 @@ public class ImageVal extends MatrixVal<RgbVal> {
                     for (int imageX = startX; imageX < endX; imageX++) {
                         if (imageX >= 0 && imageX < width) {
                             final float value = kernelValues[kernelIndex];
-                            final RgbVal px = this.pixels[imageIndex];
-                            r += value * px.r();
-                            g += value * px.g();
-                            b += value * px.b();
+                            final int px = this.pixels[imageIndex];
+                            r += value * red(px);
+                            g += value * green(px);
+                            b += value * blue(px);
                             if (imageX == x && imageY == y) {
-                                a = px.a();
+                                a = alpha(px);
                             }
                         }
                         kernelIndex++;
@@ -114,8 +104,8 @@ public class ImageVal extends MatrixVal<RgbVal> {
                     }
                 }
                 target.pixels[targetIndex] = kernelSum == 0
-                        ? new RgbVal(r, g, b, a)
-                        : new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
+                        ? toIntArgb(r, g, b, a)
+                        : toIntArgb(r / kernelSum, g / kernelSum, b / kernelSum, a);
                 targetIndex++;
             }
         }
@@ -162,29 +152,29 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
     }
 
-    public ImageVal add(ImageVal right) {
+    public ImageVal_IntArgb add(ImageVal_IntArgb right) {
         return composeWith(right, RgbVal::add);
     }
 
-    public ImageVal subtract(ImageVal right) {
+    public ImageVal_IntArgb subtract(ImageVal_IntArgb right) {
         return composeWith(right, RgbVal::subtract);
     }
 
-    public ImageVal multiply(ImageVal right) {
+    public ImageVal_IntArgb multiply(ImageVal_IntArgb right) {
         return composeWith(right, RgbVal::multiplyWith);
     }
 
-    public ImageVal divide(ImageVal right) {
+    public ImageVal_IntArgb divide(ImageVal_IntArgb right) {
         return composeWith(right, RgbVal::divideBy);
     }
 
-    public ImageVal composeWith(ImageVal that, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
+    public ImageVal_IntArgb composeWith(ImageVal_IntArgb that, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
         if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
             throw new IllegalArgumentException("composed images must have the same dimensions");
         }
-        final ImageVal result = new ImageVal(this.width(), this.height());
+        final ImageVal_IntArgb result = new ImageVal_IntArgb(this.width(), this.height());
         for (int i = 0; i < this.pixels.length; i++) {
-            result.pixels[i] = operation.apply(this.pixels[i], that.pixels[i]);
+            result.pixels[i] = toIntArgb(operation.apply(toRgbVal(this.pixels[i]), toRgbVal(that.pixels[i])));
         }
         return result;
     }
@@ -196,46 +186,69 @@ public class ImageVal extends MatrixVal<RgbVal> {
 
     @Override
     RgbVal internalGet(int index) {
-        return this.pixels[index];
+        return toRgbVal(this.pixels[index]);
     }
 
     @Override
     void internalSet(int index, RgbVal value) {
-        this.pixels[index] = value;
+        this.pixels[index] = toIntArgb(value);
     }
 
-    private static RgbVal[] getPixels(int width, int height, RgbVal initialValue) {
+    private static int[] getPixels(int width, int height, int initialValue) {
         if (width <= 0) {
             throw new IllegalArgumentException("image width must be > 0");
         }
         if (height <= 0) {
             throw new IllegalArgumentException("image height must be > 0");
         }
-        Objects.requireNonNull(initialValue);
-        final RgbVal[] pixels = new RgbVal[width * height];
+        final int[] pixels = new int[width * height];
         Arrays.fill(pixels, initialValue);
         return pixels;
     }
 
-    private static RgbVal[] clonePixels(RgbVal[] pixels) {
-        final RgbVal[] clone = new RgbVal[pixels.length];
+    private static int[] clonePixels(int[] pixels) {
+        final int[] clone = new int[pixels.length];
         System.arraycopy(pixels, 0, clone, 0, pixels.length);
         return clone;
     }
 
     private static int toIntArgb(RgbVal rgb) {
-        return (int) RgbVal.clamp(rgb.a()) << 24 |
-               (int) RgbVal.clamp(rgb.r()) << 16 |
-               (int) RgbVal.clamp(rgb.g()) << 8 |
-               (int) RgbVal.clamp(rgb.b());
+        return toIntArgb(rgb.r(), rgb.g(), rgb.b(), rgb.a());
+    }
+
+    private static int toIntArgb(float r, float g, float b, float a) {
+        return (int) RgbVal.clamp(a) << 24 |
+               (int) RgbVal.clamp(r) << 16 |
+               (int) RgbVal.clamp(g) << 8 |
+               (int) RgbVal.clamp(b);
+    }
+
+    private static RgbVal toRgbVal(int argb) {
+        return new RgbVal(red(argb), green(argb), blue(argb), alpha(argb));
+    }
+
+    private static int red(int argb) {
+        return argb >> 16 & 0xff;
+    }
+
+    private static int green(int argb) {
+        return argb >> 8 & 0xff;
+    }
+
+    private static int blue(int argb) {
+        return argb & 0xff;
+    }
+
+    private static int alpha(int argb) {
+        return argb >> 24 & 0xff;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        final ImageVal imageVal = (ImageVal) o;
-        return Arrays.equals(pixels, imageVal.pixels);
+        final ImageVal_IntArgb ImageVal_IntArgb = (ImageVal_IntArgb) o;
+        return Arrays.equals(pixels, ImageVal_IntArgb.pixels);
     }
 
     @Override

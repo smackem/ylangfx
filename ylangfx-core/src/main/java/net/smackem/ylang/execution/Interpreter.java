@@ -110,7 +110,7 @@ public class Interpreter {
                   return value: %s""".formatted(
                 end,
                 duration.toSeconds(), duration.toMillisPart(),
-                retVal.toLangString()));
+                Values.prettyPrint(retVal)));
         return retVal;
     }
 
@@ -133,6 +133,7 @@ public class Interpreter {
     private void writeLogMessageGuarded(String message) throws ExecutionException {
         try {
             this.ctx.logWriter().write(message);
+            log.info(message);
         } catch (IOException e) {
             log.error("error writing log message", e);
             throw new ExecutionException("error writing log message", null, e);
