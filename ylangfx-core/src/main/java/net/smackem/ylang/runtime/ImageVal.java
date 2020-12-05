@@ -181,7 +181,7 @@ public class ImageVal extends MatrixVal<RgbVal> {
 
     public ImageVal composeWith(ImageVal that, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
         if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
-            throw new IllegalArgumentException("subtracted images must have the same dimensions");
+            throw new IllegalArgumentException("composed images must have the same dimensions");
         }
         final ImageVal result = new ImageVal(this.width(), this.height());
         for (int i = 0; i < this.pixels.length; i++) {

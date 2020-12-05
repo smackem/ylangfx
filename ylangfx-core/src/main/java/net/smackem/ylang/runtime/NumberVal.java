@@ -16,6 +16,14 @@ public final class NumberVal extends Value {
         return this.value;
     }
 
+    public static NumberVal max(NumberVal a, NumberVal b) {
+        return a.value > b.value ? a : b;
+    }
+
+    public static NumberVal min(NumberVal a, NumberVal b) {
+        return a.value < b.value ? a : b;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

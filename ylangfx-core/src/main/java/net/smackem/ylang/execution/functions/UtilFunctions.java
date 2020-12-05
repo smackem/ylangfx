@@ -31,7 +31,13 @@ public class UtilFunctions {
                         UtilFunctions::minList),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
-                        UtilFunctions::minKernel)));
+                        UtilFunctions::minKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.KERNEL),
+                        UtilFunctions::minKernelWithKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.IMAGE),
+                        UtilFunctions::minImageWithImage)));
         registry.put(new FunctionGroup("max",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
@@ -44,25 +50,49 @@ public class UtilFunctions {
                         UtilFunctions::maxList),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
-                        UtilFunctions::maxKernel)));
+                        UtilFunctions::maxKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.KERNEL),
+                        UtilFunctions::maxKernelWithKernel),
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.IMAGE),
+                        UtilFunctions::maxImageWithImage)));
+    }
+
+    private static Value minImageWithImage(List<Value> args) {
+        final ImageVal i1 = (ImageVal) args.get(0);
+        final ImageVal i2 = (ImageVal) args.get(1);
+        return i1.composeWith(i2, RgbVal::min);
+    }
+
+    private static Value maxImageWithImage(List<Value> args) {
+        final ImageVal i1 = (ImageVal) args.get(0);
+        final ImageVal i2 = (ImageVal) args.get(1);
+        return i1.composeWith(i2, RgbVal::max);
+    }
+
+    private static Value minKernelWithKernel(List<Value> args) {
+        final KernelVal k1 = (KernelVal) args.get(0);
+        final KernelVal k2 = (KernelVal) args.get(1);
+        return k1.composeWith(k2, NumberVal::min);
+    }
+
+    private static Value maxKernelWithKernel(List<Value> args) {
+        final KernelVal k1 = (KernelVal) args.get(0);
+        final KernelVal k2 = (KernelVal) args.get(1);
+        return k1.composeWith(k2, NumberVal::max);
     }
 
     private static Value maxRgb(List<Value> args) {
         final RgbVal rgb1 = (RgbVal) args.get(0);
         final RgbVal rgb2 = (RgbVal) args.get(1);
-        return new RgbVal(Math.max(rgb1.r(), rgb2.r()),
-                Math.max(rgb1.g(), rgb2.g()),
-                Math.max(rgb1.b(), rgb2.b()),
-                rgb1.a());
+        return RgbVal.max(rgb1, rgb2);
     }
 
     private static Value minRgb(List<Value> args) {
         final RgbVal rgb1 = (RgbVal) args.get(0);
         final RgbVal rgb2 = (RgbVal) args.get(1);
-        return new RgbVal(Math.min(rgb1.r(), rgb2.r()),
-                Math.min(rgb1.g(), rgb2.g()),
-                Math.min(rgb1.b(), rgb2.b()),
-                rgb1.a());
+        return RgbVal.min(rgb1, rgb2);
     }
 
     private static Value maxKernel(List<Value> args) {
@@ -92,7 +122,7 @@ public class UtilFunctions {
     private static Value maxNumber(List<Value> args) {
         final NumberVal a = ((NumberVal) args.get(0));
         final NumberVal b = ((NumberVal) args.get(1));
-        return a.value() > b.value() ? a : b;
+        return NumberVal.max(a, b);
     }
 
     private static Value minKernel(List<Value> args) {
@@ -122,7 +152,7 @@ public class UtilFunctions {
     private static Value minNumber(List<Value> args) {
         final NumberVal a = ((NumberVal) args.get(0));
         final NumberVal b = ((NumberVal) args.get(1));
-        return a.value() < b.value() ? a : b;
+        return NumberVal.min(a, b);
     }
 
     private static Value floatRandom(List<Value> args) {

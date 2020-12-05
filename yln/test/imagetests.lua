@@ -11,7 +11,7 @@ local function randomCh()
 end
 
 local function createRandomImage(width, height)
-    img = image.new(width, height)
+    local img = image.new(width, height)
     for y = 1, height do
         for x = 1, width do
             local color = rgba.rgb(randomCh(), randomCh(), randomCh())
@@ -40,7 +40,6 @@ local function traceKernel(k)
         end
         trace("\n")
     end
-    return img
 end
 
 local function makeGaussian(radius)

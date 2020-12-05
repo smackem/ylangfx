@@ -75,8 +75,12 @@ class RgbFunctions {
         registry.put(new FunctionGroup("i01",
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity01)));
         registry.put(new FunctionGroup("over",
-                FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
-                        RgbFunctions::over)));
+                FunctionOverload.method(
+                        List.of(ValueType.RGB, ValueType.RGB),
+                        RgbFunctions::rgbOverRgb),
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.IMAGE),
+                        RgbFunctions::imageOverImage)));
         registry.put(new FunctionGroup("grey",
                 FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::greyscale)));
         registry.put(new FunctionGroup("hsv",
@@ -101,6 +105,12 @@ class RgbFunctions {
                 FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addSaturation)));
         registry.put(new FunctionGroup("addValue",
                 FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addValue)));
+    }
+
+    private static Value imageOverImage(List<Value> args) {
+        ImageVal i1 = (ImageVal) args.get(0);
+        ImageVal i2 = (ImageVal) args.get(1);
+        return i1.composeWith(i2, RgbVal::over);
     }
 
     private static Value greyscale(List<Value> args) {
@@ -188,7 +198,7 @@ class RgbFunctions {
         return ((HsvVal) args.get(0)).toRgb();
     }
 
-    private static Value over(List<Value> args) {
+    private static Value rgbOverRgb(List<Value> args) {
         return ((RgbVal) args.get(0)).over((RgbVal) args.get(1));
     }
 

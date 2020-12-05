@@ -72,8 +72,17 @@ public class MathFunctions {
                         List.of(ValueType.RGB, ValueType.RGB),
                         MathFunctions::hypotRgb),
                 FunctionOverload.function(
+                        List.of(ValueType.IMAGE, ValueType.IMAGE),
+                        MathFunctions::hypotImage),
+                FunctionOverload.function(
                         List.of(ValueType.POINT),
                         MathFunctions::hypotPoint)));
+    }
+
+    private static Value hypotImage(List<Value> args) {
+        final ImageVal i1 = (ImageVal) args.get(0);
+        final ImageVal i2 = (ImageVal) args.get(1);
+        return i1.composeWith(i2, RgbVal::hypot);
     }
 
     private static Value hypotPoint(List<Value> args) {
@@ -84,7 +93,7 @@ public class MathFunctions {
     private static Value hypotRgb(List<Value> args) {
         final RgbVal a = (RgbVal) args.get(0);
         final RgbVal b = (RgbVal) args.get(1);
-        return new RgbVal((float) Math.hypot(a.r(), b.r()), (float) Math.hypot(a.g(), b.g()), (float) Math.hypot(a.b(), b.b()), a.a());
+        return a.hypot(b);
     }
 
     private static Value hypot(List<Value> args) {

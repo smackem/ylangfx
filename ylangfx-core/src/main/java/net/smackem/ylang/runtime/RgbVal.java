@@ -105,6 +105,14 @@ public class RgbVal extends Value {
                 255f * a);
     }
 
+    public RgbVal hypot(RgbVal that) {
+        return new RgbVal(
+                (float) Math.hypot(this.r, that.r),
+                (float) Math.hypot(this.g, that.g),
+                (float) Math.hypot(this.b, that.b),
+                this.a);
+    }
+
     public RgbVal clamp() {
         return new RgbVal(clamp(this.r), clamp(this.g), clamp(this.b), clamp(this.a));
     }
@@ -114,6 +122,20 @@ public class RgbVal extends Value {
             return 255f;
         }
         return Math.max(channelValue, 0f);
+    }
+
+    public static RgbVal max(RgbVal rgb1, RgbVal rgb2) {
+        return new RgbVal(Math.max(rgb1.r(), rgb2.r()),
+                Math.max(rgb1.g(), rgb2.g()),
+                Math.max(rgb1.b(), rgb2.b()),
+                rgb1.a());
+    }
+
+    public static RgbVal min(RgbVal rgb1, RgbVal rgb2) {
+        return new RgbVal(Math.min(rgb1.r(), rgb2.r()),
+                Math.min(rgb1.g(), rgb2.g()),
+                Math.min(rgb1.b(), rgb2.b()),
+                rgb1.a());
     }
 
     @Override

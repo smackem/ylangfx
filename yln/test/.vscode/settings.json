@@ -1,0 +1,9 @@
+{
+    "Lua.diagnostics.globals": [
+        "traceImage",
+        "kernel",
+        "inp",
+        "image",
+        "rgba"
+    ]
+}

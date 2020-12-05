@@ -219,7 +219,7 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
 
     public KernelVal composeWith(KernelVal that, BiFunction<NumberVal, NumberVal, NumberVal> operation) {
         if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
-            throw new IllegalArgumentException("subtracted images must have the same dimensions");
+            throw new IllegalArgumentException("composed kernels must have the same dimensions");
         }
         final KernelVal result = new KernelVal(this.width(), this.height(), 0);
         for (int i = 0; i < this.values.length; i++) {
