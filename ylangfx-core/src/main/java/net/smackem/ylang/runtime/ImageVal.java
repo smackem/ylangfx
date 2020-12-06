@@ -178,7 +178,23 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return composeWith(right, RgbVal::divideBy);
     }
 
-    public ImageVal composeWith(ImageVal that, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
+    public ImageVal over(ImageVal background) {
+        return composeWith(background, RgbVal::over);
+    }
+
+    public ImageVal hypot(ImageVal right) {
+        return composeWith(right, RgbVal::hypot);
+    }
+
+    public static ImageVal min(ImageVal a, ImageVal b) {
+        return Objects.requireNonNull(a).composeWith(b, RgbVal::min);
+    }
+
+    public static ImageVal max(ImageVal a, ImageVal b) {
+        return Objects.requireNonNull(a).composeWith(b, RgbVal::max);
+    }
+
+    private ImageVal composeWith(ImageVal that, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
         if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
             throw new IllegalArgumentException("composed images must have the same dimensions");
         }

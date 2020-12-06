@@ -62,13 +62,13 @@ public class UtilFunctions {
     private static Value minImageWithImage(List<Value> args) {
         final ImageVal i1 = (ImageVal) args.get(0);
         final ImageVal i2 = (ImageVal) args.get(1);
-        return i1.composeWith(i2, RgbVal::min);
+        return ImageVal.min(i1, i2);
     }
 
     private static Value maxImageWithImage(List<Value> args) {
         final ImageVal i1 = (ImageVal) args.get(0);
         final ImageVal i2 = (ImageVal) args.get(1);
-        return i1.composeWith(i2, RgbVal::max);
+        return ImageVal.max(i1, i2);
     }
 
     private static Value minKernelWithKernel(List<Value> args) {

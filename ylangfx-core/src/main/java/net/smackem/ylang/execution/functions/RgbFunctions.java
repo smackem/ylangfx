@@ -110,7 +110,7 @@ class RgbFunctions {
     private static Value imageOverImage(List<Value> args) {
         ImageVal i1 = (ImageVal) args.get(0);
         ImageVal i2 = (ImageVal) args.get(1);
-        return i1.composeWith(i2, RgbVal::over);
+        return i1.over(i2);
     }
 
     private static Value greyscale(List<Value> args) {

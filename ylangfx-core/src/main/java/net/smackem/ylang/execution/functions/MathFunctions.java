@@ -82,7 +82,7 @@ public class MathFunctions {
     private static Value hypotImage(List<Value> args) {
         final ImageVal i1 = (ImageVal) args.get(0);
         final ImageVal i2 = (ImageVal) args.get(1);
-        return i1.composeWith(i2, RgbVal::hypot);
+        return i1.hypot(i2);
     }
 
     private static Value hypotPoint(List<Value> args) {

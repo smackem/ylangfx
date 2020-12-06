@@ -47,7 +47,15 @@ include_directories(
         )
 
 # main target
-add_executable(yln main.c)
+add_executable(ylnx main.c)
+
+# lib target
+add_library(yln SHARED lib.c)
+
+target_include_directories(yln PUBLIC
+        "$ENV{JAVA_HOME}/include"
+        "$ENV{JAVA_HOME}/include/${CMAKE_SYSTEM_NAME}"
+        )
 
 # test target
 add_executable(yln_test test.c)
