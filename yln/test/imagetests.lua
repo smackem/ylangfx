@@ -57,14 +57,24 @@ local function makeGaussian(radius)
     return kernel.of(width, height, values)
 end
 
-local gaussian = makeGaussian(7)
-local laplace = kernel.of(3, 3, {
-    -1, -2, -1,
-     0,  0,  0,
-     1,  2,  1,
-})
+local function makeLaplace(radius)
+    local width = radius * 2 + 1
+    local height = width
+    local values = {}
+    for i = 1, width * height do table.insert(values, -1) end
+    values[math.ceil(#values / 2)] = width * height - 1
+    return kernel.of(width, height, values)
+end
 
-traceKernel(gaussian)
+local gaussian = makeGaussian(5)
+local laplace = kernel.of(3, 3, {
+    -1, -1, -1,
+    -1,  8, -1,
+    -1, -1, -1,
+})
+laplace = makeLaplace(2)
+
+traceKernel(laplace)
 
 return inp:convolve(gaussian)
     :convolve(laplace)
