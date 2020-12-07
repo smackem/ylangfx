@@ -28,6 +28,16 @@ void init_kernel(Kernel *kernel, int width, int height, float value) {
     }
 }
 
+void wrap_kernel(Kernel *kernel, int width, int height, float *values) {
+    assert(kernel != NULL);
+    assert(width > 0);
+    assert(height > 0);
+    assert(values != NULL);
+    kernel->width = width;
+    kernel->height = height;
+    kernel->values = values;
+}
+
 void free_kernel(Kernel *kernel) {
     assert(kernel != NULL);
     if (kernel->values != NULL) {

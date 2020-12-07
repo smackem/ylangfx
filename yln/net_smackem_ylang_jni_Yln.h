@@ -31,6 +31,14 @@ JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_jni_Yln_convolveKernel
 JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_jni_Yln_composeImages
   (JNIEnv *, jobject, jint, jint, jintArray, jintArray, jint);
 
+/*
+ * Class:     net_smackem_ylang_jni_Yln
+ * Method:    composeKernels
+ * Signature: (II[F[FI)[F
+ */
+JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_jni_Yln_composeKernels
+  (JNIEnv *, jobject, jint, jint, jfloatArray, jfloatArray, jint);
+
 #ifdef __cplusplus
 }
 #endif

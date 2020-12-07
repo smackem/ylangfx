@@ -16,12 +16,16 @@ typedef struct image_rgba {
     rgba *pixels;
 } ImageRgba;
 
+typedef rgba (*composition_t)(rgba left, rgba right);
+
 void init_image(ImageRgba *image, int width, int height);
+void wrap_image(ImageRgba *image, int width, int height, rgba *pixels);
 void free_image(ImageRgba *image);
 void invert_image(ImageRgba *image);
 void clone_image(ImageRgba *dest, const ImageRgba *orig);
 void convolve_image(ImageRgba *dest, const ImageRgba *orig, const Kernel *kernel);
 rgba convolve_image_pixel(const ImageRgba *orig, const Kernel *kernel, int x, int y);
 int get_pixel_count(const ImageRgba *image);
+void compose_images(ImageRgba *dest, const ImageRgba *left, const ImageRgba *right, composition_t compose);
 
 #endif //YLN_IMAGE_H

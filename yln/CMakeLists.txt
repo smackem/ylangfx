@@ -46,10 +46,25 @@ include_directories(
         "${LIBPNG_INCLUDE}"
         )
 
+# -------------------------------------
 # main target
+# -------------------------------------
 add_executable(ylnx main.c)
 
+# libraries specific to yln_test
+target_link_libraries(ylnx PUBLIC
+        luabind
+        ${LUA_LIB}
+        )
+
+target_include_directories(ylnx PUBLIC
+        "${PROJECT_SOURCE_DIR}/luabind"
+        "${LIBLUA_INCLUDE}"
+        )
+
+# -------------------------------------
 # lib target
+# -------------------------------------
 add_library(yln SHARED lib.c)
 
 target_include_directories(yln PUBLIC
@@ -57,7 +72,9 @@ target_include_directories(yln PUBLIC
         "$ENV{JAVA_HOME}/include/${CMAKE_SYSTEM_NAME}"
         )
 
+# -------------------------------------
 # test target
+# -------------------------------------
 add_executable(yln_test test.c)
 
 # libraries specific to yln_test

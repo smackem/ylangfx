@@ -14,6 +14,16 @@ void init_image(ImageRgba *image, int width, int height) {
     image->pixels = new_arr(rgba, get_pixel_count(image));
 }
 
+void wrap_image(ImageRgba *image, int width, int height, rgba *pixels) {
+    assert(image != NULL);
+    assert(width > 0);
+    assert(height > 0);
+    assert(pixels != NULL);
+    image->width = width;
+    image->height = height;
+    image->pixels = pixels;
+}
+
 void free_image(ImageRgba *image) {
     assert(image != NULL);
     if (image->pixels != NULL) {
@@ -150,4 +160,19 @@ rgba convolve_image_pixel(const ImageRgba *orig, const Kernel *kernel, int x, in
 inline int get_pixel_count(const ImageRgba *image) {
     assert(image != NULL);
     return image->width * image->height;
+}
+
+void compose_images(ImageRgba *dest, const ImageRgba *left, const ImageRgba *right, composition_t compose) {
+    assert(dest != NULL);
+    assert(left != NULL);
+    assert(right != NULL);
+    assert(left->width == right->width);
+    assert(left->height == right->height);
+    int size = left->width * left->height;
+    rgba *dest_ptr = dest->pixels;
+    rgba *left_ptr = left->pixels;
+    rgba *right_ptr = right->pixels;
+    for ( ; size > 0; size--) {
+        *dest_ptr++ = compose(*left_ptr++, *right_ptr++);
+    }
 }

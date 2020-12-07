@@ -12,6 +12,7 @@ typedef struct kernel {
 } Kernel;
 
 void init_kernel(Kernel *kernel, int width, int height, float value);
+void wrap_kernel(Kernel *kernel, int width, int height, float *values);
 void free_kernel(Kernel *kernel);
 float get_kernel_sum(const Kernel *kernel);
 
