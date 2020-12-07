@@ -1,4 +1,4 @@
-package net.smackem.ylang.jni;
+package net.smackem.ylang.interop;
 
 public enum MatrixComposition {
     ADD(1),

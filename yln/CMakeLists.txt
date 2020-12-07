@@ -67,9 +67,12 @@ target_include_directories(ylnx PUBLIC
 # -------------------------------------
 add_library(yln SHARED lib.c)
 
+string(TOLOWER ${CMAKE_SYSTEM_NAME} JAVA_SYSTEM_INCLUDE_DIR)
+message(STATUS "system include: ${JAVA_SYSTEM_INCLUDE_DIR}")
+
 target_include_directories(yln PUBLIC
         "$ENV{JAVA_HOME}/include"
-        "$ENV{JAVA_HOME}/include/${CMAKE_SYSTEM_NAME}"
+        "$ENV{JAVA_HOME}/include/${JAVA_SYSTEM_INCLUDE_DIR}"
         )
 
 # -------------------------------------

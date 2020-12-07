@@ -228,6 +228,14 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
         return result;
     }
 
+    float[] floatValues() {
+        float[] values = new float[this.values.length];
+        for (int i = 0; i < values.length; i++) {
+            values[i] = this.values[i].value();
+        }
+        return values;
+    }
+
     @SuppressWarnings("NullableProblems")
     @Override
     public Iterator<Value> iterator() {

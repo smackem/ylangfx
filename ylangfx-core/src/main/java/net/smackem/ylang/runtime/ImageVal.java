@@ -1,5 +1,8 @@
 package net.smackem.ylang.runtime;
 
+import net.smackem.ylang.interop.MatrixComposition;
+import net.smackem.ylang.interop.Yln;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -7,6 +10,7 @@ import java.util.function.BiFunction;
 @SuppressWarnings("DuplicatedCode")
 public class ImageVal extends MatrixVal<RgbVal> {
     private final RgbVal[] pixels;
+    private final PixelBufferOperations bufferOps;
 
     private ImageVal(int width, int height, RgbVal[] pixels) {
         super(ValueType.IMAGE, width, height);
@@ -14,6 +18,7 @@ public class ImageVal extends MatrixVal<RgbVal> {
             throw new IllegalArgumentException("pixel buffer size does not match width and height");
         }
         this.pixels = pixels;
+        this.bufferOps = getBufferOps();
     }
 
     public ImageVal(int width, int height) {
@@ -27,6 +32,7 @@ public class ImageVal extends MatrixVal<RgbVal> {
     public ImageVal(ImageVal original) {
         super(original);
         this.pixels = clonePixels(original.pixels);
+        this.bufferOps = getBufferOps();
     }
 
     public static ImageVal fromArgbPixels(int width, int height, int[] pixels) {
@@ -64,62 +70,6 @@ public class ImageVal extends MatrixVal<RgbVal> {
             buffer[i] = toIntArgb(this.pixels[i]);
         }
         return buffer;
-    }
-
-    public ImageVal convolve(KernelVal kernel) {
-        final int width = width();
-        final int height = height();
-        final ImageVal target = new ImageVal(width, height);
-        final float kernelSum = kernel.sum().value();
-        final int kernelWidth = kernel.width();
-        final int kernelHeight = kernel.height();
-        final int halfKernelWidth = kernelWidth / 2;
-        final int halfKernelHeight = kernelHeight / 2;
-        final float[] kernelValues = new float[kernel.size()];
-        int targetIndex = 0;
-        int i = 0;
-        for (final Value n : kernel) {
-            kernelValues[i++] = ((NumberVal) n).value();
-        }
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                float r = 0;
-                float g = 0;
-                float b = 0;
-                float a = 255;
-                int startY = y - halfKernelHeight;
-                int endY = startY + kernelHeight;
-                int startX = x - halfKernelWidth;
-                int endX = startX + kernelWidth;
-                int kernelIndex = 0;
-                for (int imageY = startY; imageY < endY; imageY++) {
-                    if (imageY < 0 || imageY >= height) {
-                        kernelIndex += kernelWidth;
-                        continue;
-                    }
-                    int imageIndex = imageY * width + startX;
-                    for (int imageX = startX; imageX < endX; imageX++) {
-                        if (imageX >= 0 && imageX < width) {
-                            final float value = kernelValues[kernelIndex];
-                            final RgbVal px = this.pixels[imageIndex];
-                            r += value * px.r();
-                            g += value * px.g();
-                            b += value * px.b();
-                            if (imageX == x && imageY == y) {
-                                a = px.a();
-                            }
-                        }
-                        kernelIndex++;
-                        imageIndex++;
-                    }
-                }
-                target.pixels[targetIndex] = kernelSum == 0
-                        ? new RgbVal(r, g, b, a)
-                        : new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
-                targetIndex++;
-            }
-        }
-        return target;
     }
 
     public RgbVal convolve(int x, int y, KernelVal kernel) {
@@ -162,47 +112,48 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
     }
 
+    public ImageVal invert() {
+        final ImageVal result = new ImageVal(width(), height(), RgbVal.EMPTY);
+        for (int i = 0; i < result.pixels.length; i++) {
+            result.pixels[i] = this.pixels[i].invert();
+        }
+        return result;
+    }
+
+    public ImageVal convolve(KernelVal kernel) {
+        return this.bufferOps.convolve(this, kernel);
+    }
+
     public ImageVal add(ImageVal right) {
-        return composeWith(right, RgbVal::add);
+        return this.bufferOps.add(this, right);
     }
 
     public ImageVal subtract(ImageVal right) {
-        return composeWith(right, RgbVal::subtract);
+        return this.bufferOps.subtract(this, right);
     }
 
     public ImageVal multiply(ImageVal right) {
-        return composeWith(right, RgbVal::multiplyWith);
+        return this.bufferOps.multiply(this, right);
     }
 
     public ImageVal divide(ImageVal right) {
-        return composeWith(right, RgbVal::divideBy);
+        return this.bufferOps.divide(this, right);
     }
 
     public ImageVal over(ImageVal background) {
-        return composeWith(background, RgbVal::over);
+        return this.bufferOps.over(this, background);
     }
 
     public ImageVal hypot(ImageVal right) {
-        return composeWith(right, RgbVal::hypot);
+        return this.bufferOps.hypot(this, right);
     }
 
     public static ImageVal min(ImageVal a, ImageVal b) {
-        return Objects.requireNonNull(a).composeWith(b, RgbVal::min);
+        return Objects.requireNonNull(a).bufferOps.min(a, b);
     }
 
     public static ImageVal max(ImageVal a, ImageVal b) {
-        return Objects.requireNonNull(a).composeWith(b, RgbVal::max);
-    }
-
-    private ImageVal composeWith(ImageVal that, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
-        if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
-            throw new IllegalArgumentException("composed images must have the same dimensions");
-        }
-        final ImageVal result = new ImageVal(this.width(), this.height());
-        for (int i = 0; i < this.pixels.length; i++) {
-            result.pixels[i] = operation.apply(this.pixels[i], that.pixels[i]);
-        }
-        return result;
+        return Objects.requireNonNull(a).bufferOps.max(a, b);
     }
 
     @Override
@@ -239,6 +190,12 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return clone;
     }
 
+    private static PixelBufferOperations getBufferOps() {
+        return Yln.INSTANCE != null
+                ? new NativePixelBufferOperations(Yln.INSTANCE)
+                : new JavaPixelBufferOperations();
+    }
+
     private static int toIntArgb(RgbVal rgb) {
         return (int) RgbVal.clamp(rgb.a()) << 24 |
                (int) RgbVal.clamp(rgb.r()) << 16 |
@@ -257,5 +214,201 @@ public class ImageVal extends MatrixVal<RgbVal> {
     @Override
     public int hashCode() {
         return Arrays.hashCode(pixels);
+    }
+
+    private interface PixelBufferOperations {
+        ImageVal convolve(ImageVal image, KernelVal kernel);
+        ImageVal add(ImageVal left, ImageVal right);
+        ImageVal subtract(ImageVal left, ImageVal right);
+        ImageVal multiply(ImageVal left, ImageVal right);
+        ImageVal divide(ImageVal left, ImageVal right);
+        ImageVal over(ImageVal left, ImageVal background);
+        ImageVal hypot(ImageVal left, ImageVal right);
+        ImageVal min(ImageVal a, ImageVal b);
+        ImageVal max(ImageVal a, ImageVal b);
+    }
+
+    private static class JavaPixelBufferOperations implements PixelBufferOperations {
+        @Override
+        public ImageVal convolve(ImageVal image, KernelVal kernel) {
+            final int width = image.width();
+            final int height = image.height();
+            final ImageVal target = new ImageVal(width, height);
+            final float kernelSum = kernel.sum().value();
+            final int kernelWidth = kernel.width();
+            final int kernelHeight = kernel.height();
+            final int halfKernelWidth = kernelWidth / 2;
+            final int halfKernelHeight = kernelHeight / 2;
+            final float[] kernelValues = new float[kernel.size()];
+            int targetIndex = 0;
+            int i = 0;
+            for (final Value n : kernel) {
+                kernelValues[i++] = ((NumberVal) n).value();
+            }
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    float r = 0;
+                    float g = 0;
+                    float b = 0;
+                    float a = 255;
+                    int startY = y - halfKernelHeight;
+                    int endY = startY + kernelHeight;
+                    int startX = x - halfKernelWidth;
+                    int endX = startX + kernelWidth;
+                    int kernelIndex = 0;
+                    for (int imageY = startY; imageY < endY; imageY++) {
+                        if (imageY < 0 || imageY >= height) {
+                            kernelIndex += kernelWidth;
+                            continue;
+                        }
+                        int imageIndex = imageY * width + startX;
+                        for (int imageX = startX; imageX < endX; imageX++) {
+                            if (imageX >= 0 && imageX < width) {
+                                final float value = kernelValues[kernelIndex];
+                                final RgbVal px = image.pixels[imageIndex];
+                                r += value * px.r();
+                                g += value * px.g();
+                                b += value * px.b();
+                                if (imageX == x && imageY == y) {
+                                    a = px.a();
+                                }
+                            }
+                            kernelIndex++;
+                            imageIndex++;
+                        }
+                    }
+                    target.pixels[targetIndex] = kernelSum == 0
+                            ? new RgbVal(r, g, b, a)
+                            : new RgbVal(r / kernelSum, g / kernelSum, b / kernelSum, a);
+                    targetIndex++;
+                }
+            }
+            return target;
+        }
+
+        @Override
+        public ImageVal add(ImageVal left, ImageVal right) {
+            return compose(left, right, RgbVal::add);
+        }
+
+        @Override
+        public ImageVal subtract(ImageVal left, ImageVal right) {
+            return compose(left, right, RgbVal::subtract);
+        }
+
+        @Override
+        public ImageVal multiply(ImageVal left, ImageVal right) {
+            return compose(left, right, RgbVal::multiplyWith);
+        }
+
+        @Override
+        public ImageVal divide(ImageVal left, ImageVal right) {
+            return compose(left, right, RgbVal::divideBy);
+        }
+
+        @Override
+        public ImageVal over(ImageVal left, ImageVal right) {
+            return compose(left, right, RgbVal::over);
+        }
+
+        @Override
+        public ImageVal hypot(ImageVal left, ImageVal right) {
+            return compose(left, right, RgbVal::hypot);
+        }
+
+        @Override
+        public ImageVal min(ImageVal a, ImageVal b) {
+            return compose(a, b, RgbVal::min);
+        }
+
+        @Override
+        public ImageVal max(ImageVal a, ImageVal b) {
+            return compose(a, b, RgbVal::max);
+        }
+
+        private ImageVal compose(ImageVal left, ImageVal right, BiFunction<RgbVal, RgbVal, RgbVal> operation) {
+            Objects.requireNonNull(left);
+            Objects.requireNonNull(right);
+            Objects.requireNonNull(operation);
+            if (left.width() != right.width() || left.height() != right.height()) {
+                throw new IllegalArgumentException("left and right must have equal dimensions");
+            }
+            final ImageVal result = new ImageVal(left.width(), left.height());
+            for (int i = 0; i < left.pixels.length; i++) {
+                result.pixels[i] = operation.apply(left.pixels[i], right.pixels[i]);
+            }
+            return result;
+        }
+    }
+
+    private static class NativePixelBufferOperations implements PixelBufferOperations {
+        private final Yln yln;
+
+        NativePixelBufferOperations(Yln yln) {
+            this.yln = Objects.requireNonNull(yln);
+        }
+
+        @Override
+        public ImageVal convolve(ImageVal image, KernelVal kernel) {
+            return ImageVal.fromArgbPixels(image.width(), image.height(),
+                    this.yln.convolveImage(image.width(), image.height(),
+                            image.toArgbPixels(), kernel.width(), kernel.height(), kernel.floatValues()));
+        }
+
+        @Override
+        public ImageVal add(ImageVal left, ImageVal right) {
+            return ImageVal.fromArgbPixels(left.width(), left.height(),
+                    this.yln.composeImages(left.width(), left.height(),
+                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.ADD));
+        }
+
+        @Override
+        public ImageVal subtract(ImageVal left, ImageVal right) {
+            return ImageVal.fromArgbPixels(left.width(), left.height(),
+                    this.yln.composeImages(left.width(), left.height(),
+                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.SUB));
+        }
+
+        @Override
+        public ImageVal multiply(ImageVal left, ImageVal right) {
+            return ImageVal.fromArgbPixels(left.width(), left.height(),
+                    this.yln.composeImages(left.width(), left.height(),
+                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.MUL));
+        }
+
+        @Override
+        public ImageVal divide(ImageVal left, ImageVal right) {
+            return ImageVal.fromArgbPixels(left.width(), left.height(),
+                    this.yln.composeImages(left.width(), left.height(),
+                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.DIV));
+        }
+
+        @Override
+        public ImageVal over(ImageVal left, ImageVal right) {
+            return ImageVal.fromArgbPixels(left.width(), left.height(),
+                    this.yln.composeImages(left.width(), left.height(),
+                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.OVER));
+        }
+
+        @Override
+        public ImageVal hypot(ImageVal left, ImageVal right) {
+            return ImageVal.fromArgbPixels(left.width(), left.height(),
+                    this.yln.composeImages(left.width(), left.height(),
+                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.HYPOT));
+        }
+
+        @Override
+        public ImageVal min(ImageVal a, ImageVal b) {
+            return ImageVal.fromArgbPixels(a.width(), a.height(),
+                    this.yln.composeImages(a.width(), a.height(),
+                            a.toArgbPixels(), b.toArgbPixels(), MatrixComposition.MIN));
+        }
+
+        @Override
+        public ImageVal max(ImageVal a, ImageVal b) {
+            return ImageVal.fromArgbPixels(a.width(), a.height(),
+                    this.yln.composeImages(a.width(), a.height(),
+                            a.toArgbPixels(), b.toArgbPixels(), MatrixComposition.MAX));
+        }
     }
 }

@@ -19,7 +19,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="ylangfx-app" options="-Xlint:all" />
-      <module name="ylangfx-core" options="-Xlint:all" />
+      <module name="ylangfx-core" options="-Xlint:all -h target/headers" />
     </option>
   </component>
 </project>

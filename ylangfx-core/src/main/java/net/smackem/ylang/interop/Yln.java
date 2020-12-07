@@ -1,6 +1,27 @@
-package net.smackem.ylang.jni;
+package net.smackem.ylang.interop;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+// -Djava.library.path=/home/philip/java/ylangfx/yln/cmake-build-release
 public class Yln {
+    private Yln() {}
+
+    public static final Yln INSTANCE;
+    private static final Logger log = LoggerFactory.getLogger(Yln.class);
+
+    static {
+        boolean libLoaded = false;
+        try {
+            System.loadLibrary("yln");
+            libLoaded = true;
+            log.info("yln library available");
+        } catch (UnsatisfiedLinkError e) {
+            log.warn("yln (native image operations) not available", e);
+        }
+        INSTANCE = libLoaded ? new Yln() : null;
+    }
+
     public native int[] convolveImage(int width, int height, int[] pixels,
                                       int kernelWidth, int kernelHeight, float[] kernelValues);
 

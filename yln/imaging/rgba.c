@@ -5,13 +5,13 @@
 #include "rgba.h"
 
 inline byte clamp_i(int i) {
-    if (i < 0.0) {
+    if (i < 0) {
         return 0;
     }
-    if (i > 255.0) {
+    if (i > 255) {
         return 255;
     }
-    return (byte) (i + 0.5);
+    return (byte) i;
 }
 
 inline byte clamp_f(float f) {

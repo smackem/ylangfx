@@ -3,9 +3,9 @@
 //
 
 #include <imaging.h>
-#include "net_smackem_ylang_jni_Yln.h"
+#include "net_smackem_ylang_interop_Yln.h"
 
-JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_jni_Yln_convolveImage(JNIEnv *env_ptr, jobject this_ptr,
+JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveImage(JNIEnv *env_ptr, jobject this_ptr,
          jint width, jint height, jintArray pixels,
          jint kernelWidth, jint kernelHeight, jfloatArray kernelValues) {
     JNIEnv env = *env_ptr;
@@ -31,18 +31,28 @@ JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_jni_Yln_convolveImage(JNIEnv 
     return result;
 }
 
-JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_jni_Yln_convolveKernel(JNIEnv *env_ptr, jobject this_ptr,
+JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveKernel(JNIEnv *env_ptr, jobject this_ptr,
         jint width, jint height, jfloatArray values,
         jint kernelWidth, jint kernelHeight, jfloatArray kernelValues) {
-    return NULL;
+    JNIEnv env = *env_ptr;
+    jfloat *origValues = env->GetFloatArrayElements(env_ptr, values, NULL);
+    jfloat *kernelFloats = env->GetFloatArrayElements(env_ptr, kernelValues, NULL);
+
+    int size = width * height;
+    jfloatArray result = env->NewFloatArray(env_ptr, size);
+    env->SetFloatArrayRegion(env_ptr, result, 0, size, origValues);
+
+    env->ReleaseFloatArrayElements(env_ptr, values, origValues, JNI_ABORT);
+    env->ReleaseFloatArrayElements(env_ptr, kernelValues, kernelFloats, JNI_ABORT);
+    return result;
 }
 
-JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_jni_Yln_composeImages(JNIEnv *env_ptr, jobject this_ptr,
+JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_composeImages(JNIEnv *env_ptr, jobject this_ptr,
         jint width, jint height, jintArray destPixels, jintArray origPixels, jint composition) {
     return NULL;
 }
 
-JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_jni_Yln_composeKernels(JNIEnv *env_ptr, jobject this_ptr,
+JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_composeKernels(JNIEnv *env_ptr, jobject this_ptr,
         jint width, jint height, jfloatArray leftValues, jfloatArray rightValues, jint composition) {
     return NULL;
 }
