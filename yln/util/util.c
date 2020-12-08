@@ -46,3 +46,27 @@ static void func() {
     }
     array_free(&array);
 }
+
+inline int min_i(int a, int b) {
+    return a < b ? a : b;
+}
+
+inline float min_f(float a, float b) {
+    return a < b ? a : b;
+}
+
+inline double min_d(double a, double b) {
+    return a < b ? a : b;
+}
+
+inline int max_i(int a, int b) {
+    return a > b ? a : b;
+}
+
+inline float max_f(float a, float b) {
+    return a > b ? a : b;
+}
+
+inline double max_d(double a, double b) {
+    return a > b ? a : b;
+}

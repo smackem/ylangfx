@@ -113,7 +113,7 @@ public class ImageVal extends MatrixVal<RgbVal> {
     }
 
     public ImageVal invert() {
-        final ImageVal result = new ImageVal(width(), height(), RgbVal.EMPTY);
+        final ImageVal result = new ImageVal(width(), height());
         for (int i = 0; i < result.pixels.length; i++) {
             result.pixels[i] = this.pixels[i].invert();
         }
