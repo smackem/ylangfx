@@ -1,4 +1,4 @@
-add_library(imaging image.c rgba.c kernel.c imageio.c)
+add_library(imaging image.c rgba.c kernel.c imageio.c color.c)
 
 target_link_libraries(imaging PUBLIC
         util

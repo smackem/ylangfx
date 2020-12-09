@@ -16,6 +16,12 @@ typedef struct image_rgba {
     rgba *pixels;
 } ImageRgba;
 
+typedef struct image_float {
+    int width;
+    int height;
+    Color *pixels;
+} ImageFloat;
+
 typedef rgba (*composition_t)(rgba left, rgba right);
 
 void init_image(ImageRgba *image, int width, int height);
