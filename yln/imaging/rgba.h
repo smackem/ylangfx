@@ -25,6 +25,4 @@ rgba make_rgba_f(float r, float g, float b, float a);
 rgba make_rgba_d(double r, double g, double b, double a);
 
 rgba invert_rgba(rgba color);
-
-rgba rgba_over(rgba foreground, rgba background);
 #endif //YLN_RGBA_H

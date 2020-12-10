@@ -9,25 +9,25 @@
 #include "luakernel.h"
 #include "luaimage.h"
 
-typedef struct image_rgba_wrapper {
-    ImageRgba base;
+typedef struct image_wrapper {
+    ImageFloat base;
     /**
      * if `true`, the image is subject to lua garbage collection. must be set if the image is created
      * from within a lua script. if the image is passed into the script from the C environment,
      * must be set to `false`.
      */
     bool managed;
-} ImageRgbaWrapper;
+} ImageWrapper;
 
-static ImageRgbaWrapper *push_image_internal(lua_State *L, bool managed) {
-    ImageRgbaWrapper *lua_image = (ImageRgbaWrapper *)lua_newuserdata(L, sizeof(ImageRgbaWrapper));
+static ImageWrapper *push_image_internal(lua_State *L, bool managed) {
+    ImageWrapper *lua_image = (ImageWrapper *)lua_newuserdata(L, sizeof(ImageWrapper));
     luaL_setmetatable(L, YLN_IMAGE);
     lua_image->managed = managed;
     return lua_image;
 }
 
-static ImageRgba *push_new_image(lua_State *L, int width, int height) {
-    ImageRgbaWrapper *lua_image = push_image_internal(L, true);
+static ImageFloat *push_new_image(lua_State *L, int width, int height) {
+    ImageWrapper *lua_image = push_image_internal(L, true);
     init_image(&lua_image->base, width, height);
     return &lua_image->base;
 }
@@ -51,8 +51,8 @@ static int push_image_height(lua_State *L) {
     return 1;
 }
 
-static rgba *get_image_pixel_addr(lua_State *L) {
-    ImageRgba *image = to_image(L, 1);
+static Color *get_image_pixel_addr(lua_State *L) {
+    ImageFloat *image = to_image(L, 1);
     lua_Integer x = luaL_checkinteger(L, 2) - 1; // ranges from 1..width] as usual in lua
     lua_Integer y = luaL_checkinteger(L, 3) - 1;
     luaL_argcheck(L, image->pixels != NULL, 1, "image is uninitialized");
@@ -108,7 +108,7 @@ static const struct luaL_Reg method_lib[] = {
 };
 
 static int do_gc (lua_State *L) {
-    ImageRgbaWrapper *p = (ImageRgbaWrapper *) to_image(L, 1);
+    ImageWrapper *p = (ImageWrapper *) to_image(L, 1);
     if (p->managed) {
         free_image(&p->base);
     } else {
@@ -130,7 +130,7 @@ ImageRgba *to_image(lua_State *L, int arg) {
 }
 
 void push_image(lua_State *L, const ImageRgba *image) {
-    struct image_rgba_wrapper *lua_image = push_image_internal(L, false);
+    struct image_wrapper *lua_image = push_image_internal(L, false);
     lua_image->base = *image;
 }
 

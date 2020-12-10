@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
         }
 
         //invert_image(&orig);
-        clone_image(&dest, &orig);
+        clone_image_rgba(&dest, &orig);
         long start = current_millis();
         smoothen_image(&dest, &orig, 3);
         long end = current_millis();
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
         err = save_image_to_file(&dest, dest_path);
     } ONCE;
 
-    free_image(&orig);
-    free_image(&dest);
+    free_image_rgba(&orig);
+    free_image_rgba(&dest);
     return err;
 }

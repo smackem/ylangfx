@@ -43,7 +43,7 @@ static rgba compose_rgba_max(rgba left, rgba right) {
     return make_rgba(max(red(left), red(right)), max(green(left), green(right)), max(blue(left), blue(right)), alpha(left));
 }
 
-static const composition_t compositions[] = {
+static const rgba_composition_t compositions[] = {
         NULL,
         compose_rgba_add,   // start at 1 ..
         compose_rgba_sub,
@@ -64,11 +64,11 @@ JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveImage(JNI
     jfloat *kernelFloats = env->GetFloatArrayElements(env_ptr, kernelValues, NULL);
 
     ImageRgba orig;
-    wrap_image(&orig, width, height, (rgba *) origPixels);
+    wrap_image_rgba(&orig, width, height, (rgba *) origPixels);
     Kernel kernel;
     wrap_kernel(&kernel, kernelWidth, kernelHeight, (float *) kernelFloats);
     ImageRgba dest;
-    init_image(&dest, width, height);
+    init_image_rgba(&dest, width, height);
 
     convolve_image(&dest, &orig, &kernel);
 
@@ -78,7 +78,7 @@ JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveImage(JNI
 
     env->ReleaseIntArrayElements(env_ptr, pixels, origPixels, JNI_ABORT);
     env->ReleaseFloatArrayElements(env_ptr, kernelValues, kernelFloats, JNI_ABORT);
-    free_image(&dest);
+    free_image_rgba(&dest);
     return result;
 }
 
@@ -105,11 +105,11 @@ JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_composeImages(JNI
     jint *rightBuf = env->GetIntArrayElements(env_ptr, rightPixels, NULL);
 
     ImageRgba left;
-    wrap_image(&left, width, height, (rgba *) leftBuf);
+    wrap_image_rgba(&left, width, height, (rgba *) leftBuf);
     ImageRgba right;
-    wrap_image(&right, width, height, (rgba *) rightBuf);
+    wrap_image_rgba(&right, width, height, (rgba *) rightBuf);
     ImageRgba dest;
-    init_image(&dest, width, height);
+    init_image_rgba(&dest, width, height);
 
     compose_images(&dest, &left, &right, compositions[composition]);
 

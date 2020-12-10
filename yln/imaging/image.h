@@ -6,6 +6,7 @@
 #define YLN_IMAGE_H
 
 #include "rgba.h"
+#include "color.h"
 #include "kernel.h"
 
 #define MAX_IMAGE_PIXELS (64 * 1024 * 1024)
@@ -22,16 +23,19 @@ typedef struct image_float {
     Color *pixels;
 } ImageFloat;
 
-typedef rgba (*composition_t)(rgba left, rgba right);
+typedef rgba (*rgba_composition_t)(rgba left, rgba right);
+typedef void (*color_composition_t)(Color *dest, const Color *left, const Color *right);
 
-void init_image(ImageRgba *image, int width, int height);
-void wrap_image(ImageRgba *image, int width, int height, rgba *pixels);
-void free_image(ImageRgba *image);
-void invert_image(ImageRgba *image);
-void clone_image(ImageRgba *dest, const ImageRgba *orig);
-void convolve_image(ImageRgba *dest, const ImageRgba *orig, const Kernel *kernel);
-rgba convolve_image_pixel(const ImageRgba *orig, const Kernel *kernel, int x, int y);
+void init_image_rgba(ImageRgba *image, int width, int height);
+void wrap_image_rgba(ImageRgba *image, int width, int height, rgba *pixels);
+void free_image_rgba(ImageRgba *image);
+void invert_image_rgba(ImageRgba *image);
+void clone_image_rgba(ImageRgba *dest, const ImageRgba *orig);
 int get_pixel_count(const ImageRgba *image);
-void compose_images(ImageRgba *dest, const ImageRgba *left, const ImageRgba *right, composition_t compose);
+
+void init_image(ImageFloat *image, int width, int height);
+void convolve_image(ImageFloat *dest, const ImageFloat *orig, const Kernel *kernel);
+void convolve_image_pixel(Color *dest, const ImageFloat *orig, const Kernel *kernel, int x, int y);
+void compose_images(ImageFloat *dest, const ImageFloat *left, const ImageFloat *right, color_composition_t compose);
 
 #endif //YLN_IMAGE_H

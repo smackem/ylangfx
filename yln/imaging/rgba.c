@@ -65,15 +65,3 @@ inline rgba make_rgba_d(double r, double g, double b, double a) {
 inline rgba invert_rgba(rgba color) {
     return make_rgba(255 - red(color), 255 - green(color), 255 - blue(color), alpha(color));
 }
-
-rgba rgba_over(rgba foreground, rgba background) {
-    double foregroundA = alpha(foreground) / 255.0;
-    double backgroundA = alpha(background) / 255.0;
-    double multipliedA = (1.0 - foregroundA) * backgroundA;
-    double a = backgroundA + (1.0 - backgroundA) * foregroundA;
-
-    return make_rgba((red(foreground) * foregroundA + red(background) * multipliedA) / a,
-            (green(foreground) * foregroundA + green(background) * multipliedA) / a,
-            (blue(foreground) * foregroundA + blue(background) * multipliedA) / a,
-            255.0 * a);
-}

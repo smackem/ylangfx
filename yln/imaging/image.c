@@ -5,7 +5,7 @@
 #include <assert.h>
 #include "image.h"
 
-void init_image(ImageRgba *image, int width, int height) {
+void init_image_rgba(ImageRgba *image, int width, int height) {
     assert(image != NULL);
     assert(width > 0);
     assert(height > 0);
@@ -14,7 +14,7 @@ void init_image(ImageRgba *image, int width, int height) {
     image->pixels = new_arr(rgba, get_pixel_count(image));
 }
 
-void wrap_image(ImageRgba *image, int width, int height, rgba *pixels) {
+void wrap_image_rgba(ImageRgba *image, int width, int height, rgba *pixels) {
     assert(image != NULL);
     assert(width > 0);
     assert(height > 0);
@@ -24,7 +24,7 @@ void wrap_image(ImageRgba *image, int width, int height, rgba *pixels) {
     image->pixels = pixels;
 }
 
-void free_image(ImageRgba *image) {
+void free_image_rgba(ImageRgba *image) {
     assert(image != NULL);
     if (image->pixels != NULL) {
         free(image->pixels);
@@ -32,7 +32,7 @@ void free_image(ImageRgba *image) {
     bzero(image, sizeof(ImageRgba));
 }
 
-void invert_image(ImageRgba *image) {
+void invert_image_rgba(ImageRgba *image) {
     assert(image != NULL);
     int size = get_pixel_count(image);
     rgba *pixel_ptr = image->pixels;
@@ -41,7 +41,7 @@ void invert_image(ImageRgba *image) {
     }
 }
 
-void clone_image(ImageRgba *dest, const ImageRgba *orig) {
+void clone_image_rgba(ImageRgba *dest, const ImageRgba *orig) {
     assert(dest != NULL);
     memcpy(dest, orig, sizeof(ImageRgba));
     size_t size = get_pixel_count(orig);
@@ -49,7 +49,21 @@ void clone_image(ImageRgba *dest, const ImageRgba *orig) {
     memcpy(dest->pixels, orig->pixels, size * sizeof(rgba));
 }
 
-void convolve_image(ImageRgba *dest, const ImageRgba *orig, const Kernel *kernel) {
+inline int get_pixel_count(const ImageRgba *image) {
+    assert(image != NULL);
+    return image->width * image->height;
+}
+
+void init_image(ImageFloat *image, int width, int height) {
+    assert(image != NULL);
+    assert(width > 0);
+    assert(height > 0);
+    image->width = width;
+    image->height = height;
+    image->pixels = new_arr(Color, width * height);
+}
+
+void convolve_image(ImageFloat *dest, const ImageFloat *orig, const Kernel *kernel) {
     assert(dest != NULL);
     assert(orig != NULL);
     assert(dest->width == orig->width);
@@ -89,26 +103,29 @@ void convolve_image(ImageRgba *dest, const ImageRgba *orig, const Kernel *kernel
                 for (int image_x = start_x; image_x < end_x; image_x++) {
                     if (image_x >= 0 && image_x < width) {
                         float value = kernel->values[kernel_index];
-                        rgba px = orig->pixels[image_index];
-                        r += value * red(px);
-                        g += value * green(px);
-                        b += value * blue(px);
+                        Color *px = orig->pixels + image_index;
+                        r += value * px->red;
+                        g += value * px->green;
+                        b += value * px->blue;
                     }
                     kernel_index++;
                     image_index++;
                 }
             }
 
-            float a = alpha(orig->pixels[y * width + x]);
-            dest->pixels[target_index] = kernel_sum == 0.0
-                                         ? make_rgba(r, g, b, a)
-                                         : make_rgba(r / kernel_sum, g / kernel_sum, b / kernel_sum, a);
+            float a = (orig->pixels + y * width + x)->alpha;
+            if (kernel_sum == 0.0f) {
+                set_color(dest->pixels + target_index, r, g, b, a);
+            } else {
+                set_color(dest->pixels + target_index, r / kernel_sum, g / kernel_sum, b / kernel_sum, a);
+            }
             target_index++;
         }
     }
 }
 
-rgba convolve_image_pixel(const ImageRgba *orig, const Kernel *kernel, int x, int y) {
+void convolve_image_pixel(Color *dest, const ImageFloat *orig, const Kernel *kernel, int x, int y) {
+    assert(dest != NULL);
     assert(orig != NULL);
     assert(orig->pixels != NULL);
     assert(kernel != NULL);
@@ -141,38 +158,35 @@ rgba convolve_image_pixel(const ImageRgba *orig, const Kernel *kernel, int x, in
         for (int image_x = start_x; image_x < end_x; image_x++) {
             if (image_x >= 0 && image_x < width) {
                 float value = kernel->values[kernel_index];
-                rgba px = orig->pixels[image_index];
-                r += value * red(px);
-                g += value * green(px);
-                b += value * blue(px);
+                Color *px = orig->pixels + image_index;
+                r += value * px->red;
+                g += value * px->green;
+                b += value * px->blue;
             }
             kernel_index++;
             image_index++;
         }
     }
 
-    float a = alpha(orig->pixels[y * width + x]);
-    return kernel_sum == 0.0
-            ? make_rgba(r, g, b, a)
-            : make_rgba(r / kernel_sum, g / kernel_sum, b / kernel_sum, a);
+    float a = (orig->pixels + y * width + x)->alpha;
+    if (kernel_sum == 0.0f) {
+        set_color(dest, r, g, b, a);
+    } else {
+        set_color(dest, r / kernel_sum, g / kernel_sum, b / kernel_sum, a);
+    }
 }
 
-inline int get_pixel_count(const ImageRgba *image) {
-    assert(image != NULL);
-    return image->width * image->height;
-}
-
-void compose_images(ImageRgba *dest, const ImageRgba *left, const ImageRgba *right, composition_t compose) {
+void compose_images(ImageFloat *dest, const ImageFloat *left, const ImageFloat *right, color_composition_t compose) {
     assert(dest != NULL);
     assert(left != NULL);
     assert(right != NULL);
     assert(left->width == right->width);
     assert(left->height == right->height);
     int size = left->width * left->height;
-    rgba *dest_ptr = dest->pixels;
-    rgba *left_ptr = left->pixels;
-    rgba *right_ptr = right->pixels;
+    Color *dest_ptr = dest->pixels;
+    Color *left_ptr = left->pixels;
+    Color *right_ptr = right->pixels;
     for ( ; size > 0; size--) {
-        *dest_ptr++ = compose(*left_ptr++, *right_ptr++);
+        compose(dest_ptr++, left_ptr++, right_ptr++);
     }
 }

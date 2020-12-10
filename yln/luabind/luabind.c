@@ -37,7 +37,7 @@ error run_lua_script(const char *script_path, ImageRgba *dest, const ImageRgba *
             error = 1;
             break;
         }
-        clone_image(dest, result);
+        clone_image_rgba(dest, result);
     } ONCE;
 
     lua_close(L);
