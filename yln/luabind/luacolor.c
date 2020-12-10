@@ -18,3 +18,46 @@ static int new_color(lua_State *L) {
     return 1;
 }
 
+static int get_color_red(lua_State *L) {
+    Color *color = (Color *)to_color(L, 1);
+    lua_pushnumber(L, color->red);
+    return 1;
+}
+
+static int get_color_green(lua_State *L) {
+    Color *color = (Color *)to_color(L, 1);
+    lua_pushnumber(L, color->green);
+    return 1;
+}
+
+static int get_color_blue(lua_State *L) {
+    Color *color = (Color *)to_color(L, 1);
+    lua_pushnumber(L, color->blue);
+    return 1;
+}
+
+static int get_color_alpha(lua_State *L) {
+    Color *color = (Color *)to_color(L, 1);
+    lua_pushnumber(L, color->alpha);
+    return 1;
+}
+
+static const struct luaL_Reg function_lib[] = {
+        {"new",    new_color},
+        {NULL, NULL},
+};
+
+static const struct luaL_Reg method_lib[] = {
+        {"red",  get_color_red},
+        {"green", get_color_green},
+        {"blue",    get_color_blue},
+        {"alpha",    get_color_alpha},
+        {NULL, NULL},
+};
+
+Color *to_color(lua_State *L, int arg) {
+    void *userdata = luaL_checkudata(L, arg, YLN_COLOR);
+    luaL_argcheck(L, userdata != NULL, arg, "`color` expected");
+    return (Color *)userdata;
+}
+
