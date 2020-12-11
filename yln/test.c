@@ -36,13 +36,6 @@ static void test_resize_array() {
     report_array(&array, L"freed");
 }
 
-static void laplace(ImageRgba *dest, const ImageRgba *orig) {
-    Kernel kernel;
-    init_kernel(&kernel, 3, 3, -1.0);
-    kernel.values[4] = (float)8.0;
-    convolve_image(dest, orig, &kernel);
-}
-
 int main(int argc, char **argv) {
     ImageFloat orig;
     ImageFloat dest;

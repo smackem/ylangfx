@@ -344,71 +344,103 @@ public class ImageVal extends MatrixVal<RgbVal> {
     private static class NativePixelBufferOperations implements PixelBufferOperations {
         private final Yln yln;
 
+        private float[] toFloatBuffer(ImageVal image) {
+            final float[] buffer = new float[image.pixels.length * 4];
+            int bufferPos = 0;
+            for (final RgbVal color : image.pixels) {
+                buffer[bufferPos++] = color.r();
+                buffer[bufferPos++] = color.g();
+                buffer[bufferPos++] = color.b();
+                buffer[bufferPos++] = color.a();
+            }
+            return buffer;
+        }
+
+        private ImageVal fromFloatBuffer(float[] buffer, int width, int height) {
+            final RgbVal[] pixels = new RgbVal[width * height];
+            int bufferPos = 0;
+            for (int i = 0; i < pixels.length; i++) {
+                pixels[i] = new RgbVal(buffer[bufferPos], buffer[bufferPos + 1],
+                        buffer[bufferPos + 2], buffer[bufferPos + 3]);
+                bufferPos += 4;
+            }
+            return new ImageVal(width, height, pixels);
+        }
+
         NativePixelBufferOperations(Yln yln) {
             this.yln = Objects.requireNonNull(yln);
         }
 
         @Override
         public ImageVal convolve(ImageVal image, KernelVal kernel) {
-            return ImageVal.fromArgbPixels(image.width(), image.height(),
-                    this.yln.convolveImage(image.width(), image.height(),
-                            image.toArgbPixels(), kernel.width(), kernel.height(), kernel.floatValues()));
+            return fromFloatBuffer(
+                    this.yln.convolveImage(image.width(), image.height(), toFloatBuffer(image),
+                            kernel.width(), kernel.height(), kernel.floatValues()),
+                    image.width(), image.height());
         }
 
         @Override
         public ImageVal add(ImageVal left, ImageVal right) {
-            return ImageVal.fromArgbPixels(left.width(), left.height(),
-                    this.yln.composeImages(left.width(), left.height(),
-                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.ADD));
+            return fromFloatBuffer(
+                    this.yln.composeImages(left.width(), left.height(), toFloatBuffer(left),
+                            toFloatBuffer(right), MatrixComposition.ADD),
+                    left.width(), left.height());
         }
 
         @Override
         public ImageVal subtract(ImageVal left, ImageVal right) {
-            return ImageVal.fromArgbPixels(left.width(), left.height(),
-                    this.yln.composeImages(left.width(), left.height(),
-                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.SUB));
+            return fromFloatBuffer(
+                    this.yln.composeImages(left.width(), left.height(), toFloatBuffer(left),
+                            toFloatBuffer(right), MatrixComposition.SUB),
+                    left.width(), left.height());
         }
 
         @Override
         public ImageVal multiply(ImageVal left, ImageVal right) {
-            return ImageVal.fromArgbPixels(left.width(), left.height(),
-                    this.yln.composeImages(left.width(), left.height(),
-                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.MUL));
+            return fromFloatBuffer(
+                    this.yln.composeImages(left.width(), left.height(), toFloatBuffer(left),
+                            toFloatBuffer(right), MatrixComposition.MUL),
+                    left.width(), left.height());
         }
 
         @Override
         public ImageVal divide(ImageVal left, ImageVal right) {
-            return ImageVal.fromArgbPixels(left.width(), left.height(),
-                    this.yln.composeImages(left.width(), left.height(),
-                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.DIV));
+            return fromFloatBuffer(
+                    this.yln.composeImages(left.width(), left.height(), toFloatBuffer(left),
+                            toFloatBuffer(right), MatrixComposition.DIV),
+                    left.width(), left.height());
         }
 
         @Override
         public ImageVal over(ImageVal left, ImageVal right) {
-            return ImageVal.fromArgbPixels(left.width(), left.height(),
-                    this.yln.composeImages(left.width(), left.height(),
-                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.OVER));
+            return fromFloatBuffer(
+                    this.yln.composeImages(left.width(), left.height(), toFloatBuffer(left),
+                            toFloatBuffer(right), MatrixComposition.OVER),
+                    left.width(), left.height());
         }
 
         @Override
         public ImageVal hypot(ImageVal left, ImageVal right) {
-            return ImageVal.fromArgbPixels(left.width(), left.height(),
-                    this.yln.composeImages(left.width(), left.height(),
-                            left.toArgbPixels(), right.toArgbPixels(), MatrixComposition.HYPOT));
+            return fromFloatBuffer(
+                    this.yln.composeImages(left.width(), left.height(), toFloatBuffer(left),
+                            toFloatBuffer(right), MatrixComposition.HYPOT),
+                    left.width(), left.height());
         }
 
         @Override
         public ImageVal min(ImageVal a, ImageVal b) {
-            return ImageVal.fromArgbPixels(a.width(), a.height(),
-                    this.yln.composeImages(a.width(), a.height(),
-                            a.toArgbPixels(), b.toArgbPixels(), MatrixComposition.MIN));
+            return fromFloatBuffer(
+                    this.yln.composeImages(a.width(), a.height(), toFloatBuffer(a),
+                            toFloatBuffer(b), MatrixComposition.MIN),
+                    a.width(), a.height());
         }
 
         @Override
         public ImageVal max(ImageVal a, ImageVal b) {
-            return ImageVal.fromArgbPixels(a.width(), a.height(),
-                    this.yln.composeImages(a.width(), a.height(),
-                            a.toArgbPixels(), b.toArgbPixels(), MatrixComposition.MAX));
+            return fromFloatBuffer(
+                    this.yln.composeImages(a.width(), a.height(), toFloatBuffer(a),
+                            toFloatBuffer(b), MatrixComposition.MAX),
+                    a.width(), a.height());
         }
     }
 }

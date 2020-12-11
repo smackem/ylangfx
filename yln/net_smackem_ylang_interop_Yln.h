@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     net_smackem_ylang_interop_Yln
  * Method:    convolveImage
- * Signature: (II[III[F)[I
+ * Signature: (II[FII[F)[F
  */
-JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveImage
-  (JNIEnv *, jobject, jint, jint, jintArray, jint, jint, jfloatArray);
+JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveImage
+  (JNIEnv *, jobject, jint, jint, jfloatArray, jint, jint, jfloatArray);
 
 /*
  * Class:     net_smackem_ylang_interop_Yln
@@ -26,10 +26,10 @@ JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveKernel
 /*
  * Class:     net_smackem_ylang_interop_Yln
  * Method:    composeImages
- * Signature: (II[I[II)[I
+ * Signature: (II[F[FI)[F
  */
-JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_composeImages
-  (JNIEnv *, jobject, jint, jint, jintArray, jintArray, jint);
+JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_composeImages
+  (JNIEnv *, jobject, jint, jint, jfloatArray, jfloatArray, jint);
 
 /*
  * Class:     net_smackem_ylang_interop_Yln

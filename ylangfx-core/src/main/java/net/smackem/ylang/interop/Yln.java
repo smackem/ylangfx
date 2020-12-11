@@ -3,7 +3,7 @@ package net.smackem.ylang.interop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// -Djava.library.path=/home/philip/java/ylangfx/yln/cmake-build-release
+// -Djava.library.path=$ProjectFileDir$/yln/cmake-build-release
 public class Yln {
     private Yln() {}
 
@@ -22,14 +22,14 @@ public class Yln {
         INSTANCE = libLoaded ? new Yln() : null;
     }
 
-    public native int[] convolveImage(int width, int height, int[] pixels,
+    public native float[] convolveImage(int width, int height, float[] pixels,
                                       int kernelWidth, int kernelHeight, float[] kernelValues);
 
     public native float[] convolveKernel(int width, int height, float[] values,
                                          int kernelWidth, int kernelHeight, float[] kernelValues);
 
-    public int[] composeImages(int width, int height, int[] leftPixels,
-                               int[] rightPixels, MatrixComposition composition) {
+    public float[] composeImages(int width, int height, float[] leftPixels,
+                               float[] rightPixels, MatrixComposition composition) {
         return this.composeImages(width, height, leftPixels, rightPixels, composition.nativeValue());
     }
 
@@ -38,8 +38,8 @@ public class Yln {
         return this.composeKernels(width, height, leftValues, rightValues, composition.nativeValue());
     }
 
-    private native int[] composeImages(int width, int height, int[] leftPixels,
-                                       int[] rightPixels, int composition);
+    private native float[] composeImages(int width, int height, float[] leftPixels,
+                                       float[] rightPixels, int composition);
 
     private native float[] composeKernels(int width, int height, float[] leftValues,
                                           float[] rightValues, int composition);

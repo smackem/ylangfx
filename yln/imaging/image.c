@@ -91,6 +91,13 @@ void init_image(ImageFloat *image, int width, int height) {
     image->pixels = new_arr(Color, width * height);
 }
 
+void wrap_image(ImageFloat *image, int width, int height, Color *pixels) {
+    assert(image != NULL);
+    image->width = width;
+    image->height = height;
+    image->pixels = pixels;
+}
+
 void convolve_image(ImageFloat *dest, const ImageFloat *orig, const Kernel *kernel) {
     assert(dest != NULL);
     assert(orig != NULL);

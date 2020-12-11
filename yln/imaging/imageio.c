@@ -101,7 +101,7 @@ error save_png(const ImageFloat *image, const char *path) {
     png.width = image->width;
     png.height = image->height;
     error err = OK;
-    if (png_image_write_to_file(&png, path, false, image->pixels, 0, NULL) == 0) {
+    if (png_image_write_to_file(&png, path, false, rgba_image.pixels, 0, NULL) == 0) {
         err = 1;
     }
     free_image_rgba(&rgba_image);

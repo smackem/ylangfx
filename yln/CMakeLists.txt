@@ -5,8 +5,9 @@ cmake_minimum_required(VERSION 3.17)
 project(yln LANGUAGES C VERSION 0.1)
 configure_file(build_config.h.in build_config.h)
 
-# language level
+# settings
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_VERBOSE_MAKEFILE on)
 
 # add child projects
 add_subdirectory(imaging)

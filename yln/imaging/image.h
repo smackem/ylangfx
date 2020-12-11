@@ -37,6 +37,7 @@ void image_from_rgba(ImageFloat *image, const ImageRgba *rgba_image);
 void image_to_rgba(ImageRgba *rgba_image, const ImageFloat *image);
 
 void init_image(ImageFloat *image, int width, int height);
+void wrap_image(ImageFloat *image, int width, int height, Color *pixels);
 void convolve_image(ImageFloat *dest, const ImageFloat *orig, const Kernel *kernel);
 void convolve_image_pixel(Color *dest, const ImageFloat *orig, const Kernel *kernel, int x, int y);
 void compose_images(ImageFloat *dest, const ImageFloat *left, const ImageFloat *right, color_composition_t compose);

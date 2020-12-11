@@ -7,78 +7,105 @@
 #include <util.h>
 #include "net_smackem_ylang_interop_Yln.h"
 
-static rgba compose_rgba_add(rgba left, rgba right) {
-    return make_rgba((int)red(left) + (int)red(right), (int)green(left) + (int)green(right), (int)blue(left) + (int)blue(right), alpha(left));
+static void compose_color_add(Color *dest, const Color *left, const Color *right) {
+    dest->red = left->red + right->red;
+    dest->green = left->green + right->green;
+    dest->blue = left->blue + right->blue;
+    dest->alpha = left->alpha;
 }
 
-static rgba compose_rgba_sub(rgba left, rgba right) {
-    return make_rgba((int)red(left) - (int)red(right), (int)green(left) - (int)green(right), (int)blue(left) - (int)blue(right), alpha(left));
+static void compose_color_sub(Color *dest, const Color *left, const Color *right) {
+    dest->red = left->red - right->red;
+    dest->green = left->green - right->green;
+    dest->blue = left->blue - right->blue;
+    dest->alpha = left->alpha;
 }
 
-static rgba compose_rgba_mul(rgba left, rgba right) {
-    return make_rgba((double)red(left) * (double)red(right) / 255.0, (double)green(left) * (double)green(right) / 255.0, (double)blue(left) * (double)blue(right) / 255.0, alpha(left));
+static void compose_color_mul(Color *dest, const Color *left, const Color *right) {
+    dest->red = left->red * right->red / 255.0f;
+    dest->green = left->green * right->green / 255.0f;
+    dest->blue = left->blue * right->blue / 255.0f;
+    dest->alpha = left->alpha;
 }
 
-static rgba compose_rgba_div(rgba left, rgba right) {
-    return make_rgba((double)red(left) * 255.0 / (double)red(right), (double)green(left) * 255.0 / (double)green(right), (double)blue(left) * 255.0 / (double)blue(right), alpha(left));
+static void compose_color_div(Color *dest, const Color *left, const Color *right) {
+    dest->red = left->red * 255.0f / right->red;
+    dest->green = left->green * 255.0f / right->green;
+    dest->blue = left->blue * 255.0f / right->blue;
+    dest->alpha = left->alpha;
 }
 
-static rgba compose_rgba_mod(rgba left, rgba right) {
-    return make_rgba((int)red(left) % (int)red(right), (int)green(left) % (int)green(right), (int)blue(left) % (int)blue(right), alpha(left));
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
+static void compose_color_mod(Color *dest, const Color *left, const Color *right) {
+    dest->red = (int)left->red % (int)right->red;
+    dest->green = (int)left->green % (int)right->green;
+    dest->blue = (int)left->blue % (int)right->blue;
+    dest->alpha = left->alpha;
+}
+#pragma clang diagnostic pop
+
+static void compose_color_hypot(Color *dest, const Color *left, const Color *right) {
+    dest->red = hypotf(left->red, right->red);
+    dest->green = hypotf(left->green, right->green);
+    dest->blue = hypotf(left->blue, right->blue);
+    dest->alpha = left->alpha;
 }
 
-static rgba compose_rgba_hypot(rgba left, rgba right) {
-    return make_rgba(hypot(red(left), red(right)), hypot(green(left), green(right)), hypot(blue(left), blue(right)), alpha(left));
+static void compose_color_over(Color *dest, const Color *left, const Color *right) {
+    paint_color_over(dest, left, right);
 }
 
-static rgba compose_rgba_over(rgba left, rgba right) {
-    return rgba_over(left, right);
+static void compose_color_min(Color *dest, const Color *left, const Color *right) {
+    dest->red = min(left->red, right->red);
+    dest->green = min(left->green, right->green);
+    dest->blue = min(left->blue, right->blue);
+    dest->alpha = left->alpha;
 }
 
-static rgba compose_rgba_min(rgba left, rgba right) {
-    return make_rgba(min(red(left), red(right)), min(green(left), green(right)), min(blue(left), blue(right)), alpha(left));
+static void compose_color_max(Color *dest, const Color *left, const Color *right) {
+    dest->red = max(left->red, right->red);
+    dest->green = max(left->green, right->green);
+    dest->blue = max(left->blue, right->blue);
+    dest->alpha = left->alpha;
 }
 
-static rgba compose_rgba_max(rgba left, rgba right) {
-    return make_rgba(max(red(left), red(right)), max(green(left), green(right)), max(blue(left), blue(right)), alpha(left));
-}
-
-static const rgba_composition_t compositions[] = {
+static const color_composition_t compositions[] = {
         NULL,
-        compose_rgba_add,   // start at 1 ..
-        compose_rgba_sub,
-        compose_rgba_mul,
-        compose_rgba_div,
-        compose_rgba_mod,
-        compose_rgba_hypot,
-        compose_rgba_over,
-        compose_rgba_min,
-        compose_rgba_max,
+        compose_color_add,   // start at 1 ..
+        compose_color_sub,
+        compose_color_mul,
+        compose_color_div,
+        compose_color_mod,
+        compose_color_hypot,
+        compose_color_over,
+        compose_color_min,
+        compose_color_max,
 };
 
-JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveImage(JNIEnv *env_ptr, jobject this_ptr,
-         jint width, jint height, jintArray pixels,
+JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveImage(JNIEnv *env_ptr, jobject this_ptr,
+         jint width, jint height, jfloatArray pixels,
          jint kernelWidth, jint kernelHeight, jfloatArray kernelValues) {
     JNIEnv env = *env_ptr;
-    jint *origPixels = env->GetIntArrayElements(env_ptr, pixels, NULL);
+    jfloat *origPixels = env->GetFloatArrayElements(env_ptr, pixels, NULL);
     jfloat *kernelFloats = env->GetFloatArrayElements(env_ptr, kernelValues, NULL);
 
-    ImageRgba orig;
-    wrap_image_rgba(&orig, width, height, (rgba *) origPixels);
+    ImageFloat orig;
+    wrap_image(&orig, width, height, (Color *) origPixels);
     Kernel kernel;
     wrap_kernel(&kernel, kernelWidth, kernelHeight, (float *) kernelFloats);
-    ImageRgba dest;
-    init_image_rgba(&dest, width, height);
+    ImageFloat dest;
+    init_image(&dest, width, height);
 
     convolve_image(&dest, &orig, &kernel);
 
-    int size = width * height;
-    jintArray result = env->NewIntArray(env_ptr, size);
-    env->SetIntArrayRegion(env_ptr, result, 0, size, (jint *) dest.pixels);
+    int size = width * height * 4;
+    jfloatArray result = env->NewFloatArray(env_ptr, size);
+    env->SetFloatArrayRegion(env_ptr, result, 0, size, (jfloat *) dest.pixels);
 
-    env->ReleaseIntArrayElements(env_ptr, pixels, origPixels, JNI_ABORT);
+    env->ReleaseFloatArrayElements(env_ptr, pixels, origPixels, JNI_ABORT);
     env->ReleaseFloatArrayElements(env_ptr, kernelValues, kernelFloats, JNI_ABORT);
-    free_image_rgba(&dest);
+    free_image(&dest);
     return result;
 }
 
@@ -89,7 +116,7 @@ JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveKernel(
     jfloat *origValues = env->GetFloatArrayElements(env_ptr, values, NULL);
     jfloat *kernelFloats = env->GetFloatArrayElements(env_ptr, kernelValues, NULL);
 
-    int size = width * height;
+    int size = width * height * 4;
     jfloatArray result = env->NewFloatArray(env_ptr, size);
     env->SetFloatArrayRegion(env_ptr, result, 0, size, origValues);
 
@@ -98,27 +125,27 @@ JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveKernel(
     return result;
 }
 
-JNIEXPORT jintArray JNICALL Java_net_smackem_ylang_interop_Yln_composeImages(JNIEnv *env_ptr, jobject this_ptr,
-        jint width, jint height, jintArray leftPixels, jintArray rightPixels, jint composition) {
+JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_composeImages(JNIEnv *env_ptr, jobject this_ptr,
+        jint width, jint height, jfloatArray leftPixels, jfloatArray rightPixels, jint composition) {
     JNIEnv env = *env_ptr;
-    jint *leftBuf = env->GetIntArrayElements(env_ptr, leftPixels, NULL);
-    jint *rightBuf = env->GetIntArrayElements(env_ptr, rightPixels, NULL);
+    jfloat *leftBuf = env->GetFloatArrayElements(env_ptr, leftPixels, NULL);
+    jfloat *rightBuf = env->GetFloatArrayElements(env_ptr, rightPixels, NULL);
 
-    ImageRgba left;
-    wrap_image_rgba(&left, width, height, (rgba *) leftBuf);
-    ImageRgba right;
-    wrap_image_rgba(&right, width, height, (rgba *) rightBuf);
-    ImageRgba dest;
-    init_image_rgba(&dest, width, height);
+    ImageFloat left;
+    wrap_image(&left, width, height, (Color *) leftBuf);
+    ImageFloat right;
+    wrap_image(&right, width, height, (Color *) rightBuf);
+    ImageFloat dest;
+    init_image(&dest, width, height);
 
     compose_images(&dest, &left, &right, compositions[composition]);
 
-    int size = width * height;
-    jintArray result = env->NewIntArray(env_ptr, size);
-    env->SetIntArrayRegion(env_ptr, result, 0, size, (jint *) dest.pixels);
+    int size = width * height * 4;
+    jfloatArray result = env->NewFloatArray(env_ptr, size);
+    env->SetFloatArrayRegion(env_ptr, result, 0, size, (jfloat *) dest.pixels);
 
-    env->ReleaseIntArrayElements(env_ptr, leftPixels, leftBuf, JNI_ABORT);
-    env->ReleaseIntArrayElements(env_ptr, rightPixels, rightBuf, JNI_ABORT);
+    env->ReleaseFloatArrayElements(env_ptr, leftPixels, leftBuf, JNI_ABORT);
+    env->ReleaseFloatArrayElements(env_ptr, rightPixels, rightBuf, JNI_ABORT);
     return result;
 }
 
