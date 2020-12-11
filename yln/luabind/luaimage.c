@@ -6,6 +6,7 @@
 #include <lauxlib.h>
 #include <lualib.h>
 #include <luaconf.h>
+#include "luacolor.h"
 #include "luakernel.h"
 #include "luaimage.h"
 
@@ -62,32 +63,34 @@ static Color *get_image_pixel_addr(lua_State *L) {
 }
 
 static int push_image_pixel(lua_State *L) {
-    lua_pushinteger(L, *get_image_pixel_addr(L));
+    const Color *color = get_image_pixel_addr(L);
+    push_color(L, color);
     return 1;
 }
 
 static int set_image_pixel(lua_State *L) {
-    rgba *pixel_ptr = get_image_pixel_addr(L);
-    int color = luaL_checkinteger(L, 4);
-    *pixel_ptr = color;
+    Color *pixel_ptr = get_image_pixel_addr(L);
+    Color *color = to_color(L, 4);
+    *pixel_ptr = *color;
     return 0;
 }
 
 static int push_convolve_image_pixel(lua_State *L) {
-    const ImageRgba *image = to_image(L, 1);
+    const ImageFloat *image = to_image(L, 1);
     lua_Integer x = luaL_checkinteger(L, 2) - 1; // ranges from 1..width] as usual in lua
     lua_Integer y = luaL_checkinteger(L, 3) - 1;
     luaL_argcheck(L, 0 <= x && x < image->width, 2, "x is out of range");
     luaL_argcheck(L, 0 <= y && y < image->height, 3, "y is out of range");
     const Kernel *kernel = to_kernel(L, 4);
-    lua_pushinteger(L, convolve_image_pixel(image, kernel, x, y));
+    Color *color = push_new_color(L);
+    convolve_image_pixel(color, image, kernel, x, y);
     return 1;
 }
 
 static int push_convolve_image(lua_State *L) {
-    const ImageRgba *image = to_image(L, 1);
+    const ImageFloat *image = to_image(L, 1);
     const Kernel *kernel = to_kernel(L, 2);
-    ImageRgba *dest = push_new_image(L, image->width, image->height);
+    ImageFloat *dest = push_new_image(L, image->width, image->height);
     convolve_image(dest, image, kernel);
     return 1;
 }
@@ -123,13 +126,13 @@ static const luaL_Reg metameth_lib[] = {
         {NULL, NULL}
 };
 
-ImageRgba *to_image(lua_State *L, int arg) {
+ImageFloat *to_image(lua_State *L, int arg) {
     void *userdata = luaL_checkudata(L, arg, YLN_IMAGE);
     luaL_argcheck(L, userdata != NULL, arg, "`image` expected");
-    return (ImageRgba *)userdata;
+    return (ImageFloat *)userdata;
 }
 
-void push_image(lua_State *L, const ImageRgba *image) {
+void push_image(lua_State *L, const ImageFloat *image) {
     struct image_wrapper *lua_image = push_image_internal(L, false);
     lua_image->base = *image;
 }

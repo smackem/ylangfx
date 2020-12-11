@@ -22,6 +22,7 @@ extern "C" {
 
 Color *to_color(lua_State *L, int arg);
 int luaopen_color(lua_State *L);
+Color *push_new_color(lua_State *L);
 void push_color(lua_State *L, const Color *color);
 
 #endif //YLN_LUACOLOR_H

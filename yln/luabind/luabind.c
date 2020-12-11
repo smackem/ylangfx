@@ -8,16 +8,18 @@
 #include "luargba.h"
 #include "luaimage.h"
 #include "luakernel.h"
+#include "luacolor.h"
 #include "luabind.h"
 
 static void register_libs(lua_State *L) {
     luaL_requiref(L, "rgba", luaopen_rgba, true);
     luaL_requiref(L, "image", luaopen_image, true);
     luaL_requiref(L, "kernel", luaopen_kernel, true);
-    lua_pop(L, 3);
+    luaL_requiref(L, "color", luaopen_color, true);
+    lua_pop(L, 4);
 }
 
-error run_lua_script(const char *script_path, ImageRgba *dest, const ImageRgba *orig) {
+error run_lua_script(const char *script_path, ImageFloat *dest, const ImageFloat *orig) {
     lua_State *L = luaL_newstate();   // opens Lua
     int error = OK;
     luaL_openlibs(L);
@@ -32,12 +34,12 @@ error run_lua_script(const char *script_path, ImageRgba *dest, const ImageRgba *
             trace("%s\n", lua_tostring(L, -1));
             break;
         }
-        const ImageRgba *result = luaL_testudata(L, -1, YLN_IMAGE);
+        const ImageFloat *result = to_image(L, -1);
         if (result == NULL) {
             error = 1;
             break;
         }
-        clone_image_rgba(dest, result);
+        clone_image(dest, result);
     } ONCE;
 
     lua_close(L);

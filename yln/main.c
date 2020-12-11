@@ -4,25 +4,11 @@
 #include <imaging.h>
 #include <util.h>
 
-static void smoothen_image(ImageRgba *dest, const ImageRgba *orig, int radius) {
-    Kernel kernel;
-    int diameter = radius * 2 + 1;
-    init_kernel(&kernel, diameter, diameter, 1);
-    convolve_image(dest, orig, &kernel);
-    free_kernel(&kernel);
-}
-
 static error load_image_from_file(ImageRgba *image, const char *path) {
-    if (str_endswith(path, ".png")) {
-        return load_png(image, path);
-    }
     return load_image(image, path);
 }
 
 static error save_image_to_file(const ImageRgba *image, const char *path) {
-    if (str_endswith(path, ".png")) {
-        return save_png(image, path);
-    }
     return save_image(image, path);
 }
 
@@ -51,10 +37,9 @@ int main(int argc, char **argv) {
             break;
         }
 
-        //invert_image(&orig);
         clone_image_rgba(&dest, &orig);
         long start = current_millis();
-        smoothen_image(&dest, &orig, 3);
+        invert_image_rgba(&orig);
         long end = current_millis();
         wprintf(L"elapsed: %Ld ms\n", end - start);
 

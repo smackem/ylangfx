@@ -44,8 +44,8 @@ static void laplace(ImageRgba *dest, const ImageRgba *orig) {
 }
 
 int main(int argc, char **argv) {
-    ImageRgba orig;
-    ImageRgba dest;
+    ImageFloat orig;
+    ImageFloat dest;
     error err = 0;
     char dest_path[PATH_MAX];
     zero(orig);

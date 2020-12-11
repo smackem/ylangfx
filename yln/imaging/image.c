@@ -54,6 +54,34 @@ inline int get_pixel_count(const ImageRgba *image) {
     return image->width * image->height;
 }
 
+void image_from_rgba(ImageFloat *image, const ImageRgba *rgba_image) {
+    assert(image != NULL);
+    assert(rgba_image != NULL);
+    init_image(image, rgba_image->width, rgba_image->height);
+    int size = image->width * image->height;
+    Color *dest_ptr = image->pixels;
+    const rgba *rgba_ptr = rgba_image->pixels;
+    for ( ; size > 0; size--) {
+        set_color(dest_ptr, red(*rgba_ptr), green(*rgba_ptr), blue(*rgba_ptr), alpha(*rgba_ptr));
+        dest_ptr++;
+        rgba_ptr++;
+    }
+}
+
+void image_to_rgba(ImageRgba *rgba_image, const ImageFloat *image) {
+    assert(image != NULL);
+    assert(rgba_image != NULL);
+    init_image_rgba(rgba_image, image->width, image->height);
+    int size = image->width * image->height;
+    rgba *dest_ptr = rgba_image->pixels;
+    const Color *color_ptr = image->pixels;
+    for ( ; size > 0; size--) {
+        *dest_ptr = make_rgba(color_ptr->red, color_ptr->green, color_ptr->blue, color_ptr->alpha);
+        dest_ptr++;
+        color_ptr++;
+    }
+}
+
 void init_image(ImageFloat *image, int width, int height) {
     assert(image != NULL);
     assert(width > 0);
@@ -188,5 +216,26 @@ void compose_images(ImageFloat *dest, const ImageFloat *left, const ImageFloat *
     Color *right_ptr = right->pixels;
     for ( ; size > 0; size--) {
         compose(dest_ptr++, left_ptr++, right_ptr++);
+    }
+}
+
+void free_image(ImageFloat *image) {
+    assert(image != NULL);
+    if (image->pixels != NULL) {
+        free(image->pixels);
+    }
+    bzero(image, sizeof(ImageFloat));
+}
+
+void clone_image(ImageFloat *dest, const ImageFloat *orig) {
+    assert(dest != NULL);
+    assert(orig != NULL);
+    dest->width = orig->width;
+    dest->height = orig->height;
+    dest->pixels = NULL;
+    if (orig->pixels != NULL) {
+        size_t size = orig->width * orig->height;
+        dest->pixels = new_arr(Color, size);
+        memcpy(dest->pixels, orig->pixels, size * sizeof(Color));
     }
 }

@@ -5,6 +5,6 @@
 #ifndef YLN_LUABIND_H
 #define YLN_LUABIND_H
 
-error run_lua_script(const char *script_path, ImageRgba *dest, const ImageRgba *orig);
+error run_lua_script(const char *script_path, ImageFloat *dest, const ImageFloat *orig);
 
 #endif //YLN_LUABIND_H

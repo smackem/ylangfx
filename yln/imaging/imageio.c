@@ -68,9 +68,10 @@ error save_image(const ImageRgba *image, const char *path) {
     return err;
 }
 
-error load_png(ImageRgba *image, const char *path) {
+error load_png(ImageFloat *image, const char *path) {
     assert(image != NULL);
     png_image png;
+    ImageRgba rgba_image;
     zero(png);
     png.version = PNG_IMAGE_VERSION;
     if (png_image_begin_read_from_file(&png, path) == 0) {
@@ -83,22 +84,26 @@ error load_png(ImageRgba *image, const char *path) {
         free(buffer);
         return 1;
     }
-    image->width = png.width;
-    image->height = png.height;
-    image->pixels = (rgba *)buffer;
+    wrap_image_rgba(&rgba_image, png.width, png.height, (rgba *)buffer);
+    image_from_rgba(image, &rgba_image);
+    free_image_rgba(&rgba_image);
     return OK;
 }
 
-error save_png(const ImageRgba *image, const char *path) {
+error save_png(const ImageFloat *image, const char *path) {
     assert(image != NULL);
     png_image png;
+    ImageRgba rgba_image;
     zero(png);
+    image_to_rgba(&rgba_image, image);
     png.version = PNG_IMAGE_VERSION;
     png.format = PNG_FORMAT_BGRA;
     png.width = image->width;
     png.height = image->height;
+    error err = OK;
     if (png_image_write_to_file(&png, path, false, image->pixels, 0, NULL) == 0) {
-        return 1;
+        err = 1;
     }
-    return OK;
+    free_image_rgba(&rgba_image);
+    return err;
 }
