@@ -48,19 +48,19 @@ public class ImageFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL, ValueType.POINT, ValueType.KERNEL),
                         ImageFunctions::selectKernelFromKernel)));
-        registry.put(new FunctionGroup("selectAlpha",
+        registry.put(new FunctionGroup("select_alpha",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
                         args -> selectKernelFromImage(args, RgbVal::a))));
-        registry.put(new FunctionGroup("selectRed",
+        registry.put(new FunctionGroup("select_red",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
                         args -> selectKernelFromImage(args, RgbVal::r))));
-        registry.put(new FunctionGroup("selectGreen",
+        registry.put(new FunctionGroup("select_green",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
                         args -> selectKernelFromImage(args, RgbVal::g))));
-        registry.put(new FunctionGroup("selectBlue",
+        registry.put(new FunctionGroup("select_blue",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.POINT, ValueType.KERNEL),
                         args -> selectKernelFromImage(args, RgbVal::b))));

@@ -217,6 +217,10 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
         return composeWith(right, (a, b) -> new NumberVal(a.value() / b.value()));
     }
 
+    public KernelVal modulo(KernelVal right) {
+        return composeWith(right, (a, b) -> new NumberVal((int) a.value() % (int) b.value()));
+    }
+
     public KernelVal composeWith(KernelVal that, BiFunction<NumberVal, NumberVal, NumberVal> operation) {
         if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
             throw new IllegalArgumentException("composed kernels must have the same dimensions");

@@ -99,11 +99,11 @@ class RgbFunctions {
         registry.put(new FunctionGroup("v",
                 FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::value),
                 FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::withValue)));
-        registry.put(new FunctionGroup("addHue",
+        registry.put(new FunctionGroup("add_hue",
                 FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addHue)));
-        registry.put(new FunctionGroup("addSaturation",
+        registry.put(new FunctionGroup("add_saturation",
                 FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addSaturation)));
-        registry.put(new FunctionGroup("addValue",
+        registry.put(new FunctionGroup("add_value",
                 FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addValue)));
     }
 

@@ -91,9 +91,15 @@ public class GeometryFunctions {
             translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.POINT), GeometryFunctions::translateByPoint));
             translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.NUMBER, ValueType.NUMBER), GeometryFunctions::translateByXY));
         }
+        distanceOverloads.add(FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
+                GeometryFunctions::distanceRgb));
         registry.put(new FunctionGroup("intersect", intersectOverloads));
         registry.put(new FunctionGroup("distance", distanceOverloads));
         registry.put(new FunctionGroup("translate", translateOverloads));
+    }
+
+    private static Value distanceRgb(List<Value> args) {
+        return new NumberVal(((RgbVal) args.get(0)).distance((RgbVal) args.get(1)));
     }
 
     private static Value translateByPoint(List<Value> args) {

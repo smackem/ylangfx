@@ -35,15 +35,15 @@ static void compose_color_div(Color *dest, const Color *left, const Color *right
     dest->alpha = left->alpha;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "cppcoreguidelines-narrowing-conversions"
 static void compose_color_mod(Color *dest, const Color *left, const Color *right) {
-    dest->red = (int)left->red % (int)right->red;
-    dest->green = (int)left->green % (int)right->green;
-    dest->blue = (int)left->blue % (int)right->blue;
+    int right_red = (int) right->red;
+    int right_green = (int) right->green;
+    int right_blue = (int) right->blue;
+    dest->red = (float)(right_red != 0 ? (int) left->red % right_red : 0);
+    dest->green = (float)(right_green != 0 ? (int) left->green % (int) right->green : 0);
+    dest->blue = (float)(right_blue != 0 ? (int) left->blue % (int) right->blue : 0);
     dest->alpha = left->alpha;
 }
-#pragma clang diagnostic pop
 
 static void compose_color_hypot(Color *dest, const Color *left, const Color *right) {
     dest->red = hypotf(left->red, right->red);

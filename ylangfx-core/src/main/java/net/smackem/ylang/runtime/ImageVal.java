@@ -140,6 +140,10 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return this.bufferOps.divide(this, right);
     }
 
+    public ImageVal modulo(ImageVal right) {
+        return this.bufferOps.modulo(this, right);
+    }
+
     public ImageVal over(ImageVal background) {
         return this.bufferOps.over(this, background);
     }
@@ -222,6 +226,7 @@ public class ImageVal extends MatrixVal<RgbVal> {
         ImageVal subtract(ImageVal left, ImageVal right);
         ImageVal multiply(ImageVal left, ImageVal right);
         ImageVal divide(ImageVal left, ImageVal right);
+        ImageVal modulo(ImageVal left, ImageVal right);
         ImageVal over(ImageVal left, ImageVal background);
         ImageVal hypot(ImageVal left, ImageVal right);
         ImageVal min(ImageVal a, ImageVal b);
@@ -304,6 +309,11 @@ public class ImageVal extends MatrixVal<RgbVal> {
         @Override
         public ImageVal divide(ImageVal left, ImageVal right) {
             return compose(left, right, RgbVal::divideBy);
+        }
+
+        @Override
+        public ImageVal modulo(ImageVal left, ImageVal right) {
+            return compose(left, right, RgbVal::modulo);
         }
 
         @Override
@@ -408,6 +418,14 @@ public class ImageVal extends MatrixVal<RgbVal> {
             return fromFloatBuffer(
                     this.yln.composeImages(left.width(), left.height(), toFloatBuffer(left),
                             toFloatBuffer(right), MatrixComposition.DIV),
+                    left.width(), left.height());
+        }
+
+        @Override
+        public ImageVal modulo(ImageVal left, ImageVal right) {
+            return fromFloatBuffer(
+                    this.yln.composeImages(left.width(), left.height(), toFloatBuffer(left),
+                            toFloatBuffer(right), MatrixComposition.MOD),
                     left.width(), left.height());
         }
 

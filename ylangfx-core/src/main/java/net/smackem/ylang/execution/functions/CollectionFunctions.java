@@ -35,7 +35,7 @@ public class CollectionFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
                         CollectionFunctions::pop)));
-        registry.put(new FunctionGroup("removeAt",
+        registry.put(new FunctionGroup("remove_at",
                 FunctionOverload.method(
                         List.of(ValueType.LIST, ValueType.NUMBER),
                         CollectionFunctions::removeAt)));

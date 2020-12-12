@@ -82,6 +82,10 @@ public class RgbVal extends Value {
         return new RgbVal(this.r / other.r01(), this.g / other.g01(), this.b / other.b01(), this.a);
     }
 
+    public RgbVal modulo(RgbVal other) {
+        return new RgbVal((int) this.r % (int) other.r, (int) this.g % (int) other.g, (int) this.b % (int) other.b, this.a);
+    }
+
     public RgbVal invert() {
         return new RgbVal(255f - this.r, 255f - this.g, 255f - this.b, this.a);
     }
@@ -111,6 +115,13 @@ public class RgbVal extends Value {
                 (float) Math.hypot(this.g, that.g),
                 (float) Math.hypot(this.b, that.b),
                 this.a);
+    }
+
+    public float distance(RgbVal that) {
+        float dr = this.r - that.r;
+        float dg = this.g - that.g;
+        float db = this.b - that.b;
+        return (float) Math.sqrt(dr * dr + dg * dg + db * db);
     }
 
     public RgbVal clamp() {
