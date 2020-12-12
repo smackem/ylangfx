@@ -29,9 +29,9 @@ static void compose_color_mul(Color *dest, const Color *left, const Color *right
 }
 
 static void compose_color_div(Color *dest, const Color *left, const Color *right) {
-    dest->red = left->red * 255.0f / right->red;
-    dest->green = left->green * 255.0f / right->green;
-    dest->blue = left->blue * 255.0f / right->blue;
+    dest->red = left->red / right->red;
+    dest->green = left->green / right->green;
+    dest->blue = left->blue / right->blue;
     dest->alpha = left->alpha;
 }
 
@@ -113,15 +113,25 @@ JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveKernel(
         jint width, jint height, jfloatArray values,
         jint kernelWidth, jint kernelHeight, jfloatArray kernelValues) {
     JNIEnv env = *env_ptr;
-    jfloat *origValues = env->GetFloatArrayElements(env_ptr, values, NULL);
+    jfloat *imageFloats = env->GetFloatArrayElements(env_ptr, values, NULL);
     jfloat *kernelFloats = env->GetFloatArrayElements(env_ptr, kernelValues, NULL);
 
-    int size = width * height * 4;
-    jfloatArray result = env->NewFloatArray(env_ptr, size);
-    env->SetFloatArrayRegion(env_ptr, result, 0, size, origValues);
+    Kernel image;
+    wrap_kernel(&image, width, height, (float *) imageFloats);
+    Kernel kernel;
+    wrap_kernel(&kernel, kernelWidth, kernelHeight, (float *) kernelFloats);
+    Kernel dest;
+    init_kernel(&dest, width, height, width);
 
-    env->ReleaseFloatArrayElements(env_ptr, values, origValues, JNI_ABORT);
+    //convolve_kernel();
+
+    int size = width * height;
+    jfloatArray result = env->NewFloatArray(env_ptr, size);
+    env->SetFloatArrayRegion(env_ptr, result, 0, size, dest.values);
+
+    env->ReleaseFloatArrayElements(env_ptr, values, imageFloats, JNI_ABORT);
     env->ReleaseFloatArrayElements(env_ptr, kernelValues, kernelFloats, JNI_ABORT);
+    free_kernel(&dest);
     return result;
 }
 
