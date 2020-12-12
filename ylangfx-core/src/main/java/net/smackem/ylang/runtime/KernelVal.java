@@ -1,15 +1,20 @@
 package net.smackem.ylang.runtime;
 
+import net.smackem.ylang.interop.MatrixComposition;
+import net.smackem.ylang.interop.Yln;
+
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
     private final NumberVal[] values;
+    private final PixelBufferOperations bufferOps;
 
     private KernelVal(int width, int height, NumberVal[] values) {
         super(ValueType.KERNEL, width, height);
         this.values = values;
+        this.bufferOps = getBufferOps();
     }
 
     private KernelVal(int len, NumberVal[] values) {
@@ -27,6 +32,7 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
     public KernelVal(KernelVal original) {
         super(original);
         this.values = Arrays.copyOf(original.values, original.values.length);
+        this.bufferOps = getBufferOps();
     }
 
     public static KernelVal laplace(int radius) {
@@ -123,53 +129,6 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
     }
 
     @SuppressWarnings("DuplicatedCode")
-    public KernelVal convolve(KernelVal kernel) {
-        final int width = width();
-        final int height = height();
-        final KernelVal target = new KernelVal(width, height, 0);
-        final float kernelSum = kernel.sum().value();
-        final int kernelWidth = kernel.width();
-        final int kernelHeight = kernel.height();
-        final int halfKernelWidth = kernelWidth / 2;
-        final int halfKernelHeight = kernelHeight / 2;
-        final float[] kernelValues = new float[kernel.size()];
-        int targetIndex = 0;
-        int i = 0;
-        for (final Value n : kernel) {
-            kernelValues[i++] = ((NumberVal) n).value();
-        }
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                float acc = 0;
-                int startY = y - halfKernelHeight;
-                int endY = startY + kernelHeight;
-                int startX = x - halfKernelWidth;
-                int endX = startX + kernelWidth;
-                int kernelIndex = 0;
-                for (int imageY = startY; imageY < endY; imageY++) {
-                    if (imageY < 0 || imageY >= height) {
-                        kernelIndex += kernelWidth;
-                        continue;
-                    }
-                    int imageIndex = imageY * width + startX;
-                    for (int imageX = startX; imageX < endX; imageX++) {
-                        if (imageX >= 0 && imageX < width) {
-                            final float value = kernelValues[kernelIndex];
-                            final NumberVal px = this.values[imageIndex];
-                            acc += value * px.value();
-                        }
-                        kernelIndex++;
-                        imageIndex++;
-                    }
-                }
-                target.values[targetIndex] = new NumberVal(kernelSum == 0 ? acc : acc / kernelSum);
-                targetIndex++;
-            }
-        }
-        return target;
-    }
-
-    @SuppressWarnings("DuplicatedCode")
     public float convolve(int x, int y, KernelVal kernel) {
         final int width = width();
         final int height = height();
@@ -201,35 +160,40 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
         return acc / kernelSum;
     }
 
+    public KernelVal convolve(KernelVal kernel) {
+        return this.bufferOps.convolve(this, kernel);
+    }
+
     public KernelVal add(KernelVal right) {
-        return composeWith(right, (a, b) -> new NumberVal(a.value() + b.value()));
+        return this.bufferOps.add(this, right);
     }
 
     public KernelVal subtract(KernelVal right) {
-        return composeWith(right, (a, b) -> new NumberVal(a.value() - b.value()));
+        return this.bufferOps.subtract(this, right);
     }
 
     public KernelVal multiply(KernelVal right) {
-        return composeWith(right, (a, b) -> new NumberVal(a.value() * b.value()));
+        return this.bufferOps.multiply(this, right);
     }
 
     public KernelVal divide(KernelVal right) {
-        return composeWith(right, (a, b) -> new NumberVal(a.value() / b.value()));
+        return this.bufferOps.divide(this, right);
     }
 
     public KernelVal modulo(KernelVal right) {
-        return composeWith(right, (a, b) -> new NumberVal((int) a.value() % (int) b.value()));
+        return this.bufferOps.modulo(this, right);
     }
 
-    public KernelVal composeWith(KernelVal that, BiFunction<NumberVal, NumberVal, NumberVal> operation) {
-        if (Objects.requireNonNull(that).width() != width() || that.height() != this.height()) {
-            throw new IllegalArgumentException("composed kernels must have the same dimensions");
-        }
-        final KernelVal result = new KernelVal(this.width(), this.height(), 0);
-        for (int i = 0; i < this.values.length; i++) {
-            result.values[i] = operation.apply(this.values[i], that.values[i]);
-        }
-        return result;
+    public KernelVal hypot(KernelVal right) {
+        return this.bufferOps.hypot(this, right);
+    }
+
+    public static KernelVal min(KernelVal a, KernelVal b) {
+        return Objects.requireNonNull(a).bufferOps.min(a, b);
+    }
+
+    public static KernelVal max(KernelVal a, KernelVal b) {
+        return Objects.requireNonNull(a).bufferOps.max(a, b);
     }
 
     float[] floatValues() {
@@ -268,6 +232,12 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
         return len;
     }
 
+    private static PixelBufferOperations getBufferOps() {
+        return Yln.INSTANCE != null
+                ? new NativePixelBufferOperations(Yln.INSTANCE)
+                : new JavaPixelBufferOperations();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -300,5 +270,206 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
         return Arrays.stream(this.values)
                 .map(NumberVal::toLangString)
                 .collect(Collectors.joining(" ", "|", "|"));
+    }
+
+    private interface PixelBufferOperations {
+        KernelVal convolve(KernelVal image, KernelVal kernel);
+        KernelVal add(KernelVal left, KernelVal right);
+        KernelVal subtract(KernelVal left, KernelVal right);
+        KernelVal multiply(KernelVal left, KernelVal right);
+        KernelVal divide(KernelVal left, KernelVal right);
+        KernelVal modulo(KernelVal left, KernelVal right);
+        KernelVal hypot(KernelVal left, KernelVal right);
+        KernelVal min(KernelVal a, KernelVal b);
+        KernelVal max(KernelVal a, KernelVal b);
+    }
+
+    private static class JavaPixelBufferOperations implements PixelBufferOperations {
+        @Override
+        @SuppressWarnings("DuplicatedCode")
+        public KernelVal convolve(KernelVal image, KernelVal kernel) {
+            final int width = image.width();
+            final int height = image.height();
+            final KernelVal target = new KernelVal(width, height, 0);
+            final float kernelSum = kernel.sum().value();
+            final int kernelWidth = kernel.width();
+            final int kernelHeight = kernel.height();
+            final int halfKernelWidth = kernelWidth / 2;
+            final int halfKernelHeight = kernelHeight / 2;
+            final float[] kernelValues = new float[kernel.size()];
+            int targetIndex = 0;
+            int i = 0;
+            for (final Value n : kernel) {
+                kernelValues[i++] = ((NumberVal) n).value();
+            }
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    float acc = 0;
+                    int startY = y - halfKernelHeight;
+                    int endY = startY + kernelHeight;
+                    int startX = x - halfKernelWidth;
+                    int endX = startX + kernelWidth;
+                    int kernelIndex = 0;
+                    for (int imageY = startY; imageY < endY; imageY++) {
+                        if (imageY < 0 || imageY >= height) {
+                            kernelIndex += kernelWidth;
+                            continue;
+                        }
+                        int imageIndex = imageY * width + startX;
+                        for (int imageX = startX; imageX < endX; imageX++) {
+                            if (imageX >= 0 && imageX < width) {
+                                final float value = kernelValues[kernelIndex];
+                                final NumberVal px = image.values[imageIndex];
+                                acc += value * px.value();
+                            }
+                            kernelIndex++;
+                            imageIndex++;
+                        }
+                    }
+                    target.values[targetIndex] = new NumberVal(kernelSum == 0 ? acc : acc / kernelSum);
+                    targetIndex++;
+                }
+            }
+            return target;
+        }
+
+        @Override
+        public KernelVal add(KernelVal left, KernelVal right) {
+            return compose(left, right, (a, b) -> new NumberVal(a.value() + b.value()));
+        }
+
+        @Override
+        public KernelVal subtract(KernelVal left, KernelVal right) {
+            return compose(left, right, (a, b) -> new NumberVal(a.value() - b.value()));
+        }
+
+        @Override
+        public KernelVal multiply(KernelVal left, KernelVal right) {
+            return compose(left, right, (a, b) -> new NumberVal(a.value() * b.value()));
+        }
+
+        @Override
+        public KernelVal divide(KernelVal left, KernelVal right) {
+            return compose(left, right, (a, b) -> new NumberVal(a.value() / b.value()));
+        }
+
+        @Override
+        public KernelVal modulo(KernelVal left, KernelVal right) {
+            return compose(left, right, (a, b) -> new NumberVal(a.value() % b.value()));
+        }
+
+        @Override
+        public KernelVal hypot(KernelVal left, KernelVal right) {
+            return compose(left, right, (a, b) -> new NumberVal((float) Math.hypot(a.value(), b.value())));
+        }
+
+        @Override
+        public KernelVal min(KernelVal left, KernelVal right) {
+            return compose(left, right, NumberVal::min);
+        }
+
+        @Override
+        public KernelVal max(KernelVal left, KernelVal right) {
+            return compose(left, right, NumberVal::max);
+        }
+
+        private KernelVal compose(KernelVal left, KernelVal right, BiFunction<NumberVal, NumberVal, NumberVal> operation) {
+            if (Objects.requireNonNull(right).width() != left.width() || right.height() != left.height()) {
+                throw new IllegalArgumentException("composed kernels must have the same dimensions");
+            }
+            final KernelVal result = new KernelVal(left.width(), left.height(), 0);
+            for (int i = 0; i < left.values.length; i++) {
+                result.values[i] = operation.apply(left.values[i], right.values[i]);
+            }
+            return result;
+        }
+    }
+
+    private static class NativePixelBufferOperations implements PixelBufferOperations {
+        private final Yln yln;
+
+        NativePixelBufferOperations(Yln yln) {
+            this.yln = yln;
+        }
+
+        private static KernelVal fromFloatValues(float[] values, int width, int height) {
+            final NumberVal[] numberValues = new NumberVal[values.length];
+            for (int i = 0; i < numberValues.length; i++) {
+                numberValues[i] = new NumberVal(values[i]);
+            }
+            return new KernelVal(width, height, numberValues);
+        }
+
+        @Override
+        public KernelVal convolve(KernelVal image, KernelVal kernel) {
+            return fromFloatValues(
+                    yln.convolveKernel(image.width(), image.height(), image.floatValues(),
+                            kernel.width(), kernel.height(), kernel.floatValues()),
+                    image.width(), image.height());
+        }
+
+        @Override
+        public KernelVal add(KernelVal left, KernelVal right) {
+            return fromFloatValues(
+                    yln.composeKernels(left.width(), left.height(),left.floatValues(),
+                            right.floatValues(), MatrixComposition.ADD),
+                    left.width(), left.height());
+        }
+
+        @Override
+        public KernelVal subtract(KernelVal left, KernelVal right) {
+            return fromFloatValues(
+                    yln.composeKernels(left.width(), left.height(),left.floatValues(),
+                            right.floatValues(), MatrixComposition.SUB),
+                    left.width(), left.height());
+        }
+
+        @Override
+        public KernelVal multiply(KernelVal left, KernelVal right) {
+            return fromFloatValues(
+                    yln.composeKernels(left.width(), left.height(),left.floatValues(),
+                            right.floatValues(), MatrixComposition.MUL),
+                    left.width(), left.height());
+        }
+
+        @Override
+        public KernelVal divide(KernelVal left, KernelVal right) {
+            return fromFloatValues(
+                    yln.composeKernels(left.width(), left.height(),left.floatValues(),
+                            right.floatValues(), MatrixComposition.DIV),
+                    left.width(), left.height());
+        }
+
+        @Override
+        public KernelVal modulo(KernelVal left, KernelVal right) {
+            return fromFloatValues(
+                    yln.composeKernels(left.width(), left.height(),left.floatValues(),
+                            right.floatValues(), MatrixComposition.MOD),
+                    left.width(), left.height());
+        }
+
+        @Override
+        public KernelVal hypot(KernelVal left, KernelVal right) {
+            return fromFloatValues(
+                    yln.composeKernels(left.width(), left.height(),left.floatValues(),
+                            right.floatValues(), MatrixComposition.HYPOT),
+                    left.width(), left.height());
+        }
+
+        @Override
+        public KernelVal min(KernelVal a, KernelVal b) {
+            return fromFloatValues(
+                    yln.composeKernels(a.width(), a.height(),a.floatValues(),
+                            b.floatValues(), MatrixComposition.MIN),
+                    a.width(), a.height());
+        }
+
+        @Override
+        public KernelVal max(KernelVal a, KernelVal b) {
+            return fromFloatValues(
+                    yln.composeKernels(a.width(), a.height(),a.floatValues(),
+                            b.floatValues(), MatrixComposition.MAX),
+                    a.width(), a.height());
+        }
     }
 }

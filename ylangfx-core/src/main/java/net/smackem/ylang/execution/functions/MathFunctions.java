@@ -75,8 +75,15 @@ public class MathFunctions {
                         List.of(ValueType.IMAGE, ValueType.IMAGE),
                         MathFunctions::hypotImage),
                 FunctionOverload.function(
+                        List.of(ValueType.KERNEL, ValueType.KERNEL),
+                        MathFunctions::hypotKernel),
+                FunctionOverload.function(
                         List.of(ValueType.POINT),
                         MathFunctions::hypotPoint)));
+    }
+
+    private static Value hypotKernel(List<Value> args) {
+        return ((KernelVal) args.get(0)).hypot((KernelVal) args.get(1));
     }
 
     private static Value hypotImage(List<Value> args) {

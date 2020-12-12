@@ -74,13 +74,13 @@ public class UtilFunctions {
     private static Value minKernelWithKernel(List<Value> args) {
         final KernelVal k1 = (KernelVal) args.get(0);
         final KernelVal k2 = (KernelVal) args.get(1);
-        return k1.composeWith(k2, NumberVal::min);
+        return KernelVal.min(k1, k2);
     }
 
     private static Value maxKernelWithKernel(List<Value> args) {
         final KernelVal k1 = (KernelVal) args.get(0);
         final KernelVal k2 = (KernelVal) args.get(1);
-        return k1.composeWith(k2, NumberVal::max);
+        return KernelVal.max(k1, k2);
     }
 
     private static Value maxRgb(List<Value> args) {

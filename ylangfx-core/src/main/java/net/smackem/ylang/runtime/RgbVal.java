@@ -79,11 +79,18 @@ public class RgbVal extends Value {
     }
 
     public RgbVal divideBy(RgbVal other) {
-        return new RgbVal(this.r / other.r01(), this.g / other.g01(), this.b / other.b01(), this.a);
+        return new RgbVal(this.r / other.r, this.g / other.g, this.b / other.b, this.a);
     }
 
     public RgbVal modulo(RgbVal other) {
-        return new RgbVal((int) this.r % (int) other.r, (int) this.g % (int) other.g, (int) this.b % (int) other.b, this.a);
+        int other_red = (int) other.r;
+        int other_green = (int) other.g;
+        int other_blue = (int) other.b;
+        return new RgbVal(
+                other_red != 0 ? (int) this.r % other_red : 0,
+                other_green != 0 ? (int) this.g % other_green : 0,
+                other_blue != 0 ? (int) this.b % other_blue : 0,
+                this.a);
     }
 
     public RgbVal invert() {
