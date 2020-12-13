@@ -48,11 +48,15 @@
                <TextArea fx:id="logTextArea" editable="false" minHeight="200" />
             </Tab>
          </TabPane>
-         <VirtualizedScrollPane>
-            <content>
-               <CodeEditor fx:id="codeEditor" minHeight="100" />
-            </content>
-         </VirtualizedScrollPane>
+         <TabPane>
+            <Tab text="Code">
+               <VirtualizedScrollPane>
+                  <content>
+                     <CodeEditor fx:id="codeEditor" minHeight="100" />
+                  </content>
+               </VirtualizedScrollPane>
+            </Tab>
+         </TabPane>
       </SplitPane>
    </center>
 </BorderPane>

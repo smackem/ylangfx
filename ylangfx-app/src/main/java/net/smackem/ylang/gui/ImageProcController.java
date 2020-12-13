@@ -113,7 +113,7 @@ public class ImageProcController {
                 .otherwise(Orientation.VERTICAL));
         final Preferences prefs = Preferences.userNodeForPackage(ImageProcController.class);
         final String source = prefs.get(PREF_SOURCE, """
-                fn invertAndBlur(inp) {
+                fn invert_and_blur(inp) {
                     out := image(inp).clip(inp.bounds)
                     K := |1  1  1
                           1  1  1
@@ -124,7 +124,7 @@ public class ImageProcController {
                     return out
                 }
                 inp := $in.default(#ffffff@00)
-                return invertAndBlur(inp)
+                return invert_and_blur(inp)
                 """);
 
         this.splitPane.setDividerPositions(prefs.getDouble(PREF_DIVIDER_POS, 0.6));
