@@ -64,6 +64,10 @@ public class MathFunctions {
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
                         MathFunctions::floor)));
+        registry.put(new FunctionGroup("signum",
+                FunctionOverload.function(
+                        List.of(ValueType.NUMBER),
+                        MathFunctions::sign)));
         registry.put(new FunctionGroup("hypot",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
@@ -80,6 +84,10 @@ public class MathFunctions {
                 FunctionOverload.function(
                         List.of(ValueType.POINT),
                         MathFunctions::hypotPoint)));
+    }
+
+    private static Value sign(List<Value> args) {
+        return new NumberVal(Math.signum(((NumberVal) args.get(0)).value()));
     }
 
     private static Value hypotKernel(List<Value> args) {

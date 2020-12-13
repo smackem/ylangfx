@@ -1,6 +1,5 @@
 package net.smackem.ylang.execution.functions;
 
-import net.smackem.ylang.execution.ExecutionException;
 import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.runtime.*;
@@ -73,10 +72,10 @@ public class CollectionFunctions {
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
                         CollectionFunctions::gaussianKernel)));
-        registry.put(new FunctionGroup("laplace",
+        registry.put(new FunctionGroup("laplacian",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
-                        CollectionFunctions::laplaceKernel)));
+                        CollectionFunctions::laplacianKernel)));
         // kernel width and height are defined in CommonFunctions
         registry.put(new FunctionGroup("sum",
                 FunctionOverload.method(
@@ -145,8 +144,8 @@ public class CollectionFunctions {
         return kernel;
     }
 
-    private static Value laplaceKernel(List<Value> args) {
-        return KernelVal.laplace((int) ((NumberVal) args.get(0)).value());
+    private static Value laplacianKernel(List<Value> args) {
+        return KernelVal.laplacian((int) ((NumberVal) args.get(0)).value());
     }
 
     private static Value gaussianKernel(List<Value> args) {

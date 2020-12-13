@@ -35,7 +35,7 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
         this.bufferOps = getBufferOps();
     }
 
-    public static KernelVal laplace(int radius) {
+    public static KernelVal laplacian(int radius) {
         final int len = radius * 2 + 1;
         final KernelVal kernel = new KernelVal(len, len, -1);
         kernel.values[kernel.values.length / 2] = new NumberVal(kernel.values.length - 1);

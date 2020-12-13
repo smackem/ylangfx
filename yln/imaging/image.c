@@ -211,12 +211,14 @@ void convolve_image_pixel(Color *dest, const ImageFloat *orig, const Kernel *ker
     }
 }
 
-void compose_images(ImageFloat *dest, const ImageFloat *left, const ImageFloat *right, color_composition_t compose) {
+void compose_image(ImageFloat *dest, const ImageFloat *left, const ImageFloat *right, color_composition_t compose) {
     assert(dest != NULL);
     assert(left != NULL);
     assert(right != NULL);
     assert(left->width == right->width);
     assert(left->height == right->height);
+    assert(dest->width == left->width);
+    assert(dest->height == left->height);
     int size = left->width * left->height;
     Color *dest_ptr = dest->pixels;
     Color *left_ptr = left->pixels;

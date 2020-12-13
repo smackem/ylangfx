@@ -634,7 +634,7 @@ public class IntegrationTest {
                 a.push(1).push(2).push(3)
                 b := list(a)
                 popped := b.pop()
-                first := b.removeAt(0)
+                first := b.remove_at(0)
                 size := a.size()
                 c := a :: b
                 d := list(2)
@@ -713,9 +713,9 @@ public class IntegrationTest {
                 log(gaussian(5))
                 log(gaussian(10))
                 log("laplace")
-                log(laplace(1))
-                log(laplace(2))
-                log(laplace(3))
+                log(laplacian(1))
+                log(laplacian(2))
+                log(laplacian(3))
                 return 0
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(errors).isEmpty();

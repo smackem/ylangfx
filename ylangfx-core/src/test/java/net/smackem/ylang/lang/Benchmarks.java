@@ -3,6 +3,7 @@ package net.smackem.ylang.lang;
 import net.smackem.ylang.execution.ExecutionException;
 import net.smackem.ylang.execution.Interpreter;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.Writer;
@@ -15,7 +16,7 @@ public class Benchmarks {
     private static final int CONVOLVE_REPETITIONS = 50;
 
     @Test
-    //@Ignore
+    @Ignore
     public void benchmarkConvolveImage() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
@@ -37,7 +38,7 @@ public class Benchmarks {
     }
 
     @Test
-    //@Ignore
+    @Ignore
     public void benchmarkConvolveImage2() throws ExecutionException {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();

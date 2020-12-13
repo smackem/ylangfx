@@ -23,8 +23,8 @@ public class DivOperatorTest {
 
     @Test
     public void divideRgbByRgb() throws MissingOverloadException {
-        assertThat(BinaryOperator.DIV.invoke(new RgbVal(20f, 30f, 40f, 50f), new RgbVal(127.5f, 127.5f, 127.5f, 127.5f)))
-                .isEqualTo(new RgbVal(40f, 60f, 80f, 50f));
+        assertThat(BinaryOperator.DIV.invoke(new RgbVal(20f, 30f, 40f, 50f), new RgbVal(10f, 15f, 20f, 25f)))
+                .isEqualTo(new RgbVal(2f, 2f, 2f, 50f));
     }
 
     @Test

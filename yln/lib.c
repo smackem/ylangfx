@@ -1,3 +1,4 @@
+#include <__wctype.h>
 //
 // Created by Philip Boger on 06.12.20.
 //
@@ -70,7 +71,7 @@ static void compose_color_max(Color *dest, const Color *left, const Color *right
     dest->alpha = left->alpha;
 }
 
-static const color_composition_t compositions[] = {
+static const color_composition_t color_compositions[] = {
         NULL,
         compose_color_add,   // start at 1 ..
         compose_color_sub,
@@ -81,6 +82,58 @@ static const color_composition_t compositions[] = {
         compose_color_over,
         compose_color_min,
         compose_color_max,
+};
+
+static float compose_float_add(float left, float right) {
+    return left + right;
+}
+
+static float compose_float_sub(float left, float right) {
+    return left - right;
+}
+
+static float compose_float_mul(float left, float right) {
+    return left * right;
+}
+
+static float compose_float_div(float left, float right) {
+    return left / right;
+}
+
+static float compose_float_mod(float left, float right) {
+    int right_int = (int) right;
+    return right_int != 0
+        ? (float) ((int) left % right_int)
+        : 0.0f;
+}
+
+static float compose_float_hypot(float left, float right) {
+    return hypotf(left, right);
+}
+
+static float compose_float_over(float left, __unused float right) {
+    return left;
+}
+
+static float compose_float_min(float left, float right) {
+    return min(left, right);
+}
+
+static float compose_float_max(float left, float right) {
+    return max(left, right);
+}
+
+static const float_composition_t float_compositions[] = {
+        NULL,
+        compose_float_add,   // start at 1 ..
+        compose_float_sub,
+        compose_float_mul,
+        compose_float_div,
+        compose_float_mod,
+        compose_float_hypot,
+        compose_float_over,
+        compose_float_min,
+        compose_float_max,
 };
 
 JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveImage(JNIEnv *env_ptr, jobject this_ptr,
@@ -113,24 +166,24 @@ JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_convolveKernel(
         jint width, jint height, jfloatArray values,
         jint kernelWidth, jint kernelHeight, jfloatArray kernelValues) {
     JNIEnv env = *env_ptr;
-    jfloat *imageFloats = env->GetFloatArrayElements(env_ptr, values, NULL);
-    jfloat *kernelFloats = env->GetFloatArrayElements(env_ptr, kernelValues, NULL);
+    jfloat *imageBuf = env->GetFloatArrayElements(env_ptr, values, NULL);
+    jfloat *kernelBuf = env->GetFloatArrayElements(env_ptr, kernelValues, NULL);
 
     Kernel image;
-    wrap_kernel(&image, width, height, (float *) imageFloats);
+    wrap_kernel(&image, width, height, (float *) imageBuf);
     Kernel kernel;
-    wrap_kernel(&kernel, kernelWidth, kernelHeight, (float *) kernelFloats);
+    wrap_kernel(&kernel, kernelWidth, kernelHeight, (float *) kernelBuf);
     Kernel dest;
     init_kernel(&dest, width, height, width);
 
-    //convolve_kernel();
+    convolve_kernel(&dest, &image, &kernel);
 
     int size = width * height;
     jfloatArray result = env->NewFloatArray(env_ptr, size);
     env->SetFloatArrayRegion(env_ptr, result, 0, size, dest.values);
 
-    env->ReleaseFloatArrayElements(env_ptr, values, imageFloats, JNI_ABORT);
-    env->ReleaseFloatArrayElements(env_ptr, kernelValues, kernelFloats, JNI_ABORT);
+    env->ReleaseFloatArrayElements(env_ptr, values, imageBuf, JNI_ABORT);
+    env->ReleaseFloatArrayElements(env_ptr, kernelValues, kernelBuf, JNI_ABORT);
     free_kernel(&dest);
     return result;
 }
@@ -148,7 +201,7 @@ JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_composeImages(J
     ImageFloat dest;
     init_image(&dest, width, height);
 
-    compose_images(&dest, &left, &right, compositions[composition]);
+    compose_image(&dest, &left, &right, color_compositions[composition]);
 
     int size = width * height * 4;
     jfloatArray result = env->NewFloatArray(env_ptr, size);
@@ -156,10 +209,31 @@ JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_composeImages(J
 
     env->ReleaseFloatArrayElements(env_ptr, leftPixels, leftBuf, JNI_ABORT);
     env->ReleaseFloatArrayElements(env_ptr, rightPixels, rightBuf, JNI_ABORT);
+    free_image(&dest);
     return result;
 }
 
 JNIEXPORT jfloatArray JNICALL Java_net_smackem_ylang_interop_Yln_composeKernels(JNIEnv *env_ptr, jobject this_ptr,
         jint width, jint height, jfloatArray leftValues, jfloatArray rightValues, jint composition) {
-    return NULL;
+    JNIEnv env = *env_ptr;
+    jfloat *leftBuf = env->GetFloatArrayElements(env_ptr, leftValues, NULL);
+    jfloat *rightBuf = env->GetFloatArrayElements(env_ptr, rightValues, NULL);
+
+    Kernel left;
+    wrap_kernel(&left, width, height, (float *) leftBuf);
+    Kernel right;
+    wrap_kernel(&right, width, height, (float *) rightBuf);
+    Kernel dest;
+    init_kernel(&dest, width, height, 0.0f);
+
+    compose_kernel(&dest, &left, &right, float_compositions[composition]);
+
+    int size = width * height;
+    jfloatArray result = env->NewFloatArray(env_ptr, size);
+    env->SetFloatArrayRegion(env_ptr, result, 0, size, (jfloat *) dest.values);
+
+    env->ReleaseFloatArrayElements(env_ptr, leftValues, leftBuf, JNI_ABORT);
+    env->ReleaseFloatArrayElements(env_ptr, rightValues, rightBuf, JNI_ABORT);
+    free_kernel(&dest);
+    return result;
 }
