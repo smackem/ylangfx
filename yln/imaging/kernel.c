@@ -51,8 +51,8 @@ void convolve_kernel(Kernel *dest, const Kernel *orig, const Kernel *kernel) {
     assert(orig != NULL);
     assert(dest->width == orig->width);
     assert(dest->height == orig->height);
-    assert(dest->pixels != NULL);
-    assert(orig->pixels != NULL);
+    assert(dest->values != NULL);
+    assert(orig->values != NULL);
     assert(kernel != NULL);
     assert(kernel->width > 0);
     assert(kernel->height > 0);

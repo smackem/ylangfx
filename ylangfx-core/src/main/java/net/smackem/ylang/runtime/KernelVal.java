@@ -267,9 +267,11 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
 
     @Override
     public String toLangString() {
-        return Arrays.stream(this.values)
-                .map(NumberVal::toLangString)
-                .collect(Collectors.joining(" ", "|", "|"));
+        return this.values.length < 1000
+                ? Arrays.stream(this.values)
+                    .map(NumberVal::toLangString)
+                    .collect(Collectors.joining(" ", "|", "|"))
+                : "kernel{size=%dx%d, hash=%x}".formatted(width(), height(), hashCode());
     }
 
     private interface PixelBufferOperations {

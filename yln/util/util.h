@@ -31,11 +31,17 @@ bool str_endswith(const char *str, const char *end);
  */
 void replace_extension(char *dest, size_t dest_length, const char *path, const char *extension);
 
+/**
+ * The minimum of a and b, which can be int, float or double
+ */
 #define min(a, b) _Generic((a)+(b), default: min_i, double: min_d, float: min_f)(a, b)
 int min_i(int a, int b);
 float min_f(float a, float b);
 double min_d(double a, double b);
 
+/**
+ * The maximum of a and b, which can be int, float or double
+ */
 #define max(a, b) _Generic((a)+(b), default: max_i, double: max_d, float: max_f)(a, b)
 int max_i(int a, int b);
 float max_f(float a, float b);
