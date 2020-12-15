@@ -28,6 +28,7 @@ import net.smackem.ylang.model.Yli;
 import net.smackem.ylang.model.ScriptLibrary;
 import net.smackem.ylang.runtime.ImageVal;
 import net.smackem.ylang.runtime.Value;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -56,7 +57,7 @@ public class ImageProcController {
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVE_AS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
-    private final Collection<ScriptModel> scripts = new ArrayList<ScriptModel>();
+    private final Collection<ScriptModel> scripts = new ArrayList<>();
 
     public ImageProcController() {
         ScriptLibrary lib = null;
@@ -91,8 +92,6 @@ public class ImageProcController {
     private ImageView sourceImageView;
     @FXML
     private ImageView targetImageView;
-    @FXML
-    private CodeEditor codeEditor;
     @FXML
     private Label messageTextArea;
     @FXML
@@ -133,11 +132,11 @@ public class ImageProcController {
                 """);
 
         this.splitPane.setDividerPositions(prefs.getDouble(PREF_DIVIDER_POS, 0.6));
-        this.codeEditor.replaceText(source);
+        addScript(new ScriptModel(null, source));
         this.horizontalSplit.set(prefs.getBoolean(PREF_HORIZONTAL_SPLIT, false));
         Platform.runLater(() -> {
             this.runButton.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, ignored -> {
-                prefs.put(PREF_SOURCE, this.codeEditor.getText());
+                prefs.put(PREF_SOURCE, selectedScript().code().get());
                 prefs.putBoolean(PREF_HORIZONTAL_SPLIT, this.horizontalSplit.get());
                 prefs.putDouble(PREF_DIVIDER_POS, this.splitPane.getDividerPositions()[0]);
             });
@@ -147,7 +146,6 @@ public class ImageProcController {
             }
         });
         this.messageTextArea.maxWidthProperty().bind(this.targetTab.getTabPane().widthProperty());
-        this.codeTabPane.addEventHandler(Tab.TAB_CLOSE_REQUEST_EVENT, this::onCodeTabClosing);
     }
 
     @FXML
@@ -202,7 +200,7 @@ public class ImageProcController {
         final List<String> errors = new ArrayList<>();
         final Program program;
         try {
-            program = compiler.compile(this.codeEditor.getText(), FunctionRegistry.INSTANCE, this.scriptLibrary, errors);
+            program = compiler.compile(selectedScript().code().get(), FunctionRegistry.INSTANCE, this.scriptLibrary, errors);
         } catch (Exception e) {
             this.message.setValue(e.getMessage());
             return;
@@ -249,7 +247,7 @@ public class ImageProcController {
     private void processImageRemote() {
         this.isRunning.setValue(true);
         final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
-        final String sourceCode = this.codeEditor.getText();
+        final String sourceCode = selectedScript().code().get();
         App.getInstance().getImageProcService().processImage(sourceCode, imageDataPng).thenAccept(result -> {
             final byte[] resultImageDataPng = result.getImageDataPng();
 
@@ -336,11 +334,33 @@ public class ImageProcController {
     }
 
     private void openScript(Path path) {
+        final String code;
         try {
-            this.codeEditor.replaceText(Files.readString(path));
+            code = Files.readString(path);
         } catch (IOException e) {
             new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
+            return;
         }
+        addScript(new ScriptModel(path.getFileName().toString(), code));
+    }
+
+    private void addScript(ScriptModel script) {
+        this.scripts.add(script);
+        final CodeEditor editor = new CodeEditor();
+        editor.setId("editor");
+        editor.replaceText(script.code().get());
+        editor.multiPlainChanges().subscribe(ignored -> script.code().set(editor.getText()));
+        String title = script.fileName().get();
+        if (title == null || title.isEmpty()) {
+            title = "*";
+        }
+        final Tab tab = new Tab(title);
+        tab.setClosable(script.fileName().get() != null);
+        tab.setContent(new VirtualizedScrollPane<>(editor));
+        tab.setUserData(script);
+        this.codeTabPane.getTabs().add(tab);
+        this.codeTabPane.getSelectionModel().select(tab);
+        tab.setOnCloseRequest(ignored -> this.scripts.remove(script));
     }
 
     @FXML
@@ -371,13 +391,15 @@ public class ImageProcController {
 
         if (file != null) {
             try {
-                Files.writeString(file.toPath(), this.codeEditor.getText());
+                Files.writeString(file.toPath(), selectedScript().code().get());
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             }
         }
     }
 
-    private <T extends Event> void onCodeTabClosing(T e) {
+    private ScriptModel selectedScript() {
+        final Object selected = this.codeTabPane.getSelectionModel().selectedItemProperty().get().getUserData();
+        return (ScriptModel) selected;
     }
 }

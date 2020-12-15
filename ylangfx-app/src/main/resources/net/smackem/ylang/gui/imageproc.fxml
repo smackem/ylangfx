@@ -3,8 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
-<?import net.smackem.ylang.gui.CodeEditor?>
-<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="net.smackem.ylang.gui.ImageProcController"
@@ -48,15 +47,7 @@
                <TextArea fx:id="logTextArea" editable="false" minHeight="200" />
             </Tab>
          </TabPane>
-         <TabPane fx:id="codeTabPane">
-            <Tab text="Code">
-               <VirtualizedScrollPane>
-                  <content>
-                     <CodeEditor fx:id="codeEditor" minHeight="100" />
-                  </content>
-               </VirtualizedScrollPane>
-            </Tab>
-         </TabPane>
+         <TabPane fx:id="codeTabPane" />
       </SplitPane>
    </center>
 </BorderPane>
