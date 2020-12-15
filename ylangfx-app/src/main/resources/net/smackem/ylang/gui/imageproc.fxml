@@ -48,7 +48,7 @@
                <TextArea fx:id="logTextArea" editable="false" minHeight="200" />
             </Tab>
          </TabPane>
-         <TabPane>
+         <TabPane fx:id="codeTabPane">
             <Tab text="Code">
                <VirtualizedScrollPane>
                   <content>

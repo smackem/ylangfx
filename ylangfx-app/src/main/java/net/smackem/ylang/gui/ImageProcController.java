@@ -23,6 +23,7 @@ import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.lang.Program;
+import net.smackem.ylang.model.ScriptModel;
 import net.smackem.ylang.model.Yli;
 import net.smackem.ylang.model.ScriptLibrary;
 import net.smackem.ylang.runtime.ImageVal;
@@ -35,6 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.prefs.Preferences;
 
@@ -54,6 +56,7 @@ public class ImageProcController {
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
     private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVE_AS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+    private final Collection<ScriptModel> scripts = new ArrayList<ScriptModel>();
 
     public ImageProcController() {
         ScriptLibrary lib = null;
@@ -98,6 +101,8 @@ public class ImageProcController {
     private ToggleButton splitToggle;
     @FXML
     private SplitMenuButton openMenuButton;
+    @FXML
+    private TabPane codeTabPane;
 
     @FXML
     private void initialize() {
@@ -142,6 +147,7 @@ public class ImageProcController {
             }
         });
         this.messageTextArea.maxWidthProperty().bind(this.targetTab.getTabPane().widthProperty());
+        this.codeTabPane.addEventHandler(Tab.TAB_CLOSE_REQUEST_EVENT, this::onCodeTabClosing);
     }
 
     @FXML
@@ -370,5 +376,8 @@ public class ImageProcController {
                 new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             }
         }
+    }
+
+    private <T extends Event> void onCodeTabClosing(T e) {
     }
 }
