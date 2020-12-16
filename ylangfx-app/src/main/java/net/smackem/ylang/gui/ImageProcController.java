@@ -389,9 +389,13 @@ public class ImageProcController {
         fileChooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("YLang File", "*.ylang"));
         fileChooser.setInitialDirectory(this.scriptLibrary.basePath().toFile());
+        final String fileName = script.fileNameProperty().get();
+        if (fileName != null && fileName.isEmpty() == false) {
+            fileChooser.setInitialFileName(fileName);
+        }
         final File file = fileChooser.showSaveDialog(App.getInstance().getStage());
 
-        if (file != null && script != null) {
+        if (file != null) {
             try {
                 Files.writeString(file.toPath(), script.codeProperty().get());
                 script.dirtyProperty().set(false);
