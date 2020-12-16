@@ -23,6 +23,7 @@ import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.lang.Program;
+import net.smackem.ylang.model.ImageConversion;
 import net.smackem.ylang.model.ScriptModel;
 import net.smackem.ylang.model.Yli;
 import net.smackem.ylang.model.ScriptLibrary;
@@ -43,7 +44,6 @@ import java.util.List;
 import java.util.prefs.Preferences;
 
 public class ImageProcController {
-
     private static final String PREF_SOURCE = "imageProc.source";
     private static final String PREF_IMAGE_PATH = "imageProc.imagePath";
     private static final String PREF_HORIZONTAL_SPLIT = "imageProc.horizontalSplit";
@@ -213,7 +213,8 @@ public class ImageProcController {
             return;
         }
         final StringWriter logWriter = new StringWriter();
-        final Interpreter interpreter = new Interpreter(program, convertFromFX(this.sourceImage.get()), logWriter);
+        final Interpreter interpreter = new Interpreter(program,
+                ImageConversion.convertFromFX(this.sourceImage.get()), logWriter);
         final Value result;
         try {
             result = interpreter.execute();
@@ -228,7 +229,7 @@ public class ImageProcController {
         this.message.setValue(null);
         this.logOutput.setValue(logWriter.toString());
         if (result instanceof ImageVal) {
-            this.targetImage.set(convertToFX((ImageVal) result));
+            this.targetImage.set(ImageConversion.convertToFX((ImageVal) result));
         }
     }
 
@@ -264,28 +265,6 @@ public class ImageProcController {
             this.tabPane.getSelectionModel().select(targetTab);
             this.isRunning.setValue(false);
         });
-    }
-
-    private static ImageVal convertFromFX(Image image) {
-        if (image == null) {
-            return null;
-        }
-        final PixelReader pixelReader = image.getPixelReader();
-        final int width = (int) image.getWidth();
-        final int height = (int) image.getHeight();
-        final int[] buffer = new int[width * height];
-        pixelReader.getPixels(0, 0, width, height, PixelFormat.getIntArgbInstance(), buffer, 0, width);
-        return ImageVal.fromArgbPixels(width, height, buffer);
-    }
-
-    private static Image convertToFX(ImageVal image) {
-        final int width = image.width();
-        final int height = image.height();
-        final WritableImage wImage = new WritableImage(width, height);
-        final PixelWriter pixelWriter = wImage.getPixelWriter();
-        final int[] buffer = image.toArgbPixels();
-        pixelWriter.setPixels(0, 0, width, height, PixelFormat.getIntArgbInstance(), buffer, 0, width);
-        return wImage;
     }
 
     @FXML
@@ -356,7 +335,7 @@ public class ImageProcController {
         });
         String title = script.fileNameProperty().get();
         if (title == null || title.isEmpty()) {
-            title = " * ";
+            title = "   *   ";
         }
         final Tab tab = new Tab(title);
         tab.setClosable(script.fileNameProperty().get() != null);

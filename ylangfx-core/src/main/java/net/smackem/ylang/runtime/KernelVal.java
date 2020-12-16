@@ -274,6 +274,14 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
                 : "kernel{size=%dx%d, hash=%x}".formatted(width(), height(), hashCode());
     }
 
+    public KernelVal invert() {
+        final NumberVal[] values = new NumberVal[this.values.length];
+        for (int i = 0; i < this.values.length; i++) {
+            values[i] = new NumberVal(255 - this.values[i].value());
+        }
+        return new KernelVal(width(), height(), values);
+    }
+
     private interface PixelBufferOperations {
         KernelVal convolve(KernelVal image, KernelVal kernel);
         KernelVal add(KernelVal left, KernelVal right);

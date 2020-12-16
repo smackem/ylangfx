@@ -8,6 +8,11 @@ public class NegOperatorImpl extends UnaryOperatorImpl {
         implement(ValueType.POINT, NegOperatorImpl::negPoint);
         implement(ValueType.RGB, NegOperatorImpl::negRgb);
         implement(ValueType.IMAGE, NegOperatorImpl::negImage);
+        implement(ValueType.KERNEL, NegOperatorImpl::negKernel);
+    }
+
+    private static Value negKernel(Value value) {
+        return ((KernelVal) value).invert();
     }
 
     private static Value negNumber(Value value) {
