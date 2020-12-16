@@ -367,6 +367,9 @@ public class ImageVal extends MatrixVal<RgbVal> {
         }
 
         private ImageVal fromFloatBuffer(float[] buffer, int width, int height) {
+            if (buffer.length < width * height * 4) {
+                throw new IllegalArgumentException("float buffer too small");
+            }
             final RgbVal[] pixels = new RgbVal[width * height];
             int bufferPos = 0;
             for (int i = 0; i < pixels.length; i++) {

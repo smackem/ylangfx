@@ -47,7 +47,7 @@
                <TextArea fx:id="logTextArea" editable="false" minHeight="200" />
             </Tab>
          </TabPane>
-         <TabPane fx:id="codeTabPane" />
+         <TabPane fx:id="scriptsTabPane" />
       </SplitPane>
    </center>
 </BorderPane>

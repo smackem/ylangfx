@@ -36,6 +36,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -101,7 +102,7 @@ public class ImageProcController {
     @FXML
     private SplitMenuButton openMenuButton;
     @FXML
-    private TabPane codeTabPane;
+    private TabPane scriptsTabPane;
 
     @FXML
     private void initialize() {
@@ -136,7 +137,7 @@ public class ImageProcController {
         this.horizontalSplit.set(prefs.getBoolean(PREF_HORIZONTAL_SPLIT, false));
         Platform.runLater(() -> {
             this.runButton.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, ignored -> {
-                prefs.put(PREF_SOURCE, selectedScript().code().get());
+                prefs.put(PREF_SOURCE, selectedScript().codeProperty().get());
                 prefs.putBoolean(PREF_HORIZONTAL_SPLIT, this.horizontalSplit.get());
                 prefs.putDouble(PREF_DIVIDER_POS, this.splitPane.getDividerPositions()[0]);
             });
@@ -200,7 +201,7 @@ public class ImageProcController {
         final List<String> errors = new ArrayList<>();
         final Program program;
         try {
-            program = compiler.compile(selectedScript().code().get(), FunctionRegistry.INSTANCE, this.scriptLibrary, errors);
+            program = compiler.compile(selectedScript().codeProperty().get(), FunctionRegistry.INSTANCE, this.scriptLibrary, errors);
         } catch (Exception e) {
             this.message.setValue(e.getMessage());
             return;
@@ -247,7 +248,7 @@ public class ImageProcController {
     private void processImageRemote() {
         this.isRunning.setValue(true);
         final byte[] imageDataPng = serializeImagePng(this.sourceImage.get());
-        final String sourceCode = selectedScript().code().get();
+        final String sourceCode = selectedScript().codeProperty().get();
         App.getInstance().getImageProcService().processImage(sourceCode, imageDataPng).thenAccept(result -> {
             final byte[] resultImageDataPng = result.getImageDataPng();
 
@@ -348,19 +349,37 @@ public class ImageProcController {
         this.scripts.add(script);
         final CodeEditor editor = new CodeEditor();
         editor.setId("editor");
-        editor.replaceText(script.code().get());
-        editor.multiPlainChanges().subscribe(ignored -> script.code().set(editor.getText()));
-        String title = script.fileName().get();
+        editor.replaceText(script.codeProperty().get());
+        editor.multiPlainChanges().successionEnds(Duration.ofMillis(100)).subscribe(ignored -> {
+            script.codeProperty().set(editor.getText());
+            script.dirtyProperty().set(true);
+        });
+        String title = script.fileNameProperty().get();
         if (title == null || title.isEmpty()) {
-            title = "*";
+            title = " * ";
         }
         final Tab tab = new Tab(title);
-        tab.setClosable(script.fileName().get() != null);
+        tab.setClosable(script.fileNameProperty().get() != null);
         tab.setContent(new VirtualizedScrollPane<>(editor));
         tab.setUserData(script);
-        this.codeTabPane.getTabs().add(tab);
-        this.codeTabPane.getSelectionModel().select(tab);
-        tab.setOnCloseRequest(ignored -> this.scripts.remove(script));
+        this.scriptsTabPane.getTabs().add(tab);
+        this.scriptsTabPane.getSelectionModel().select(tab);
+        tab.setOnCloseRequest(event -> onTabCloseRequest(event, script));
+    }
+
+    private void onTabCloseRequest(Event event, ScriptModel script) {
+        if (script.dirtyProperty().get()) {
+            final ButtonType result = new Alert(Alert.AlertType.CONFIRMATION, "Save Changes?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL)
+                    .showAndWait()
+                    .orElse(ButtonType.CANCEL);
+            if (result == ButtonType.YES) {
+                saveScriptAs(script);
+            } else if (result == ButtonType.CANCEL) {
+                event.consume();
+                return;
+            }
+        }
+        this.scripts.remove(script);
     }
 
     @FXML
@@ -382,6 +401,10 @@ public class ImageProcController {
 
     @FXML
     private void saveScriptAs(ActionEvent actionEvent) {
+        saveScriptAs(selectedScript());
+    }
+
+    private void saveScriptAs(ScriptModel script) {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Script File");
         fileChooser.getExtensionFilters().add(
@@ -389,9 +412,10 @@ public class ImageProcController {
         fileChooser.setInitialDirectory(this.scriptLibrary.basePath().toFile());
         final File file = fileChooser.showSaveDialog(App.getInstance().getStage());
 
-        if (file != null) {
+        if (file != null && script != null) {
             try {
-                Files.writeString(file.toPath(), selectedScript().code().get());
+                Files.writeString(file.toPath(), script.codeProperty().get());
+                script.dirtyProperty().set(false);
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             }
@@ -399,7 +423,7 @@ public class ImageProcController {
     }
 
     private ScriptModel selectedScript() {
-        final Object selected = this.codeTabPane.getSelectionModel().selectedItemProperty().get().getUserData();
+        final Object selected = this.scriptsTabPane.getSelectionModel().selectedItemProperty().get().getUserData();
         return (ScriptModel) selected;
     }
 }

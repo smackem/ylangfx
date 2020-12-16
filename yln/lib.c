@@ -1,4 +1,3 @@
-#include <__wctype.h>
 //
 // Created by Philip Boger on 06.12.20.
 //
@@ -111,7 +110,7 @@ static float compose_float_hypot(float left, float right) {
     return hypotf(left, right);
 }
 
-static float compose_float_over(float left, __unused float right) {
+static float compose_float_over(float left, float right) {
     return left;
 }
 

@@ -15,11 +15,15 @@ public class ScriptModel {
         this.code.set(code);
     }
 
-    public StringProperty fileName() {
+    public StringProperty fileNameProperty() {
         return this.fileName;
     }
 
-    public StringProperty code() {
+    public StringProperty codeProperty() {
         return this.code;
+    }
+
+    public BooleanProperty dirtyProperty() {
+        return this.dirty;
     }
 }
