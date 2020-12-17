@@ -333,11 +333,13 @@ public class ImageProcController {
             script.codeProperty().set(editor.getText());
             script.dirtyProperty().set(true);
         });
-        String title = script.fileNameProperty().get();
-        if (title == null || title.isEmpty()) {
-            title = "   *   ";
-        }
-        final Tab tab = new Tab(title);
+        final Tab tab = new Tab();
+        tab.textProperty().bind(Bindings.when(
+                script.fileNameProperty().isNull())
+                .then("   *   ")
+                .otherwise(Bindings.when(script.dirtyProperty())
+                        .then(script.fileNameProperty().concat(" *"))
+                        .otherwise(script.fileNameProperty())));
         tab.setClosable(script.fileNameProperty().get() != null);
         tab.setContent(new VirtualizedScrollPane<>(editor));
         tab.setUserData(script);
