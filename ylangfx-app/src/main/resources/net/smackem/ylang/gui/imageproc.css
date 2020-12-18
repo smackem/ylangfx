@@ -22,12 +22,7 @@
     -fx-font-size: 12pt;
 }
 
-#sourceContainer > .viewport {
-    -fx-background-image: url("checker_dark.png");
-    -fx-background-repeat: repeat;
-}
-
-#targetContainer > .viewport {
+.imageScrollPane > .viewport {
     -fx-background-image: url("checker_dark.png");
     -fx-background-repeat: repeat;
 }

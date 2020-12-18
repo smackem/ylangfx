@@ -99,6 +99,8 @@ public abstract class MatrixVal<T extends Value> extends Value {
         }
     }
 
+    public abstract int[] toArgbPixels();
+
     abstract T internalGet(int index);
 
     abstract void internalSet(int index, T value);

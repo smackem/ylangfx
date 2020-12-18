@@ -9,12 +9,14 @@ import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
 import net.smackem.ylang.execution.ExecutionException;
@@ -27,8 +29,7 @@ import net.smackem.ylang.model.ImageConversion;
 import net.smackem.ylang.model.ScriptModel;
 import net.smackem.ylang.model.Yli;
 import net.smackem.ylang.model.ScriptLibrary;
-import net.smackem.ylang.runtime.ImageVal;
-import net.smackem.ylang.runtime.Value;
+import net.smackem.ylang.runtime.*;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 
 import javax.imageio.ImageIO;
@@ -42,6 +43,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.prefs.Preferences;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class ImageProcController {
     private static final String PREF_SOURCE = "imageProc.source";
@@ -103,6 +106,8 @@ public class ImageProcController {
     private SplitMenuButton openMenuButton;
     @FXML
     private TabPane scriptsTabPane;
+    @FXML
+    private VBox targetContainer;
 
     @FXML
     private void initialize() {
@@ -200,6 +205,7 @@ public class ImageProcController {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program;
+        this.targetContainer.getChildren().clear();
         try {
             program = compiler.compile(selectedScript().codeProperty().get(), FunctionRegistry.INSTANCE, this.scriptLibrary, errors);
         } catch (Exception e) {
@@ -228,9 +234,30 @@ public class ImageProcController {
         }
         this.message.setValue(null);
         this.logOutput.setValue(logWriter.toString());
-        if (result instanceof ImageVal) {
-            this.targetImage.set(ImageConversion.convertToFX((ImageVal) result));
+        addImages(result);
+    }
+
+    private void addImages(Value result) {
+        if (result instanceof MatrixVal<?>) {
+            this.targetContainer.getChildren().add(buildImageNode(ImageConversion.convertToFX((ImageVal) result)));
+        } else if (result instanceof ListVal) {
+            addImages(StreamSupport.stream(((ListVal) result).spliterator(), false));
+        } else if (result instanceof MapVal) {
+            addImages(((MapVal) result).entries().values().stream());
         }
+    }
+
+    private void addImages(Stream<Value> values) {
+        values.filter(value -> value instanceof MatrixVal<?>)
+                .map(value -> ImageConversion.convertToFX((MatrixVal<?>) value))
+                .map(this::buildImageNode)
+                .forEach(this.targetContainer.getChildren()::add);
+    }
+
+    private Node buildImageNode(Image image) {
+        final ImageView imageView = new ImageView(image);
+        imageView.setPreserveRatio(true);
+        return imageView;
     }
 
     private String buildErrorMessage(ExecutionException e) {

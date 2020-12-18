@@ -196,6 +196,16 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
         return Objects.requireNonNull(a).bufferOps.max(a, b);
     }
 
+    @Override
+    public int[] toArgbPixels() {
+        final int[] buffer = new int[width() * height()];
+        final int pixelCount = buffer.length;
+        for (int i = 0; i < pixelCount; i++) {
+            buffer[i] = RgbVal.toIntArgb(this.values[i].value());
+        }
+        return buffer;
+    }
+
     float[] floatValues() {
         float[] values = new float[this.values.length];
         for (int i = 0; i < values.length; i++) {

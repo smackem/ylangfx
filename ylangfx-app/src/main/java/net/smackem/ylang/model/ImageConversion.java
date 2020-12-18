@@ -2,6 +2,8 @@ package net.smackem.ylang.model;
 
 import javafx.scene.image.*;
 import net.smackem.ylang.runtime.ImageVal;
+import net.smackem.ylang.runtime.KernelVal;
+import net.smackem.ylang.runtime.MatrixVal;
 
 public class ImageConversion {
     private ImageConversion() {}
@@ -18,7 +20,7 @@ public class ImageConversion {
         return ImageVal.fromArgbPixels(width, height, buffer);
     }
 
-    public static Image convertToFX(ImageVal image) {
+    public static Image convertToFX(MatrixVal<?> image) {
         final int width = image.width();
         final int height = image.height();
         final WritableImage wImage = new WritableImage(width, height);

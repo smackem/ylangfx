@@ -18,6 +18,22 @@ public class RgbVal extends Value {
         this.a = a;
     }
 
+    public static RgbVal fromIntArgb(int argb) {
+        return new RgbVal(argb >> 16 & 0xff, argb >> 8 & 0xff, argb & 0xff, argb >> 24 & 0xff);
+    }
+
+    public int toIntArgb() {
+        return (int) RgbVal.clamp(this.a) << 24 |
+                (int) RgbVal.clamp(this.r) << 16 |
+                (int) RgbVal.clamp(this.g) << 8 |
+                (int) RgbVal.clamp(this.b);
+    }
+
+    public static int toIntArgb(float grey) {
+        int v = (int) clamp(grey);
+        return 255 << 24 | v << 16 | v << 8 | v;
+    }
+
     public float r() {
         return this.r;
     }

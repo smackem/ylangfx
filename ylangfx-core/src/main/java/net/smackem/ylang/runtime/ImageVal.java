@@ -48,7 +48,7 @@ public class ImageVal extends MatrixVal<RgbVal> {
         final RgbVal[] rgbPixels = new RgbVal[pixels.length];
         for (int i = 0; i < pixels.length; i++) {
             final int pixel = pixels[i];
-            rgbPixels[i] = new RgbVal(pixel >> 16 & 0xff, pixel >> 8 & 0xff, pixel & 0xff, pixel >> 24 & 0xff);
+            rgbPixels[i] = RgbVal.fromIntArgb(pixel);
         }
         return new ImageVal(width, height, rgbPixels);
     }
@@ -63,11 +63,12 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return image;
     }
 
+    @Override
     public int[] toArgbPixels() {
         final int[] buffer = new int[width() * height()];
         final int pixelCount = buffer.length;
         for (int i = 0; i < pixelCount; i++) {
-            buffer[i] = toIntArgb(this.pixels[i]);
+            buffer[i] = this.pixels[i].toIntArgb();
         }
         return buffer;
     }
@@ -198,13 +199,6 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return Yln.INSTANCE != null
                 ? new NativePixelBufferOperations(Yln.INSTANCE)
                 : new JavaPixelBufferOperations();
-    }
-
-    private static int toIntArgb(RgbVal rgb) {
-        return (int) RgbVal.clamp(rgb.a()) << 24 |
-               (int) RgbVal.clamp(rgb.r()) << 16 |
-               (int) RgbVal.clamp(rgb.g()) << 8 |
-               (int) RgbVal.clamp(rgb.b());
     }
 
     @Override
