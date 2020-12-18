@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
@@ -59,7 +60,6 @@ public class ImageProcController {
     private final BooleanProperty horizontalSplit = new SimpleBooleanProperty();
     private final ScriptLibrary scriptLibrary;
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
-    private static final KeyCombination KEY_COMBINATION_TAKE = new KeyCodeCombination(KeyCode.T, KeyCombination.CONTROL_DOWN);
     private static final KeyCombination KEY_COMBINATION_SAVE_AS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
     private final Collection<ScriptModel> scripts = new ArrayList<>();
 
@@ -257,7 +257,17 @@ public class ImageProcController {
     private Node buildImageNode(Image image) {
         final ImageView imageView = new ImageView(image);
         imageView.setPreserveRatio(true);
+        final ContextMenu menu = new ContextMenu(
+                newMenuItem("Save As...", ignored -> saveImageAs(image)),
+                newMenuItem("Take", ignored -> this.sourceImage.setValue(image)));
+        imageView.setOnContextMenuRequested(event -> menu.show(imageView, event.getScreenX(), event.getScreenY()));
         return imageView;
+    }
+
+    private static MenuItem newMenuItem(String text, EventHandler<ActionEvent> handler) {
+        final MenuItem menuItem = new MenuItem(text);
+        menuItem.setOnAction(handler);
+        return menuItem;
     }
 
     private String buildErrorMessage(ExecutionException e) {
@@ -294,13 +304,7 @@ public class ImageProcController {
         });
     }
 
-    @FXML
-    private void takeImage(ActionEvent actionEvent) {
-        this.sourceImage.setValue(this.targetImage.getValue());
-    }
-
-    @FXML
-    public void saveImageAs(ActionEvent actionEvent) {
+    public void saveImageAs(Image image) {
         final FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Image");
         fileChooser.getExtensionFilters().add(
@@ -311,7 +315,7 @@ public class ImageProcController {
             final BufferedImage bimg = SwingFXUtils.fromFXImage(this.targetImage.get(), null);
             try {
                 ImageIO.write(bimg, "png", file);
-                Yli.saveImage(this.targetImage.get(), Paths.get(file.getAbsolutePath() + Yli.FILE_EXTENSION));
+                Yli.saveImage(image, Paths.get(file.getAbsolutePath() + Yli.FILE_EXTENSION));
             } catch (Exception e) {
                 new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             }
@@ -322,10 +326,8 @@ public class ImageProcController {
     private void onKeyPressed(KeyEvent keyEvent) {
         if (KEY_COMBINATION_RUN.match(keyEvent)) {
             processImage(new ActionEvent());
-        } else if (KEY_COMBINATION_TAKE.match(keyEvent)) {
-            takeImage(new ActionEvent());
         } else if (KEY_COMBINATION_SAVE_AS.match(keyEvent)) {
-            saveImageAs(new ActionEvent());
+            saveScriptAs(new ActionEvent());
         }
     }
 
@@ -334,9 +336,7 @@ public class ImageProcController {
         final ObservableList<MenuItem> items = this.openMenuButton.getItems();
         items.clear();
         for (final Path path : this.scriptLibrary.scriptFiles()) {
-            final MenuItem menuItem = new MenuItem(path.getFileName().toString());
-            menuItem.setOnAction(ignored -> openScript(path));
-            items.add(menuItem);
+            items.add(newMenuItem(path.getFileName().toString(), ignored -> openScript(path)));
         }
     }
 
