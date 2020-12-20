@@ -9,6 +9,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ModuleVisitorTest {
     @Test
+    public void emptyProgram() {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final CodeMap codeMap = CodeMap.oneToOne("");
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
+        assertThat(ast).isNotNull();
+        assertThat(errors).isEmpty();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
+        final ModuleDecl module = ast.accept(visitor);
+        assertThat(module).isNotNull();
+        assertThat(visitor.semanticErrors()).isEmpty();
+        assertThat(module.functions()).isEmpty();
+        assertThat(module.mainBody()).isNotNull();
+        assertThat(module.mainBody().localCount()).isEqualTo(0);
+    }
+
+    @Test
     public void minimalProgram() {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
@@ -205,5 +222,31 @@ public class ModuleVisitorTest {
         assertThat(visitor.semanticErrors())
                 .hasSize(1)
                 .allMatch(msg -> msg.contains("function declaration"));
+    }
+
+    @Test
+    public void docComments() {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final CodeMap codeMap = CodeMap.oneToOne("""
+                /// global a
+                globA := 1
+                /// function 1
+                /// second line
+                fn func1() {
+                }
+                /// global b
+                globB := 2
+                """);
+        final YLangParser.ProgramContext ast = compiler.compileToAst(codeMap, errors);
+        assertThat(ast).isNotNull();
+        assertThat(errors).isEmpty();
+        final ModuleVisitor visitor = new ModuleVisitor(codeMap);
+        final ModuleDecl module = ast.accept(visitor);
+        assertThat(module).isNotNull();
+        assertThat(module.globals()).hasSize(2);
+        assertThat(module.globals().keySet()).containsOnly("globA", "globB");
+        assertThat(module.globals().get("globA").docComment()).isEqualTo("global a");
+        assertThat(module.globals().get("globB").docComment()).isEqualTo("global b");
     }
 }

@@ -5,22 +5,20 @@ import net.smackem.ylang.interop.Yln;
 public class RuntimeContext {
     private RuntimeContext() {}
 
-    private static final ThreadLocal<RuntimeContext> INSTANCE = ThreadLocal.withInitial(RuntimeContext::new);
+    private static final ThreadLocal<RuntimeContext> instance = ThreadLocal.withInitial(RuntimeContext::new);
 
     private boolean disableYln;
 
     public static RuntimeContext current() {
-        return INSTANCE.get();
+        return instance.get();
     }
 
     public static void reset() {
-        INSTANCE.remove();
+        instance.remove();
     }
 
-    public boolean disableYln(boolean disabled) {
-        final boolean old = this.disableYln;
+    public void disableYln(boolean disabled) {
         this.disableYln = disabled;
-        return old;
     }
 
     public boolean isYlnDisabled() {

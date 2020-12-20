@@ -1,25 +1,29 @@
 package net.smackem.ylang.lang;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 
-class FunctionDecl {
+public final class FunctionDecl {
     private final String name;
-    private final int parameterCount;
     private final int localCount;
+    private final Collection<String> parameters;
+    private final String docComment;
 
-    private FunctionDecl(String name, int parameterCount, int localCount) {
+    private FunctionDecl(String name, Collection<String> parameters, int localCount, String docComment) {
         this.name = name;
-        this.parameterCount = parameterCount;
         this.localCount = localCount;
+        this.parameters = Collections.unmodifiableCollection(Objects.requireNonNull(parameters));
+        this.docComment = docComment;
     }
 
-    public static FunctionDecl function(String name, int parameterCount, int localCount) {
+    static FunctionDecl function(String name, Collection<String> parameters, int localCount, String docComment) {
         Objects.requireNonNull(name);
-        return new FunctionDecl(name, parameterCount, localCount);
+        return new FunctionDecl(name, parameters, localCount, docComment);
     }
 
-    public static FunctionDecl main(int localCount) {
-        return new FunctionDecl(null, 0, localCount);
+    static FunctionDecl main(int localCount) {
+        return new FunctionDecl(null, Collections.emptyList(), localCount, "");
     }
 
     public boolean isMain() {
@@ -35,6 +39,14 @@ class FunctionDecl {
     }
 
     public int parameterCount() {
-        return this.parameterCount;
+        return this.parameters.size();
+    }
+
+    public Collection<String> parameters() {
+        return this.parameters;
+    }
+
+    public String docComment() {
+        return this.docComment;
     }
 }

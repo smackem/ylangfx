@@ -1,17 +1,24 @@
 package net.smackem.ylang.model;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.*;
+
+import java.nio.file.Path;
 
 public class ScriptModel {
     private final StringProperty fileName = new SimpleStringProperty();
     private final StringProperty code = new SimpleStringProperty();
     private final BooleanProperty dirty = new SimpleBooleanProperty(false);
+    private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
 
-    public ScriptModel(String fileName, String code) {
-        this.fileName.set(fileName);
+    public ScriptModel(Path path, String code) {
+        this.fileNameProperty().bind(Bindings.createStringBinding(
+                () -> {
+                    final Path p = this.path.get();
+                    return p == null ? null : p.getFileName().toString();
+                },
+                this.path));
+        this.path.set(path);
         this.code.set(code);
     }
 
@@ -25,5 +32,9 @@ public class ScriptModel {
 
     public BooleanProperty dirtyProperty() {
         return this.dirty;
+    }
+
+    public ObjectProperty<Path> pathProperty() {
+        return this.path;
     }
 }

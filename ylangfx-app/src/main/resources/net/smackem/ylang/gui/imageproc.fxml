@@ -16,7 +16,11 @@
          <Button text="Run (F5)" onAction="#processImage" fx:id="runButton" />
          <Separator orientation="VERTICAL" />
          <SplitMenuButton fx:id="openMenuButton" text="Open Script..." onShowing="#fillScriptsMenu" onAction="#openScriptFile" />
-         <Button text="Save Script..." onAction="#saveScriptAs" />
+         <SplitMenuButton text="Save Script" onAction="#saveScript">
+            <items>
+               <MenuItem text="Save As..." onAction="#saveScriptAs" />
+            </items>
+         </SplitMenuButton>
          <Button text="Browse Script Library..." onAction="#browseLibrary" />
          <Separator orientation="VERTICAL" />
          <ToggleButton fx:id="splitToggle" text="Horizontal" />

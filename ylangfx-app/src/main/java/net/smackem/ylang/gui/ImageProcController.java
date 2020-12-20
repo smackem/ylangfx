@@ -59,7 +59,7 @@ public class ImageProcController {
     private final BooleanProperty horizontalSplit = new SimpleBooleanProperty();
     private final ScriptLibrary scriptLibrary;
     private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
-    private static final KeyCombination KEY_COMBINATION_SAVE_AS = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
+    private static final KeyCombination KEY_COMBINATION_SAVE = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
     private final Collection<ScriptModel> scripts = new ArrayList<>();
 
     public ImageProcController() {
@@ -324,8 +324,8 @@ public class ImageProcController {
     private void onKeyPressed(KeyEvent keyEvent) {
         if (KEY_COMBINATION_RUN.match(keyEvent)) {
             processImage(new ActionEvent());
-        } else if (KEY_COMBINATION_SAVE_AS.match(keyEvent)) {
-            saveScriptAs(new ActionEvent());
+        } else if (KEY_COMBINATION_SAVE.match(keyEvent)) {
+            saveScript(new ActionEvent());
         }
     }
 
@@ -346,7 +346,7 @@ public class ImageProcController {
             new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             return;
         }
-        addScript(new ScriptModel(path.getFileName().toString(), code));
+        addScript(new ScriptModel(path, code));
     }
 
     private void addScript(ScriptModel script) {
@@ -423,17 +423,36 @@ public class ImageProcController {
         final File file = fileChooser.showSaveDialog(App.getInstance().getStage());
 
         if (file != null) {
-            try {
-                Files.writeString(file.toPath(), script.codeProperty().get());
-                script.dirtyProperty().set(false);
-            } catch (Exception e) {
-                new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
-            }
+            saveScript(script, file.toPath());
         }
     }
 
     private ScriptModel selectedScript() {
         final Object selected = this.scriptsTabPane.getSelectionModel().selectedItemProperty().get().getUserData();
         return (ScriptModel) selected;
+    }
+
+    private void saveScript(ScriptModel script, Path path) {
+        try {
+            Files.writeString(path, script.codeProperty().get());
+            script.dirtyProperty().set(false);
+            script.pathProperty().set(path);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
+        }
+    }
+
+    @FXML
+    private void saveScript(ActionEvent ignored) {
+        final ScriptModel script = selectedScript();
+        if (script == null) {
+            return;
+        }
+        final String fileName = script.fileNameProperty().get();
+        if (fileName == null || fileName.isEmpty()) {
+            saveScriptAs(script);
+            return;
+        }
+        saveScript(script, script.pathProperty().get());
     }
 }

@@ -1,11 +1,17 @@
 package net.smackem.ylang.lang;
 
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
 
     private final List<FunctionDecl> functions = new ArrayList<>();
+    private final List<GlobalDecl> globals = new ArrayList<>();
 
     public ModuleVisitor(CodeMap codeMap) {
         super(codeMap);
@@ -24,7 +30,7 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
         }
         final FunctionDecl mainBody = FunctionDecl.main(allocCount);
         return semanticErrors().isEmpty()
-                ? new ModuleDecl(mainBody, this.functions)
+                ? new ModuleDecl(mainBody, this.functions, this.globals)
                 : null;
     }
 
@@ -46,7 +52,22 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
     private static boolean isBodyStatement(YLangParser.StatementContext ctx) {
         // if statement only contains one child, it is LineBreak
         // declStmts are allowed both in body and in declaration
-        return ctx != null && ctx.children != null && ctx.children.size() > 1 && ctx.declStmt() == null;
+        return ctx != null &&
+               ctx.children != null &&
+               ctx.children.size() > 1 &&
+               ctx.declStmt() == null;
+    }
+
+    @Override
+    public ModuleDecl visitTopLevelStmt(YLangParser.TopLevelStmtContext ctx) {
+        final var stmt = ctx.statement();
+        if (stmt != null && stmt.declStmt() != null) {
+            final var decl = stmt.declStmt();
+            final String docComment = trimDocComment(decl.DocComment());
+            globals.add(new GlobalDecl(decl.Ident().getText(), docComment));
+            return null;
+        }
+        return super.visitTopLevelStmt(ctx);
     }
 
     @Override
@@ -56,13 +77,20 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
         if (logSemanticErrors(allocVisitor.semanticErrors())) {
             return null;
         }
-        final int parameterCount = ctx.parameters() != null
-                ? ctx.parameters().Ident().size()
-                : 0;
+        final List<String> parameters = ctx.parameters() != null
+                ? ctx.parameters().Ident().stream().map(ParseTree::getText).collect(Collectors.toList())
+                : Collections.emptyList();
         final FunctionDecl func = FunctionDecl.function(ctx.Ident().getText(),
-                parameterCount,
-                allocCount);
+                parameters,
+                allocCount,
+                trimDocComment(ctx.DocComment()));
         this.functions.add(func);
         return null;
+    }
+
+    private static String trimDocComment(TerminalNode docComment) {
+        return docComment != null
+                ? docComment.getText().replaceAll("///\\s*", "").strip()
+                : "";
     }
 }

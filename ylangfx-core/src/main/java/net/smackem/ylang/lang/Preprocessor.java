@@ -38,6 +38,15 @@ public final class Preprocessor {
         return new SegmentedCodeMap(this.acc.toString(), this.segments);
     }
 
+    public static CodeMap stripDirectives(String source) {
+        // TODO: fix this to not strip #option, which is not a preprocessor directive
+        final StringBuilder buffer = new StringBuilder();
+        source.lines()
+                .map(line -> line.startsWith("#") ? "" : line)
+                .forEach(buffer::append);
+        return CodeMap.oneToOne(buffer.toString());
+    }
+
     private void walk(BufferedReader reader) throws IOException {
         String line;
         while ((line = reader.readLine()) != null) {
