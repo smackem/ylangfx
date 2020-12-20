@@ -33,9 +33,7 @@
             <Tab fx:id="targetTab" text="Target">
                <ScrollPane styleClass="imageScrollPane">
                   <StackPane>
-                     <VBox fx:id="targetContainer" StackPane.alignment="TOP_LEFT" spacing="4">
-                        <ImageView fx:id="targetImageView" preserveRatio="true" />
-                     </VBox>
+                     <VBox fx:id="targetContainer" StackPane.alignment="TOP_LEFT" spacing="4" />
                      <Label fx:id="messageTextArea"
                             wrapText="true"
                             StackPane.alignment="TOP_LEFT" />

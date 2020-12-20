@@ -1,20 +1,25 @@
 grammar YLang;
 
 program
-    : topLevelStmt* returnStmt LineBreak EOF
+    : topLevelStmt* EOF
     ;
 
 topLevelStmt
     : functionDecl
+    | optionStmt
     | statement
     ;
 
 functionDecl
-    : 'fn' Ident LParen parameters? RParen block LineBreak
+    : DocComment? 'fn' Ident LParen parameters? RParen block LineBreak
     ;
 
 parameters
     : Ident (Comma Ident)*
+    ;
+
+optionStmt
+    : '#' 'option' Ident literal LineBreak
     ;
 
 statement
@@ -31,7 +36,7 @@ statement
     ;
 
 declStmt
-    : Ident Decleq expr
+    : DocComment? Ident Decleq expr
     ;
 
 assignStmt
@@ -177,20 +182,24 @@ invocationSuffix
     ;
 
 atom
-    : number
+    : literal
     | Ident
-    | String
-    | Color
-    | True
-    | False
-    | Nil
     | EnvironmentArg
-    | kernel
     | map
     | list
     | functionInvocation
     | functionRef
     | LParen expr RParen
+    ;
+
+literal
+    : number
+    | String
+    | Color
+    | True
+    | False
+    | Nil
+    | kernel
     ;
 
 functionInvocation
@@ -286,6 +295,14 @@ HexLiteral
 
 String
     : '"' ~["\\\r\n]* '"'
+    ;
+
+DocCommentLine
+    : '///' ~ [\r\n]*
+    ;
+
+DocComment
+    : (DocCommentLine LineBreak*)+
     ;
 
 Comment

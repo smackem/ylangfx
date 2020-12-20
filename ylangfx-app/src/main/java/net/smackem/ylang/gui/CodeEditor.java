@@ -33,6 +33,7 @@ public class CodeEditor extends CodeArea {
     private static final String FNCALL_PATTERN = "(\\b(?!fn)(?:[A-Za-z0-9_]+))\\(";
     private static final String NUMBER_PATTERN = "\\b\\d+(\\.\\d*)?\\b";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
+    private static final String DOC_COMMENT_PATTERN = "///[^\n]*";
     private static final String COMMENT_PATTERN = "//[^\n]*";
     private static final String PREPROCESSOR_PATTERN = "#\\w+";
 
@@ -44,6 +45,7 @@ public class CodeEditor extends CodeArea {
             + "|(?<FNCALL>" + FNCALL_PATTERN + ")"
             + "|(?<NUMBER>" + NUMBER_PATTERN + ")"
             + "|(?<STRING>" + STRING_PATTERN + ")"
+            + "|(?<DOC>" + DOC_COMMENT_PATTERN + ")"
             + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
             + "|(?<PREPROC>" + PREPROCESSOR_PATTERN + ")"
     );
@@ -91,7 +93,7 @@ public class CodeEditor extends CodeArea {
         final StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
         int lastKwEnd = 0;
 
-        while(matcher.find()) {
+        while (matcher.find()) {
             final String styleClass =
                     matcher.group("KEYWORD") != null ? "keyword" :
                     matcher.group("COLOR") != null ? "color" :
@@ -100,6 +102,7 @@ public class CodeEditor extends CodeArea {
                     matcher.group("FNCALL") != null ? "fncall" :
                     matcher.group("NUMBER") != null ? "number" :
                     matcher.group("STRING") != null ? "string" :
+                    matcher.group("DOC") != null ? "doc" :
                     matcher.group("COMMENT") != null ? "comment" :
                     matcher.group("PREPROC") != null ? "preprocessor" :
                     null; // never happens

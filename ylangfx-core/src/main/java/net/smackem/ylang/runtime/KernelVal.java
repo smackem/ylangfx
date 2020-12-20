@@ -9,12 +9,10 @@ import java.util.stream.Collectors;
 
 public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
     private final NumberVal[] values;
-    private final PixelBufferOperations bufferOps;
 
     private KernelVal(int width, int height, NumberVal[] values) {
         super(ValueType.KERNEL, width, height);
         this.values = values;
-        this.bufferOps = getBufferOps();
     }
 
     private KernelVal(int len, NumberVal[] values) {
@@ -32,7 +30,6 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
     public KernelVal(KernelVal original) {
         super(original);
         this.values = Arrays.copyOf(original.values, original.values.length);
-        this.bufferOps = getBufferOps();
     }
 
     public static KernelVal laplacian(int radius) {
@@ -161,39 +158,39 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
     }
 
     public KernelVal convolve(KernelVal kernel) {
-        return this.bufferOps.convolve(this, kernel);
+        return getBufferOps().convolve(this, kernel);
     }
 
     public KernelVal add(KernelVal right) {
-        return this.bufferOps.add(this, right);
+        return getBufferOps().add(this, right);
     }
 
     public KernelVal subtract(KernelVal right) {
-        return this.bufferOps.subtract(this, right);
+        return getBufferOps().subtract(this, right);
     }
 
     public KernelVal multiply(KernelVal right) {
-        return this.bufferOps.multiply(this, right);
+        return getBufferOps().multiply(this, right);
     }
 
     public KernelVal divide(KernelVal right) {
-        return this.bufferOps.divide(this, right);
+        return getBufferOps().divide(this, right);
     }
 
     public KernelVal modulo(KernelVal right) {
-        return this.bufferOps.modulo(this, right);
+        return getBufferOps().modulo(this, right);
     }
 
     public KernelVal hypot(KernelVal right) {
-        return this.bufferOps.hypot(this, right);
+        return getBufferOps().hypot(this, right);
     }
 
     public static KernelVal min(KernelVal a, KernelVal b) {
-        return Objects.requireNonNull(a).bufferOps.min(a, b);
+        return getBufferOps().min(a, b);
     }
 
     public static KernelVal max(KernelVal a, KernelVal b) {
-        return Objects.requireNonNull(a).bufferOps.max(a, b);
+        return getBufferOps().max(a, b);
     }
 
     @Override
@@ -243,8 +240,9 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
     }
 
     private static PixelBufferOperations getBufferOps() {
-        return Yln.INSTANCE != null
-                ? new NativePixelBufferOperations(Yln.INSTANCE)
+        final Yln yln = RuntimeContext.current().yln();
+        return yln != null
+                ? new NativePixelBufferOperations(yln)
                 : new JavaPixelBufferOperations();
     }
 

@@ -4,7 +4,6 @@ import net.smackem.ylang.execution.functions.Func;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.execution.operators.UnaryOperator;
-import net.smackem.ylang.lang.DebugInfo;
 import net.smackem.ylang.lang.Instruction;
 import net.smackem.ylang.lang.Program;
 import net.smackem.ylang.runtime.*;
@@ -17,7 +16,6 @@ import java.io.Writer;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Interpreter {
     private static final Logger log = LoggerFactory.getLogger(Interpreter.class);
@@ -72,6 +70,7 @@ public class Interpreter {
     public Value execute() throws ExecutionException {
         final int programSize = this.instructions.length;
         final LocalDateTime begin = LocalDateTime.now();
+        RuntimeContext.reset();
         writeLogMessageGuarded("""
                 >> execution started @ %s
                    input image: %s""".formatted(
@@ -133,7 +132,6 @@ public class Interpreter {
     private void writeLogMessageGuarded(String message) throws ExecutionException {
         try {
             this.ctx.logWriter().write(message);
-            log.info(message);
         } catch (IOException e) {
             log.error("error writing log message", e);
             throw new ExecutionException("error writing log message", null, e);
@@ -330,8 +328,18 @@ public class Interpreter {
                 final Value retVal = function.invoke(args);
                 stack.push(retVal);
             }
+            case SET_OPT -> handleOption(instr.strArg(), instr.valueArg());
             default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
         }
+    }
+
+    private void handleOption(String option, Value value) throws MissingOverloadException {
+        if (Objects.equals(option, "DISABLE_YLN")) {
+            final boolean v = ((BoolVal) UnaryOperator.BOOL.invoke(value)).value();
+            RuntimeContext.current().disableYln(v);
+            return;
+        }
+        throw new IllegalArgumentException("unknown option '" + option + "'");
     }
 
     private void branchToFunction(int pc, int argCount) {

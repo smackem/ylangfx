@@ -1031,4 +1031,16 @@ public class IntegrationTest {
                 new MapVal(List.of(new MapEntryVal(new StringVal("x"), new NumberVal(100))))
         )));
     }
+
+    @Test
+    public void errorOnMissingReturnStmt() {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compileWithoutPreprocessing("""
+                a := 1 + 1
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).hasSize(1);
+        assertThat(errors).allMatch(err -> err.contains("return"));
+        assertThat(program).isNull();
+    }
 }

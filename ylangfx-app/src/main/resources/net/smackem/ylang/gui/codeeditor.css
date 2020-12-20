@@ -27,6 +27,9 @@
     -fx-fill: teal;
 }
 .comment {
+    -fx-fill: #666;
+}
+.doc {
     -fx-fill: darkgreen;
 }
 

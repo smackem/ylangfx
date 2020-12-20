@@ -2,6 +2,8 @@ package net.smackem.ylang.runtime;
 
 import net.smackem.ylang.interop.MatrixComposition;
 import net.smackem.ylang.interop.Yln;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -9,8 +11,8 @@ import java.util.function.BiFunction;
 
 @SuppressWarnings("DuplicatedCode")
 public class ImageVal extends MatrixVal<RgbVal> {
+    private static final Logger log = LoggerFactory.getLogger(ImageVal.class);
     private final RgbVal[] pixels;
-    private final PixelBufferOperations bufferOps;
 
     private ImageVal(int width, int height, RgbVal[] pixels) {
         super(ValueType.IMAGE, width, height);
@@ -18,7 +20,6 @@ public class ImageVal extends MatrixVal<RgbVal> {
             throw new IllegalArgumentException("pixel buffer size does not match width and height");
         }
         this.pixels = pixels;
-        this.bufferOps = getBufferOps();
     }
 
     public ImageVal(int width, int height) {
@@ -32,7 +33,6 @@ public class ImageVal extends MatrixVal<RgbVal> {
     public ImageVal(ImageVal original) {
         super(original);
         this.pixels = clonePixels(original.pixels);
-        this.bufferOps = getBufferOps();
     }
 
     public static ImageVal fromArgbPixels(int width, int height, int[] pixels) {
@@ -122,43 +122,43 @@ public class ImageVal extends MatrixVal<RgbVal> {
     }
 
     public ImageVal convolve(KernelVal kernel) {
-        return this.bufferOps.convolve(this, kernel);
+        return getBufferOps().convolve(this, kernel);
     }
 
     public ImageVal add(ImageVal right) {
-        return this.bufferOps.add(this, right);
+        return getBufferOps().add(this, right);
     }
 
     public ImageVal subtract(ImageVal right) {
-        return this.bufferOps.subtract(this, right);
+        return getBufferOps().subtract(this, right);
     }
 
     public ImageVal multiply(ImageVal right) {
-        return this.bufferOps.multiply(this, right);
+        return getBufferOps().multiply(this, right);
     }
 
     public ImageVal divide(ImageVal right) {
-        return this.bufferOps.divide(this, right);
+        return getBufferOps().divide(this, right);
     }
 
     public ImageVal modulo(ImageVal right) {
-        return this.bufferOps.modulo(this, right);
+        return getBufferOps().modulo(this, right);
     }
 
     public ImageVal over(ImageVal background) {
-        return this.bufferOps.over(this, background);
+        return getBufferOps().over(this, background);
     }
 
     public ImageVal hypot(ImageVal right) {
-        return this.bufferOps.hypot(this, right);
+        return getBufferOps().hypot(this, right);
     }
 
     public static ImageVal min(ImageVal a, ImageVal b) {
-        return Objects.requireNonNull(a).bufferOps.min(a, b);
+        return getBufferOps().min(a, b);
     }
 
     public static ImageVal max(ImageVal a, ImageVal b) {
-        return Objects.requireNonNull(a).bufferOps.max(a, b);
+        return getBufferOps().max(a, b);
     }
 
     @Override
@@ -196,9 +196,12 @@ public class ImageVal extends MatrixVal<RgbVal> {
     }
 
     private static PixelBufferOperations getBufferOps() {
-        return Yln.INSTANCE != null
-                ? new NativePixelBufferOperations(Yln.INSTANCE)
+        final Yln yln = RuntimeContext.current().yln();
+        final PixelBufferOperations ops = yln != null
+                ? new NativePixelBufferOperations(yln)
                 : new JavaPixelBufferOperations();
+        log.info("using {} for raster operations", ops.getClass().getName());
+        return ops;
     }
 
     @Override

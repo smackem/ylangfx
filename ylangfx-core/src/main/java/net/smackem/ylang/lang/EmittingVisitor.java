@@ -39,9 +39,29 @@ class EmittingVisitor extends BaseVisitor<Program> {
         }
         pushScope();
         super.visitProgram(ctx);
+        if (endsWithReturnStmt(ctx) == false) {
+            logSemanticError(ctx, "a program must end with a return statement");
+            return null;
+        }
         this.emitter.emit(ctx, OpCode.LABEL, endLabel);
         popScope();
         return this.emitter.buildProgram();
+    }
+
+    private boolean endsWithReturnStmt(YLangParser.ProgramContext ctx) {
+        final var stmts = ctx.topLevelStmt();
+        if (stmts.isEmpty()) {
+            return false;
+        }
+        final var lastStmt = stmts.get(stmts.size() - 1);
+        return lastStmt.statement() != null && lastStmt.statement().returnStmt() != null;
+    }
+
+    @Override
+    public Program visitOptionStmt(YLangParser.OptionStmtContext ctx) {
+        final Value value = parseLiteral(ctx.literal());
+        this.emitter.emit(ctx, OpCode.SET_OPT, 0, ctx.Ident().getText(), value);
+        return null;
     }
 
     @Override
@@ -459,10 +479,12 @@ class EmittingVisitor extends BaseVisitor<Program> {
 
     @Override
     public Program visitAtom(YLangParser.AtomContext ctx) {
-        if (ctx.Nil() != null) {
-            this.emitter.emit(ctx, OpCode.LD_VAL, NilVal.INSTANCE);
-        } else if (ctx.number() != null) {
-            this.emitter.emit(ctx, OpCode.LD_VAL, parseNumber(ctx.number().getText()));
+        if (ctx.literal() != null) {
+            final Value value = parseLiteral(ctx.literal());
+            if (value == null) {
+                logSemanticError(ctx, "unknown literal");
+            }
+            this.emitter.emit(ctx, OpCode.LD_VAL, value);
         } else if (ctx.Ident() != null) {
             final Address addr = lookupIdent(ctx.Ident().getText());
             if (addr == null) {
@@ -470,19 +492,6 @@ class EmittingVisitor extends BaseVisitor<Program> {
             } else {
                 addr.emitLoad(this.emitter);
             }
-        } else if (ctx.String() != null) {
-            emitStringLiteral(ctx.String());
-        } else if (ctx.True() != null) {
-            this.emitter.emit(ctx, OpCode.LD_VAL, BoolVal.TRUE);
-        } else if (ctx.False() != null) {
-            this.emitter.emit(ctx, OpCode.LD_VAL, BoolVal.FALSE);
-        } else if (ctx.kernel() != null) {
-            final List<NumberVal> numbers = ctx.kernel().number().stream()
-                    .map(n -> parseNumber(n.getText()))
-                    .collect(Collectors.toList());
-            this.emitter.emit(ctx, OpCode.LD_VAL, new KernelVal(numbers));
-        } else if (ctx.Color() != null) {
-            this.emitter.emit(ctx, OpCode.LD_VAL, parseColor(ctx.Color().getText()));
         } else if (ctx.list() != null) {
             ctx.list().accept(this);
             this.emitter.emit(ctx, OpCode.MK_LIST, ctx.list().arguments() != null ? ctx.list().arguments().expr().size() : 0);
@@ -497,6 +506,34 @@ class EmittingVisitor extends BaseVisitor<Program> {
             this.emitter.emit(ctx, OpCode.LD_ENV, ctx.EnvironmentArg().getText().substring(1));
         } else if (ctx.functionRef() != null) {
             ctx.functionRef().accept(this);
+        }
+        return null;
+    }
+
+    private static Value parseLiteral(YLangParser.LiteralContext ctx) {
+        if (ctx.Nil() != null) {
+            return NilVal.INSTANCE;
+        }
+        if (ctx.number() != null) {
+            return parseNumber(ctx.number().getText());
+        }
+        if (ctx.String() != null) {
+            return getStringLiteralValue(ctx.String());
+        }
+        if (ctx.True() != null) {
+            return BoolVal.TRUE;
+        }
+        if (ctx.False() != null) {
+            return BoolVal.FALSE;
+        }
+        if (ctx.kernel() != null) {
+            final List<NumberVal> numbers = ctx.kernel().number().stream()
+                    .map(n -> parseNumber(n.getText()))
+                    .collect(Collectors.toList());
+            return new KernelVal(numbers);
+        }
+        if (ctx.Color() != null) {
+            return parseColor(ctx.Color().getText());
         }
         return null;
     }
@@ -532,8 +569,12 @@ class EmittingVisitor extends BaseVisitor<Program> {
     }
 
     private void emitStringLiteral(TerminalNode str) {
+        this.emitter.emit(null, OpCode.LD_VAL, getStringLiteralValue(str));
+    }
+
+    private static Value getStringLiteralValue(TerminalNode str) {
         final String s = str.getText();
-        this.emitter.emit(null, OpCode.LD_VAL, new StringVal(s.substring(1, s.length() - 1)));
+        return new StringVal(s.substring(1, s.length() - 1));
     }
 
     private static NumberVal parseNumber(String s) {

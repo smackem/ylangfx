@@ -4,7 +4,7 @@
 }
 
 #messageTextArea {
-    -fx-font-family: 'Cascadia Code',monospace;
+    -fx-font-family: 'Fira Code','Cascadia Code',monospace;
     -fx-font-size: 12pt;
     -fx-background-color: #fff;
     -fx-opacity: 0.5;
@@ -12,13 +12,13 @@
 }
 
 #editor {
-    -fx-font-family: 'Cascadia Code',monospace;
+    -fx-font-family: 'Fira Code','Cascadia Code',monospace;
     -fx-font-size: 12pt;
     -fx-background-color: #111;
 }
 
 #logTextArea {
-    -fx-font-family: 'Cascadia Code',monospace;
+    -fx-font-family: 'Fira Code','Cascadia Code',monospace;
     -fx-font-size: 12pt;
 }
 

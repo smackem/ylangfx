@@ -53,7 +53,6 @@ public class ImageProcController {
     private static final String PREF_HORIZONTAL_SPLIT = "imageProc.horizontalSplit";
     private static final String PREF_DIVIDER_POS = "imageProc.dividerPos";
     private final ReadOnlyObjectWrapper<Image> sourceImage = new ReadOnlyObjectWrapper<>();
-    private final ReadOnlyObjectWrapper<Image> targetImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
     private final ReadOnlyStringWrapper logOutput = new ReadOnlyStringWrapper();
     private final ReadOnlyBooleanWrapper isRunning = new ReadOnlyBooleanWrapper();
@@ -95,8 +94,6 @@ public class ImageProcController {
     @FXML
     private ImageView sourceImageView;
     @FXML
-    private ImageView targetImageView;
-    @FXML
     private Label messageTextArea;
     @FXML
     private SplitPane splitPane;
@@ -112,7 +109,6 @@ public class ImageProcController {
     @FXML
     private void initialize() {
         this.sourceImageView.imageProperty().bind(this.sourceImage);
-        this.targetImageView.imageProperty().bind(this.targetImage);
         this.messageTextArea.visibleProperty().bind(this.message.isNotEmpty());
         this.messageTextArea.textProperty().bind(this.message);
         this.logTextArea.textProperty().bind(this.logOutput);
@@ -209,6 +205,7 @@ public class ImageProcController {
         try {
             program = compiler.compile(selectedScript().codeProperty().get(), FunctionRegistry.INSTANCE, this.scriptLibrary, errors);
         } catch (Exception e) {
+            e.printStackTrace();
             this.message.setValue(e.getMessage());
             return;
         }
@@ -292,7 +289,8 @@ public class ImageProcController {
 
             if (resultImageDataPng.length > 0) {
                 try (final InputStream is = new ByteArrayInputStream(resultImageDataPng)) {
-                    this.targetImage.setValue(new Image(is));
+                    this.targetContainer.getChildren().clear();
+                    this.targetContainer.getChildren().add(new ImageView(new Image(is)));
                 } catch (Exception e) {
                     new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
                 }
@@ -312,7 +310,7 @@ public class ImageProcController {
         final File file = fileChooser.showSaveDialog(App.getInstance().getStage());
 
         if (file != null) {
-            final BufferedImage bimg = SwingFXUtils.fromFXImage(this.targetImage.get(), null);
+            final BufferedImage bimg = SwingFXUtils.fromFXImage(image, null);
             try {
                 ImageIO.write(bimg, "png", file);
                 Yli.saveImage(image, Paths.get(file.getAbsolutePath() + Yli.FILE_EXTENSION));

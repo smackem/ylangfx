@@ -42,11 +42,12 @@ public final class Preprocessor {
         String line;
         while ((line = reader.readLine()) != null) {
             if (line.startsWith("#")) {
-                processDirective(line);
-            } else {
-                appendLine(line);
-                this.currentSegment.lineCount++;
+                if (processDirective(line)) {
+                    continue;
+                }
             }
+            appendLine(line);
+            this.currentSegment.lineCount++;
         }
     }
 
@@ -66,13 +67,18 @@ public final class Preprocessor {
         this.segments.add(this.currentSegment);
     }
 
-    private void processDirective(String line) throws IOException {
+    private boolean processDirective(String line) throws IOException {
         final Matcher matcher = includePattern.matcher(line);
         if (matcher.matches()) {
             includeFile(matcher.group(1));
-            return;
+            return true;
+        }
+        if (line.startsWith("#option")) {
+            // ignore option statement
+            return false;
         }
         log.warn("unknown preprocessor directive '{}'", line);
+        return false;
     }
 
     private void includeFile(String fileName) throws IOException {
