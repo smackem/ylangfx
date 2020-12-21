@@ -137,17 +137,28 @@ public class ImageProcController {
         addScript(new ScriptModel(null, source));
         this.horizontalSplit.set(prefs.getBoolean(PREF_HORIZONTAL_SPLIT, false));
         Platform.runLater(() -> {
-            this.runButton.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, ignored -> {
-                prefs.put(PREF_SOURCE, selectedScript().codeProperty().get());
-                prefs.putBoolean(PREF_HORIZONTAL_SPLIT, this.horizontalSplit.get());
-                prefs.putDouble(PREF_DIVIDER_POS, this.splitPane.getDividerPositions()[0]);
-            });
+            this.runButton.getScene().getWindow().addEventHandler(WindowEvent.WINDOW_CLOSE_REQUEST, this::onWindowCloseRequest);
             final String imagePath = prefs.get(PREF_IMAGE_PATH, null);
             if (imagePath != null) {
                 loadImageFromFile(new File(imagePath));
             }
         });
         this.messageTextArea.maxWidthProperty().bind(this.targetTab.getTabPane().widthProperty());
+    }
+
+    private void onWindowCloseRequest(Event event) {
+        final Preferences prefs = Preferences.userNodeForPackage(ImageProcController.class);
+        prefs.put(PREF_SOURCE, selectedScript().codeProperty().get());
+        prefs.putBoolean(PREF_HORIZONTAL_SPLIT, this.horizontalSplit.get());
+        prefs.putDouble(PREF_DIVIDER_POS, this.splitPane.getDividerPositions()[0]);
+        if (this.scripts.stream().anyMatch(script -> script.dirtyProperty().get())) {
+            final ButtonType buttonType = new Alert(Alert.AlertType.CONFIRMATION, "There are unsaved scripts. Exit anyway?", ButtonType.YES, ButtonType.NO)
+                    .showAndWait()
+                    .orElse(ButtonType.NO);
+            if (buttonType == ButtonType.NO) {
+                event.consume();
+            }
+        }
     }
 
     @FXML

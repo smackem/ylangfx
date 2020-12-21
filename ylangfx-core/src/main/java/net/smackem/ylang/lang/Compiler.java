@@ -24,12 +24,17 @@ public class Compiler {
         return internalCompile(codeMap, functionTable, outErrors);
     }
 
+    public ModuleDecl extractDeclarations(String source, Collection<String> outErrors) {
+        final CodeMap codeMap = Preprocessor.stripDirectives(source);
+        return internalCompileToModule(codeMap, outErrors, null);
+    }
+
     @SuppressWarnings("SameParameterValue")
     Program compileWithoutPreprocessing(String source, FunctionTable functionTable, Collection<String> outErrors) {
         return internalCompile(CodeMap.oneToOne(source), functionTable, outErrors);
     }
 
-    private Program internalCompile(CodeMap codeMap, FunctionTable functionTable, Collection<String> outErrors) {
+    private ModuleDecl internalCompileToModule(CodeMap codeMap, Collection<String> outErrors, YLangParser.ProgramContext[] outAst) {
         final YLangParser.ProgramContext ast = compileToAst(codeMap, outErrors);
         if (ast == null) {
             return null;
@@ -39,8 +44,20 @@ public class Compiler {
         if (outErrors.addAll(moduleVisitor.semanticErrors())) {
             return null;
         }
+        if (outAst != null) {
+            outAst[0] = ast;
+        }
+        return module;
+    }
+
+    private Program internalCompile(CodeMap codeMap, FunctionTable functionTable, Collection<String> outErrors) {
+        YLangParser.ProgramContext[] ast = new YLangParser.ProgramContext[1];
+        final ModuleDecl module = internalCompileToModule(codeMap, outErrors, ast);
+        if (outErrors.isEmpty() == false) {
+            return null;
+        }
         final EmittingVisitor emitter = new EmittingVisitor(codeMap, module, functionTable);
-        final Program program = ast.accept(emitter);
+        final Program program = ast[0].accept(emitter);
         if (outErrors.addAll(emitter.semanticErrors())) {
             return null;
         }
