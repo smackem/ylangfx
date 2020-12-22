@@ -7,6 +7,11 @@ import java.util.Collections;
 
 public class FunctionDeclModel extends DeclModel<FunctionDecl> {
     FunctionDeclModel(FunctionDecl decl) {
-        super(DeclType.FUNCTION, decl.name(), decl, Collections.emptyList());
+        super(DeclType.FUNCTION, decl, decl.docComment(), Collections.emptyList());
+    }
+
+    @Override
+    public String signature() {
+        return "%s(%s)".formatted(decl().name(), String.join(", ", decl().parameters()));
     }
 }
