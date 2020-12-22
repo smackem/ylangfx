@@ -466,4 +466,9 @@ public class ImageProcController {
         }
         saveScript(script, script.pathProperty().get());
     }
+
+    @FXML
+    private void openLibraryBrowser(ActionEvent ignored) {
+        tabPane.getTabs().add(new Tab("Library Browser", new LibraryBrowser(this.scriptLibrary)));
+    }
 }

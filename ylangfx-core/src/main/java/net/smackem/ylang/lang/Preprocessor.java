@@ -43,7 +43,10 @@ public final class Preprocessor {
         final StringBuilder buffer = new StringBuilder();
         source.lines()
                 .map(line -> line.startsWith("#") ? "" : line)
-                .forEach(buffer::append);
+                .forEach(line -> {
+                    buffer.append(line);
+                    buffer.append(System.lineSeparator());
+                });
         return CodeMap.oneToOne(buffer.toString());
     }
 

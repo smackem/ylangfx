@@ -22,6 +22,7 @@
             </items>
          </SplitMenuButton>
          <Button text="Browse Script Library..." onAction="#browseLibrary" />
+         <Button text="Library Browser" onAction="#openLibraryBrowser" />
          <Separator orientation="VERTICAL" />
          <ToggleButton fx:id="splitToggle" text="Horizontal" />
       </HBox>
