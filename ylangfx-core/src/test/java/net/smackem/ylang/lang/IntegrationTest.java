@@ -22,8 +22,8 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compileWithoutPreprocessing("""
-                a := 1
-                b := 2
+                a := 1_000
+                b := 2_3_0
                 c := a + b
                 return c
                 """, FunctionRegistry.INSTANCE, errors);
@@ -31,7 +31,7 @@ public class IntegrationTest {
         assertThat(errors).isEmpty();
         System.out.println(program.toString());
         final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
-        assertThat(retVal).isEqualTo(new NumberVal(3));
+        assertThat(retVal).isEqualTo(new NumberVal(1230));
     }
 
     @Test

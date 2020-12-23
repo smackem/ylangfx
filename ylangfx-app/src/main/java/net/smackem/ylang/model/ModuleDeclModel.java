@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 
 public class ModuleDeclModel extends DeclModel<ModuleDecl> {
     private final Path path;
@@ -33,12 +34,12 @@ public class ModuleDeclModel extends DeclModel<ModuleDecl> {
 
     private static Collection<DeclModel<?>> getChildren(ModuleDecl module) {
         final Collection<DeclModel<?>> children = new ArrayList<>();
-        for (final FunctionDecl function : module.functions().values()) {
-            children.add(new FunctionDeclModel(function));
-        }
-        for (final GlobalDecl global : module.globals().values()) {
-            children.add(new GlobalDeclModel(global));
-        }
+        module.functions().values().stream()
+                .sorted(Comparator.comparing(FunctionDecl::name))
+                .forEach(f -> children.add(new FunctionDeclModel(f)));
+        module.globals().values().stream()
+                .sorted(Comparator.comparing(GlobalDecl::name))
+                .forEach(g -> children.add(new GlobalDeclModel(g)));
         return children;
     }
 

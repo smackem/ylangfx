@@ -469,6 +469,8 @@ public class ImageProcController {
 
     @FXML
     private void openLibraryBrowser(ActionEvent ignored) {
-        tabPane.getTabs().add(new Tab("Library Browser", new LibraryBrowser(this.scriptLibrary)));
+        final Tab tab = new Tab("Library Browser", new LibraryBrowser(this.scriptLibrary));
+        tabPane.getTabs().add(tab);
+        tabPane.getSelectionModel().select(tab);
     }
 }

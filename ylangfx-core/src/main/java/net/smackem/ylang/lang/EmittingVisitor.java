@@ -578,7 +578,7 @@ class EmittingVisitor extends BaseVisitor<Program> {
     }
 
     private static NumberVal parseNumber(String s) {
-        return new NumberVal(Float.parseFloat(s));
+        return new NumberVal(Float.parseFloat(s.replace("_", "")));
     }
 
     private static RgbVal parseColor(String s) {

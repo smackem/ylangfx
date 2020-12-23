@@ -26,3 +26,26 @@
     -fx-background-image: url("checker_dark.png");
     -fx-background-repeat: repeat;
 }
+
+.tree-cell .signature {
+    -fx-font-family: monospace;
+}
+
+.tree-cell .docComment {
+    -fx-font-style: italic;
+    -fx-opacity: 0.5;
+}
+
+.tree-cell .globalIcon {
+    -fx-font-weight: bold;
+    -fx-text-fill: #ddd;
+    -fx-font-family: monospace;
+    -fx-text-alignment: center;
+}
+
+.tree-cell .functionIcon {
+    -fx-font-weight: bold;
+    -fx-text-fill: purple;
+    -fx-font-family: monospace;
+    -fx-text-alignment: center;
+}

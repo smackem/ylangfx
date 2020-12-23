@@ -21,7 +21,6 @@
                <MenuItem text="Save As..." onAction="#saveScriptAs" />
             </items>
          </SplitMenuButton>
-         <Button text="Browse Script Library..." onAction="#browseLibrary" />
          <Button text="Library Browser" onAction="#openLibraryBrowser" />
          <Separator orientation="VERTICAL" />
          <ToggleButton fx:id="splitToggle" text="Horizontal" />
@@ -29,13 +28,13 @@
    </top>
    <center>
       <SplitPane orientation="VERTICAL" fx:id="splitPane">
-         <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" SplitPane.resizableWithParent="true">
-            <Tab fx:id="sourceTab" text="Source">
+         <TabPane fx:id="tabPane" SplitPane.resizableWithParent="true">
+            <Tab fx:id="sourceTab" text="Source" closable="false">
                <ScrollPane styleClass="imageScrollPane">
                   <ImageView fx:id="sourceImageView" preserveRatio="true" />
                </ScrollPane>
             </Tab>
-            <Tab fx:id="targetTab" text="Target">
+            <Tab fx:id="targetTab" text="Target" closable="false">
                <ScrollPane styleClass="imageScrollPane">
                   <StackPane>
                      <VBox fx:id="targetContainer" StackPane.alignment="TOP_LEFT" spacing="4" />
@@ -45,7 +44,7 @@
                   </StackPane>
                </ScrollPane>
             </Tab>
-            <Tab text="Log">
+            <Tab text="Log" closable="false">
                <TextArea fx:id="logTextArea" editable="false" minHeight="200" />
             </Tab>
          </TabPane>
