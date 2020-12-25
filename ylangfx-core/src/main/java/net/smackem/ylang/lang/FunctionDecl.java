@@ -4,34 +4,28 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-public final class FunctionDecl {
-    private final String name;
+public final class FunctionDecl extends Declaration {
     private final int localCount;
     private final Collection<String> parameters;
-    private final String docComment;
 
-    private FunctionDecl(String name, Collection<String> parameters, int localCount, String docComment) {
-        this.name = name;
+    private FunctionDecl(String ident, String docComment, int lineNumber,
+                         Collection<String> parameters, int localCount) {
+        super(ident, docComment, lineNumber);
         this.localCount = localCount;
         this.parameters = Collections.unmodifiableCollection(Objects.requireNonNull(parameters));
-        this.docComment = docComment;
     }
 
-    static FunctionDecl function(String name, Collection<String> parameters, int localCount, String docComment) {
-        Objects.requireNonNull(name);
-        return new FunctionDecl(name, parameters, localCount, docComment);
+    static FunctionDecl function(String ident, String docComment, int lineNumber,
+                                 Collection<String> parameters, int localCount) {
+        return new FunctionDecl(ident, docComment, lineNumber, parameters, localCount);
     }
 
     static FunctionDecl main(int localCount) {
-        return new FunctionDecl(null, Collections.emptyList(), localCount, "");
+        return new FunctionDecl(null, "", -1, Collections.emptyList(), localCount);
     }
 
     public boolean isMain() {
-        return this.name == null;
-    }
-
-    public String name() {
-        return this.name;
+        return ident() == null;
     }
 
     public int localCount() {
@@ -44,9 +38,5 @@ public final class FunctionDecl {
 
     public Collection<String> parameters() {
         return this.parameters;
-    }
-
-    public String docComment() {
-        return this.docComment;
     }
 }

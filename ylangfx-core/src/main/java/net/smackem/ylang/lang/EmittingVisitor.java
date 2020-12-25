@@ -13,10 +13,10 @@ class EmittingVisitor extends BaseVisitor<Program> {
     private final Emitter emitter = new Emitter();
     private final LinkedList<Scope> scopes = new LinkedList<>();
     private final AllocationTable mainAllocationTable;
-    private final Map<String, FunctionDef> functions = new HashMap<>();
-    private final FunctionDef mainFunction;
+    private final Map<String, FunctionDecl> functions = new HashMap<>();
+    private final FunctionDecl mainFunction;
     private AllocationTable currentAllocationTable;
-    private FunctionDef currentFunction;
+    private FunctionDecl currentFunction;
     private int labelNumber = 1;
 
     public EmittingVisitor(CodeMap codeMap, ModuleDecl module, FunctionTable functionTable) {
@@ -25,9 +25,9 @@ class EmittingVisitor extends BaseVisitor<Program> {
         this.functionTable = Objects.requireNonNull(functionTable);
         this.mainAllocationTable = new AllocationTable(module.mainBody().localCount());
         for (final FunctionDecl functionDecl : module.functions().values()) {
-            this.functions.put(functionDecl.name(), new FunctionDef(functionDecl));
+            this.functions.put(functionDecl.ident(), functionDecl);
         }
-        this.mainFunction = new FunctionDef(module.mainBody());
+        this.mainFunction = module.mainBody();
     }
 
     @Override
@@ -72,8 +72,8 @@ class EmittingVisitor extends BaseVisitor<Program> {
         this.emitter.emit(ctx, OpCode.BR, endLabel); // hop over function
         // function addresses CALL instructions are fixed up in emitter.buildProgram
         this.emitter.emit(ctx, OpCode.LABEL, ident);
-        final int localCount = this.currentFunction.decl.localCount();
-        this.currentAllocationTable = new AllocationTable(localCount + this.currentFunction.decl.parameterCount());
+        final int localCount = this.currentFunction.localCount();
+        this.currentAllocationTable = new AllocationTable(localCount + this.currentFunction.parameterCount());
         for (int i = 0; i < localCount; i++) {
             this.emitter.emit(ctx, OpCode.LD_VAL, NilVal.INSTANCE);
         }
@@ -158,7 +158,7 @@ class EmittingVisitor extends BaseVisitor<Program> {
     @Override
     public Program visitReturnStmt(YLangParser.ReturnStmtContext ctx) {
         super.visitReturnStmt(ctx);
-        if (this.currentFunction.decl.isMain()) {
+        if (this.currentFunction.isMain()) {
             this.emitter.emit(ctx, OpCode.BR, endLabel);
         } else {
             this.emitter.emit(ctx, OpCode.RET);
@@ -252,12 +252,12 @@ class EmittingVisitor extends BaseVisitor<Program> {
                 ? ctx.arguments().expr().size()
                 : 0;
         ctx.accept(this);
-        final FunctionDef function = this.functions.get(ident);
+        final FunctionDecl function = this.functions.get(ident);
         if (function != null) {
             // user-defined function
-            if (function.decl.parameterCount() != argCount) {
+            if (function.parameterCount() != argCount) {
                 logSemanticError(ctx, "function %s expects %d arguments, but only %d passed".formatted(
-                        ident, function.decl.parameterCount(), argCount));
+                        ident, function.parameterCount(), argCount));
             }
             this.emitter.emit(ctx, OpCode.CALL, 0, ident, new NumberVal(argCount));
             return;
@@ -559,12 +559,12 @@ class EmittingVisitor extends BaseVisitor<Program> {
     @Override
     public Program visitFunctionRef(YLangParser.FunctionRefContext ctx) {
         final String ident = ctx.Ident().getText();
-        final FunctionDef function = this.functions.get(ident);
+        final FunctionDecl function = this.functions.get(ident);
         if (function == null) {
             logSemanticError(ctx, "unknown function '" + ident + "'");
             return null;
         }
-        this.emitter.emit(ctx, OpCode.LD_FUNC, 0, ident, new NumberVal(function.decl.parameterCount()));
+        this.emitter.emit(ctx, OpCode.LD_FUNC, 0, ident, new NumberVal(function.parameterCount()));
         return null;
     }
 
@@ -656,14 +656,6 @@ class EmittingVisitor extends BaseVisitor<Program> {
 
         Scope(boolean global) {
             this.global = global;
-        }
-    }
-
-    private static class FunctionDef {
-        final FunctionDecl decl;
-
-        FunctionDef(FunctionDecl decl) {
-            this.decl = decl;
         }
     }
 

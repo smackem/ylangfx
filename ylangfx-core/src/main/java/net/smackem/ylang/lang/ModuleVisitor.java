@@ -30,7 +30,7 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
         }
         final FunctionDecl mainBody = FunctionDecl.main(allocCount);
         return semanticErrors().isEmpty()
-                ? new ModuleDecl(mainBody, this.functions, this.globals)
+                ? new ModuleDecl("module", mainBody, this.functions, this.globals)
                 : null;
     }
 
@@ -64,7 +64,7 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
         if (stmt != null && stmt.declStmt() != null) {
             final var decl = stmt.declStmt();
             final String docComment = trimDocComment(decl.DocComment());
-            globals.add(new GlobalDecl(decl.Ident().getText(), docComment));
+            globals.add(new GlobalDecl(decl.Ident().getText(), docComment, stmt.declStmt().getStart().getLine()));
             return null;
         }
         return super.visitTopLevelStmt(ctx);
@@ -81,9 +81,10 @@ public class ModuleVisitor extends BaseVisitor<ModuleDecl> {
                 ? ctx.parameters().Ident().stream().map(ParseTree::getText).collect(Collectors.toList())
                 : Collections.emptyList();
         final FunctionDecl func = FunctionDecl.function(ctx.Ident().getText(),
+                trimDocComment(ctx.DocComment()),
+                ctx.getStart().getLine(),
                 parameters,
-                allocCount,
-                trimDocComment(ctx.DocComment()));
+                allocCount);
         this.functions.add(func);
         return null;
     }

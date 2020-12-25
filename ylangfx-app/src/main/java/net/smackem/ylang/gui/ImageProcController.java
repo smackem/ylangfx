@@ -32,6 +32,7 @@ import net.smackem.ylang.model.Yli;
 import net.smackem.ylang.model.ScriptLibrary;
 import net.smackem.ylang.runtime.*;
 import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.model.TwoDimensional;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -40,9 +41,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -148,10 +147,11 @@ public class ImageProcController {
 
     private void onWindowCloseRequest(Event event) {
         final Preferences prefs = Preferences.userNodeForPackage(ImageProcController.class);
-        prefs.put(PREF_SOURCE, selectedScript().codeProperty().get());
+        this.scripts.stream().findFirst().ifPresent(s ->
+                prefs.put(PREF_SOURCE, s.codeProperty().get()));
         prefs.putBoolean(PREF_HORIZONTAL_SPLIT, this.horizontalSplit.get());
         prefs.putDouble(PREF_DIVIDER_POS, this.splitPane.getDividerPositions()[0]);
-        if (this.scripts.stream().anyMatch(script -> script.dirtyProperty().get())) {
+        if (this.scripts.stream().anyMatch(ScriptModel::isDirtyFile)) {
             final ButtonType buttonType = new Alert(Alert.AlertType.CONFIRMATION, "There are unsaved scripts. Exit anyway?", ButtonType.YES, ButtonType.NO)
                     .showAndWait()
                     .orElse(ButtonType.NO);
@@ -345,11 +345,27 @@ public class ImageProcController {
         final ObservableList<MenuItem> items = this.openMenuButton.getItems();
         items.clear();
         for (final Path path : this.scriptLibrary.scriptFiles()) {
-            items.add(newMenuItem(path.getFileName().toString(), ignored -> openScript(path)));
+            items.add(newMenuItem(path.getFileName().toString(), ignored -> openScript(path, null)));
         }
     }
 
-    private void openScript(Path path) {
+    private void openScript(Path path, Integer lineNumber) {
+        final ScriptModel script = this.scripts.stream()
+                .filter(s -> Objects.equals(s.pathProperty().get(), path))
+                .findFirst()
+                .orElse(null);
+        if (script != null) {
+            final Tab tab = this.scriptsTabPane.getTabs().stream()
+                    .filter(t -> t.getUserData() == script)
+                    .findFirst()
+                    .orElseThrow();
+            scriptsTabPane.getSelectionModel().select(tab);
+            if (lineNumber != null) {
+                script.selectedLineProperty().set(lineNumber);
+            }
+            return;
+        }
+
         final String code;
         try {
             code = Files.readString(path);
@@ -357,7 +373,11 @@ public class ImageProcController {
             new Alert(Alert.AlertType.ERROR, e.getMessage(), ButtonType.CLOSE).showAndWait();
             return;
         }
-        addScript(new ScriptModel(path, code));
+        final ScriptModel newScript = new ScriptModel(path, code);
+        addScript(newScript);
+        if (lineNumber != null) {
+            newScript.selectedLineProperty().set(lineNumber);
+        }
     }
 
     private void addScript(ScriptModel script) {
@@ -368,6 +388,13 @@ public class ImageProcController {
         editor.multiPlainChanges().successionEnds(Duration.ofMillis(100)).subscribe(ignored -> {
             script.codeProperty().set(editor.getText());
             script.dirtyProperty().set(true);
+        });
+        script.selectedLineProperty().addListener((prop, old, val) -> {
+            if (val != null) {
+                final int pos = editor.position((int) val - 1, 0).toOffset();
+                editor.moveTo(pos);
+                editor.requestFollowCaret();
+            }
         });
         final Tab tab = new Tab();
         tab.textProperty().bind(Bindings.when(
@@ -407,13 +434,8 @@ public class ImageProcController {
         final File file = fileChooser.showOpenDialog(App.getInstance().getStage());
 
         if (file != null) {
-            openScript(file.toPath());
+            openScript(file.toPath(), null);
         }
-    }
-
-    @FXML
-    private void browseLibrary(ActionEvent actionEvent) {
-        this.scriptLibrary.browse();
     }
 
     @FXML
@@ -469,7 +491,14 @@ public class ImageProcController {
 
     @FXML
     private void openLibraryBrowser(ActionEvent ignored) {
-        final Tab tab = new Tab("Library Browser", new LibraryBrowser(this.scriptLibrary));
+        final LibraryBrowser libraryBrowser = new LibraryBrowser(this.scriptLibrary);
+        libraryBrowser.addEventHandler(ActionEvent.ACTION, ev -> {
+            LibraryBrowser.ItemActionEvent iae = (LibraryBrowser.ItemActionEvent) ev;
+            if (iae.module() != null) {
+                openScript(iae.module().path(), iae.decl().decl().lineNumber());
+            }
+        });
+        final Tab tab = new Tab("Library Browser", libraryBrowser);
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
     }

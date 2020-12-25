@@ -11,6 +11,6 @@ public class GlobalDeclModel extends DeclModel<GlobalDecl> {
 
     @Override
     public String signature() {
-        return decl().name();
+        return decl().ident();
     }
 }

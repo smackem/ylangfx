@@ -1,16 +1,18 @@
 package net.smackem.ylang.model;
 
+import net.smackem.ylang.lang.Declaration;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 
-public abstract class DeclModel<T> {
+public abstract class DeclModel<T extends Declaration> {
     private final DeclType type;
     private final T decl;
-    private final Collection<DeclModel<?>> children;
+    private final Collection<DeclModel<? extends Declaration>> children;
     private final String docComment;
 
-    DeclModel(DeclType type, T decl, String docComment, Collection<DeclModel<?>> children) {
+    DeclModel(DeclType type, T decl, String docComment, Collection<DeclModel<? extends Declaration>> children) {
         this.type = type;
         this.decl = decl;
         this.docComment = docComment;

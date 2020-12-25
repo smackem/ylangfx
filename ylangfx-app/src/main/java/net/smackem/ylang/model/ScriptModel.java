@@ -10,6 +10,7 @@ public class ScriptModel {
     private final StringProperty code = new SimpleStringProperty();
     private final BooleanProperty dirty = new SimpleBooleanProperty(false);
     private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
+    private final IntegerProperty selectedLine = new SimpleIntegerProperty();
 
     public ScriptModel(Path path, String code) {
         this.fileNameProperty().bind(Bindings.createStringBinding(
@@ -36,5 +37,13 @@ public class ScriptModel {
 
     public ObjectProperty<Path> pathProperty() {
         return this.path;
+    }
+
+    public IntegerProperty selectedLineProperty() {
+        return this.selectedLine;
+    }
+
+    public boolean isDirtyFile() {
+        return this.path.get() != null && this.dirty.get();
     }
 }

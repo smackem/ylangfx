@@ -12,6 +12,6 @@ public class FunctionDeclModel extends DeclModel<FunctionDecl> {
 
     @Override
     public String signature() {
-        return "%s(%s)".formatted(decl().name(), String.join(", ", decl().parameters()));
+        return "%s(%s)".formatted(decl().ident(), String.join(", ", decl().parameters()));
     }
 }

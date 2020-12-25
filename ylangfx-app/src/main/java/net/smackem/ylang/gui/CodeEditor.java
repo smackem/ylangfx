@@ -31,7 +31,7 @@ public class CodeEditor extends CodeArea {
     private static final String PAREN_PATTERN = "\\(|\\)";
     private static final String AT_PATTERN = "\\$[A-Za-z0-9_]+\\b";
     private static final String FNCALL_PATTERN = "(\\b(?!fn)(?:[A-Za-z0-9_]+))\\(";
-    private static final String NUMBER_PATTERN = "\\b\\d+(\\.\\d*)?\\b";
+    private static final String NUMBER_PATTERN = "\\b\\d[\\d_]*(\\.[\\d_]*\\d)?\\b";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
     private static final String DOC_COMMENT_PATTERN = "///[^\n]*";
     private static final String COMMENT_PATTERN = "//[^\n]*";

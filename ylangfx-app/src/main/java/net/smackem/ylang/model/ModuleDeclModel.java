@@ -35,11 +35,13 @@ public class ModuleDeclModel extends DeclModel<ModuleDecl> {
     private static Collection<DeclModel<?>> getChildren(ModuleDecl module) {
         final Collection<DeclModel<?>> children = new ArrayList<>();
         module.functions().values().stream()
-                .sorted(Comparator.comparing(FunctionDecl::name))
-                .forEach(f -> children.add(new FunctionDeclModel(f)));
+                .sorted(Comparator.comparing(FunctionDecl::ident))
+                .map(FunctionDeclModel::new)
+                .forEach(children::add);
         module.globals().values().stream()
-                .sorted(Comparator.comparing(GlobalDecl::name))
-                .forEach(g -> children.add(new GlobalDeclModel(g)));
+                .sorted(Comparator.comparing(GlobalDecl::ident))
+                .map(GlobalDeclModel::new)
+                .forEach(children::add);
         return children;
     }
 

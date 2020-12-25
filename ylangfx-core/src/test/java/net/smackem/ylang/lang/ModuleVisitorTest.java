@@ -88,7 +88,7 @@ public class ModuleVisitorTest {
         assertThat(module.functions().keySet()).containsExactly("doIt");
         final FunctionDecl function = module.functions().values().iterator().next();
         assertThat(function.localCount()).isEqualTo(0);
-        assertThat(function.name()).isEqualTo("doIt");
+        assertThat(function.ident()).isEqualTo("doIt");
         assertThat(function.parameterCount()).isEqualTo(0);
     }
 
@@ -116,7 +116,7 @@ public class ModuleVisitorTest {
         assertThat(module.functions().keySet()).containsExactly("add");
         final FunctionDecl function = module.functions().values().iterator().next();
         assertThat(function.localCount()).isEqualTo(1);
-        assertThat(function.name()).isEqualTo("add");
+        assertThat(function.ident()).isEqualTo("add");
         assertThat(function.parameterCount()).isEqualTo(2);
     }
 
@@ -157,15 +157,15 @@ public class ModuleVisitorTest {
         assertThat(module.functions().keySet()).containsOnly("withOneParam", "withTwoParamsAndThreeLocals", "withThreeParamsAndOneLocal");
         final FunctionDecl withOneParam = module.functions().get("withOneParam");
         assertThat(withOneParam.localCount()).isEqualTo(0);
-        assertThat(withOneParam.name()).isEqualTo("withOneParam");
+        assertThat(withOneParam.ident()).isEqualTo("withOneParam");
         assertThat(withOneParam.parameterCount()).isEqualTo(1);
         final FunctionDecl withTwoParamsAndThreeLocals = module.functions().get("withTwoParamsAndThreeLocals");
         assertThat(withTwoParamsAndThreeLocals.localCount()).isEqualTo(3);
-        assertThat(withTwoParamsAndThreeLocals.name()).isEqualTo("withTwoParamsAndThreeLocals");
+        assertThat(withTwoParamsAndThreeLocals.ident()).isEqualTo("withTwoParamsAndThreeLocals");
         assertThat(withTwoParamsAndThreeLocals.parameterCount()).isEqualTo(2);
         final FunctionDecl withThreeParamsAndOneLocal = module.functions().get("withThreeParamsAndOneLocal");
         assertThat(withThreeParamsAndOneLocal.localCount()).isEqualTo(1);
-        assertThat(withThreeParamsAndOneLocal.name()).isEqualTo("withThreeParamsAndOneLocal");
+        assertThat(withThreeParamsAndOneLocal.ident()).isEqualTo("withThreeParamsAndOneLocal");
         assertThat(withThreeParamsAndOneLocal.parameterCount()).isEqualTo(3);
     }
 
