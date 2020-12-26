@@ -32,7 +32,7 @@ public final class PointVal extends GeometryVal<PointVal> {
 
     @Override
     public RectVal bounds() {
-        return new RectVal(this.x, this.y, this.x, this.y);
+        return new RectVal(this.x, this.y, 1, 1);
     }
 
     @Override

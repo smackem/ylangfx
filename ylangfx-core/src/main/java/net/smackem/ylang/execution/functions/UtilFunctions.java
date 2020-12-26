@@ -33,6 +33,9 @@ public class UtilFunctions {
                         List.of(ValueType.KERNEL),
                         UtilFunctions::minKernel),
                 FunctionOverload.method(
+                        List.of(ValueType.IMAGE),
+                        UtilFunctions::minImage),
+                FunctionOverload.method(
                         List.of(ValueType.KERNEL, ValueType.KERNEL),
                         UtilFunctions::minKernelWithKernel),
                 FunctionOverload.method(
@@ -52,11 +55,22 @@ public class UtilFunctions {
                         List.of(ValueType.KERNEL),
                         UtilFunctions::maxKernel),
                 FunctionOverload.method(
+                        List.of(ValueType.IMAGE),
+                        UtilFunctions::maxImage),
+                FunctionOverload.method(
                         List.of(ValueType.KERNEL, ValueType.KERNEL),
                         UtilFunctions::maxKernelWithKernel),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.IMAGE),
                         UtilFunctions::maxImageWithImage)));
+    }
+
+    private static Value maxImage(List<Value> args) {
+        return ((ImageVal) args.get(0)).max();
+    }
+
+    private static Value minImage(List<Value> args) {
+        return ((ImageVal) args.get(0)).min();
     }
 
     private static Value minImageWithImage(List<Value> args) {

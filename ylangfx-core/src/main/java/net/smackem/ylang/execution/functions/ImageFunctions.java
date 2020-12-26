@@ -24,13 +24,6 @@ public class ImageFunctions {
                 FunctionOverload.function(
                         List.of(ValueType.KERNEL),
                         ImageFunctions::imageFromKernel)));
-        registry.put(new FunctionGroup("bounds",
-                FunctionOverload.method(
-                        List.of(ValueType.IMAGE),
-                        ImageFunctions::bounds),
-                FunctionOverload.method(
-                        List.of(ValueType.KERNEL),
-                        ImageFunctions::bounds)));
         registry.put(new FunctionGroup("convolve",
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.KERNEL),
@@ -211,11 +204,6 @@ public class ImageFunctions {
         final PointVal pt = (PointVal) args.get(1);
         final KernelVal kernel = (KernelVal) args.get(2);
         return image.convolve((int) pt.x(), (int) pt.y(), kernel);
-    }
-
-    private static Value bounds(List<Value> args) {
-        final MatrixVal<?> matrix = (MatrixVal<?>) args.get(0);
-        return new RectVal(0, 0, matrix.width(), matrix.height());
     }
 
     private static Value imageFromWidthAndHeight(List<Value> args) {

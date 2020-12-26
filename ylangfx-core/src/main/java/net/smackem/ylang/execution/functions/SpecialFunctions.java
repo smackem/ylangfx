@@ -52,7 +52,7 @@ public class SpecialFunctions {
         final KernelVal kernel = (KernelVal) args.get(0);
         final PointVal pt = (PointVal) args.get(1);
         final NumberVal n = (NumberVal) args.get(2);
-        kernel.set((int) (pt.y() * kernel.width() + pt.x()), n);
+        kernel.set((int) pt.x(), (int) pt.y(), n);
         return null;
     }
 

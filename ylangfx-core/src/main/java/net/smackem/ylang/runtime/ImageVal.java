@@ -73,6 +73,42 @@ public class ImageVal extends MatrixVal<RgbVal> {
         return buffer;
     }
 
+    public RgbVal min() {
+        float minR = Float.MAX_VALUE;
+        float minG = Float.MAX_VALUE;
+        float minB = Float.MAX_VALUE;
+        for (final RgbVal rgb : this.pixels) {
+            if (rgb.r() < minR) {
+                minR = rgb.r();
+            }
+            if (rgb.g() < minG) {
+                minG = rgb.g();
+            }
+            if (rgb.b() < minB) {
+                minB = rgb.b();
+            }
+        }
+        return new RgbVal(minR, minG, minB, 255);
+    }
+
+    public RgbVal max() {
+        float maxR = Float.MIN_VALUE;
+        float maxG = Float.MIN_VALUE;
+        float maxB = Float.MIN_VALUE;
+        for (final RgbVal rgb : this.pixels) {
+            if (rgb.r() > maxR) {
+                maxR = rgb.r();
+            }
+            if (rgb.g() > maxG) {
+                maxG = rgb.g();
+            }
+            if (rgb.b() > maxB) {
+                maxB = rgb.b();
+            }
+        }
+        return new RgbVal(maxR, maxG, maxB, 255);
+    }
+
     public RgbVal convolve(int x, int y, KernelVal kernel) {
         final int width = width();
         final int height = height();

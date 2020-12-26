@@ -247,7 +247,7 @@ public class ImageProcController {
 
     private void addImages(Value result) {
         if (result instanceof MatrixVal<?>) {
-            this.targetContainer.getChildren().add(buildImageNode(ImageConversion.convertToFX((ImageVal) result)));
+            this.targetContainer.getChildren().add(buildImageNode(ImageConversion.convertToFX((MatrixVal<?>) result)));
         } else if (result instanceof ListVal) {
             addImages(StreamSupport.stream(((ListVal) result).spliterator(), false));
         } else if (result instanceof MapVal) {

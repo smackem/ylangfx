@@ -85,7 +85,7 @@ class EmittingVisitor extends BaseVisitor<Program> {
         }
         super.visitFunctionDecl(ctx);
         popScope();
-        if (ctx.block().statement(ctx.block().statement().size() - 1).returnStmt() == null) {
+        if (ctx.block().statement().size() == 0 || ctx.block().statement(ctx.block().statement().size() - 1).returnStmt() == null) {
             // return nil if no return statement present
             this.emitter.emit(ctx, OpCode.LD_VAL, NilVal.INSTANCE);
             this.emitter.emit(ctx, OpCode.RET);

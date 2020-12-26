@@ -83,6 +83,7 @@ public class GeometryFunctions {
         final List<FunctionOverload> intersectOverloads = new ArrayList<>();
         final List<FunctionOverload> distanceOverloads = new ArrayList<>();
         final List<FunctionOverload> translateOverloads = new ArrayList<>();
+        final List<FunctionOverload> boundsOverloads = new ArrayList<>();
         for (final ValueType left : geometryTypes) {
             for (final ValueType right : geometryTypes) {
                 intersectOverloads.add(FunctionOverload.method(List.of(left, right), GeometryFunctions::intersect));
@@ -90,12 +91,29 @@ public class GeometryFunctions {
             }
             translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.POINT), GeometryFunctions::translateByPoint));
             translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.NUMBER, ValueType.NUMBER), GeometryFunctions::translateByXY));
+            boundsOverloads.add(FunctionOverload.method(List.of(left), GeometryFunctions::bounds));
         }
         distanceOverloads.add(FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
                 GeometryFunctions::distanceRgb));
         registry.put(new FunctionGroup("intersect", intersectOverloads));
         registry.put(new FunctionGroup("distance", distanceOverloads));
         registry.put(new FunctionGroup("translate", translateOverloads));
+        boundsOverloads.add(FunctionOverload.method(
+                List.of(ValueType.IMAGE),
+                GeometryFunctions::matrixBounds));
+        boundsOverloads.add(FunctionOverload.method(
+                List.of(ValueType.KERNEL),
+                GeometryFunctions::matrixBounds));
+        registry.put(new FunctionGroup("bounds", boundsOverloads));
+    }
+
+    private static Value matrixBounds(List<Value> args) {
+        final MatrixVal<?> matrix = (MatrixVal<?>) args.get(0);
+        return new RectVal(0, 0, matrix.width(), matrix.height());
+    }
+
+    private static Value bounds(List<Value> values) {
+        return ((GeometryVal<?>) values.get(0)).bounds();
     }
 
     private static Value distanceRgb(List<Value> args) {
