@@ -1,0 +1,27 @@
+
+.tree-cell .signature {
+}
+
+.tree-cell .docComment {
+    -fx-font-style: italic;
+    -fx-opacity: 0.8;
+}
+
+.tree-cell .globalIcon {
+    -fx-font-weight: bold;
+    -fx-text-fill: #ccc;
+    -fx-font-family: monospace;
+    -fx-text-alignment: center;
+}
+
+.tree-cell .functionIcon {
+    -fx-font-weight: bold;
+    -fx-text-fill: purple;
+    -fx-font-family: monospace;
+    -fx-text-alignment: center;
+}
+
+.tree-cell .highlighted {
+    -fx-background-color: firebrick;
+    -fx-text-fill: white;
+}

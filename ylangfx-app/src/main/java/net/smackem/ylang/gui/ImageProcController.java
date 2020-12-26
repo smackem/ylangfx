@@ -275,6 +275,7 @@ public class ImageProcController {
     private static MenuItem newMenuItem(String text, EventHandler<ActionEvent> handler) {
         final MenuItem menuItem = new MenuItem(text);
         menuItem.setOnAction(handler);
+        menuItem.setMnemonicParsing(false);
         return menuItem;
     }
 
@@ -493,9 +494,11 @@ public class ImageProcController {
     private void openLibraryBrowser(ActionEvent ignored) {
         final LibraryBrowser libraryBrowser = new LibraryBrowser(this.scriptLibrary);
         libraryBrowser.addEventHandler(ActionEvent.ACTION, ev -> {
-            LibraryBrowser.ItemActionEvent iae = (LibraryBrowser.ItemActionEvent) ev;
-            if (iae.module() != null) {
-                openScript(iae.module().path(), iae.decl().decl().lineNumber());
+            if (ev instanceof LibraryBrowser.ItemActionEvent) {
+                final LibraryBrowser.ItemActionEvent iae = (LibraryBrowser.ItemActionEvent) ev;
+                if (iae.module() != null) {
+                    openScript(iae.module().path(), iae.decl().decl().lineNumber());
+                }
             }
         });
         final Tab tab = new Tab("Library Browser", libraryBrowser);

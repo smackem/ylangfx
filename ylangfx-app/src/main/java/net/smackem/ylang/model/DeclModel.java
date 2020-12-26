@@ -1,5 +1,7 @@
 package net.smackem.ylang.model;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import net.smackem.ylang.lang.Declaration;
 
 import java.util.Collection;
@@ -11,6 +13,7 @@ public abstract class DeclModel<T extends Declaration> {
     private final T decl;
     private final Collection<DeclModel<? extends Declaration>> children;
     private final String docComment;
+    private final BooleanProperty highlighted = new SimpleBooleanProperty();
 
     DeclModel(DeclType type, T decl, String docComment, Collection<DeclModel<? extends Declaration>> children) {
         this.type = type;
@@ -35,5 +38,9 @@ public abstract class DeclModel<T extends Declaration> {
 
     public Collection<DeclModel<?>> children() {
         return Collections.unmodifiableCollection(this.children);
+    }
+
+    public BooleanProperty highlightedProperty() {
+        return this.highlighted;
     }
 }

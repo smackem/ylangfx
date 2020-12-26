@@ -1,6 +1,7 @@
 package net.smackem.ylang.gui;
 
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventTarget;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -13,20 +14,23 @@ import net.smackem.ylang.model.DeclModel;
 import net.smackem.ylang.model.DeclType;
 import net.smackem.ylang.model.ModuleDeclModel;
 import net.smackem.ylang.model.ScriptLibrary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class LibraryBrowser extends BorderPane {
+    private static final Logger log = LoggerFactory.getLogger(LibraryBrowser.class);
     private final ScriptLibrary scriptLibrary;
     private final Collection<ModuleDeclModel> modules;
 
     public LibraryBrowser(ScriptLibrary scriptLibrary) {
         this.scriptLibrary = Objects.requireNonNull(scriptLibrary);
+        final String cssPath = getClass().getResource("librarybrowser.css").toExternalForm();
+        this.getStylesheets().add(cssPath);
         Collection<ModuleDeclModel> modules;
         try {
             modules = parseSources();
@@ -42,12 +46,63 @@ public class LibraryBrowser extends BorderPane {
     private void assemble() {
         final Button browseButton = new Button("Browse Files...");
         browseButton.setOnAction(ignored -> this.scriptLibrary.browse());
-        setTop(new ToolBar(browseButton));
+        final Label matchesLabel = new Label();
+        final Button clearSearchButton = new Button("X");
+        final ToolBar matchesBox = new ToolBar(matchesLabel, clearSearchButton);
+        matchesBox.setVisible(false);
+        final TextField searchField = new TextField();
+        searchField.setPromptText("Find...");
+        searchField.addEventHandler(ActionEvent.ACTION, ev -> {
+            if (searchField.getText().isBlank()) {
+                clearSearch();
+                matchesBox.setVisible(false);
+                return;
+            }
+            int matchCount = searchScripts(searchField);
+            matchesLabel.setText("%d matches".formatted(matchCount));
+            matchesBox.setVisible(true);
+            ev.consume();
+        });
+        clearSearchButton.setOnAction(ev -> {
+            clearSearch();
+            searchField.setText("");
+            matchesBox.setVisible(false);
+        });
+        setTop(new ToolBar(browseButton, searchField, matchesBox));
         final TreeView<DeclModel<?>> treeView = new TreeView<>();
         treeView.setCellFactory(this::createCell);
         treeView.setShowRoot(false);
         treeView.setRoot(populateTree());
         setCenter(treeView);
+    }
+
+    private int searchScripts(TextField searchField) {
+        final String searchText = searchField.getText().toLowerCase();
+        final int[] matchCount = new int[1];
+        forEachDeclModel(decl -> {
+            final boolean match = decl.signature().toLowerCase().contains(searchText);
+            log.info("{}: match = {}", decl.signature(), match);
+            if (match) {
+                matchCount[0]++;
+            }
+            decl.highlightedProperty().set(match);
+        });
+        return matchCount[0];
+    }
+
+    private void clearSearch() {
+        forEachDeclModel(decl -> decl.highlightedProperty().set(false));
+    }
+
+    private void forEachDeclModel(Consumer<DeclModel<?>> action) {
+        final Deque<DeclModel<?>> queue = new LinkedList<>(this.modules);
+        while (queue.isEmpty() == false) {
+            final DeclModel<?> decl = queue.removeFirst();
+            action.accept(decl);
+            for (final DeclModel<?> child : decl.children()) {
+                queue.addLast(child);
+            }
+        }
     }
 
     private TreeCell<DeclModel<? extends Declaration>> createCell(TreeView<DeclModel<? extends Declaration>> treeView) {
@@ -77,7 +132,7 @@ public class LibraryBrowser extends BorderPane {
 
     private Node getDeclNode(DeclModel<?> decl) {
         return switch (decl.type()) {
-            case FILE -> new Label(decl.signature());
+            case FILE -> createSignatureLabel(decl);
             case GLOBAL -> getGlobalOrFunctionNode(decl, ":=", "globalIcon");
             case FUNCTION -> getGlobalOrFunctionNode(decl, "fn", "functionIcon");
         };
@@ -85,18 +140,33 @@ public class LibraryBrowser extends BorderPane {
 
     private Node getGlobalOrFunctionNode(DeclModel<?> decl, String iconText, String styleClass) {
         final String doc = decl.docComment();
-        final Label signatureLabel = new Label(decl.signature());
+        final Label signatureLabel = createSignatureLabel(decl);
         final Label icon = new Label();
         icon.getStyleClass().add(styleClass);
         icon.setPrefSize(20, 16);
         icon.setText(iconText);
-        signatureLabel.getStyleClass().add("signature");
         if (doc != null && doc.isEmpty() == false) {
             final Label docLabel = new Label(decl.docComment());
             docLabel.getStyleClass().add("docComment");
             return new VBox(new HBox(icon, signatureLabel), docLabel);
         }
         return new HBox(icon, signatureLabel);
+    }
+
+    private static Label createSignatureLabel(DeclModel<?> decl) {
+        final Label label = new Label(decl.signature());
+        label.getStyleClass().add("signature");
+        if (decl.highlightedProperty().get()) {
+            label.getStyleClass().add("highlighted");
+        }
+        decl.highlightedProperty().addListener((prop, old, val) -> {
+            if (val) {
+                label.getStyleClass().add("highlighted");
+            } else {
+                label.getStyleClass().remove("highlighted");
+            }
+        });
+        return label;
     }
 
     private TreeItem<DeclModel<?>> populateTree() {
