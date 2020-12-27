@@ -1,0 +1,63 @@
+/// applies the median filter to image `inp` with the given
+/// radius and the given ratio ([0..1]). A ratio of 0.5 yields
+/// does not change lightness, where ratios from 0.5..1] brighten
+/// the image and ratios from [0..0.5 darken it.
+fn median_image(inp, radius, ratio) {
+    k := kernel(radius * 2, radius * 2, 1)
+    index := round(ratio * k.size)
+    out := image(inp.bounds)
+    for p in inp.bounds {
+        r := inp.select_red(p, k).sort()[index]
+        g := inp.select_green(p, k).sort()[index]
+        b := inp.select_blue(p, k).sort()[index]
+        out[p] = rgb(r, g, b)
+    }
+    return out
+}
+
+/// applies the median filter to kernel `inp` with the given
+/// radius and the given ratio ([0..1]). A ratio of 0.5 yields
+/// does not change lightness, where ratios from 0.5..1] brighten
+/// the image and ratios from [0..0.5 darken it.
+fn median_kernel(inp, radius, ratio) {
+    k := kernel(radius * 2, radius * 2, 1)
+    index := round(ratio * k.size)
+    out := kernel(inp.bounds)
+    for p in inp.bounds {
+        out[p] = inp.select(p, k).sort()[index]
+    }
+    return out
+}
+
+/// returns the input matrix `inp` convolved with the LoG
+fn laplacian_of_gaussian(inp, radius) {
+    return inp.convolve(gaussian(radius)).convolve(laplacian(radius))
+}
+
+/// the kernel for applying the sobel operator in x-direction
+Sobel_X := |-1 0 1
+            -2 0 2
+            -1 0 1|
+
+/// the kernel for applying the sobel operator in y-direction
+Sobel_Y := |-1 -2 -1
+             0  0  0
+             1  2  1|
+
+/// applies the sobel filter to the input matrix `inp` and returns the result.
+fn sobel(inp) {
+    return hypot(inp.convolve(Sobel_X), inp.convolve(Sobel_Y))
+}
+
+/// the first of two kernels that make up the roberts cross
+Roberts_A := |-1 0
+               0 1|
+
+/// the second of two kernels that make up the roberts cross
+Roberts_B := | 0 1
+              -1 0|
+
+/// applies the roberts filter to input matrix `inp` and returns the result
+fn roberts(inp) {
+    return hypot(inp.convolve(Roberts_A), inp.convolve(Roberts_B))
+}

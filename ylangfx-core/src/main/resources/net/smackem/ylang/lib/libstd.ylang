@@ -1,0 +1,9 @@
+#include "libcolor"
+#include "libalpha"
+#include "libspatial"
+#include "libfilter"
+#include "libmorpho"
+
+/// libstd includes the entire standard ylang library, it does not
+/// define any functions.
+Std_Included := true

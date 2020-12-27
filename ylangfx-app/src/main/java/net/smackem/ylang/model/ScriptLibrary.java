@@ -1,5 +1,6 @@
 package net.smackem.ylang.model;
 
+import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.FileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,10 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.file.*;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -28,7 +27,26 @@ public class ScriptLibrary implements FileProvider {
 
     public static ScriptLibrary fromDirectory(String directory) throws IOException {
         final Path basePath = Paths.get(directory, "ylangfx", "lib");
-        return new ScriptLibrary(Files.createDirectories(basePath));
+        final Path libPath = Files.createDirectories(basePath);
+        final String[] libFiles = {
+                "libalpha.ylang",
+                "libcolor.ylang",
+                "liberror.ylang",
+                "libfilter.ylang",
+                "libkernel.ylang",
+                "libmorpho.ylang",
+                "libspatial.ylang",
+                "libstd.ylang",
+        };
+        for (final String libFile : libFiles) {
+            final Path libFilePath = Paths.get(libPath.toString(), libFile);
+            if (Files.notExists(libFilePath)) {
+                try (final InputStream is = Compiler.class.getResourceAsStream("/net/smackem/ylang/lib/" + libFile)) {
+                    Files.copy(is, libFilePath);
+                }
+            }
+        }
+        return new ScriptLibrary(libPath);
     }
 
     public Path basePath() {

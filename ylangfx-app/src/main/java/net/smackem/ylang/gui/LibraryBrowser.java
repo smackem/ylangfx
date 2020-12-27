@@ -3,6 +3,7 @@ package net.smackem.ylang.gui;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventTarget;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
@@ -145,12 +146,14 @@ public class LibraryBrowser extends BorderPane {
         icon.getStyleClass().add(styleClass);
         icon.setPrefSize(20, 16);
         icon.setText(iconText);
-        if (doc != null && doc.isEmpty() == false) {
-            final Label docLabel = new Label(decl.docComment());
-            docLabel.getStyleClass().add("docComment");
-            return new VBox(new HBox(icon, signatureLabel), docLabel);
+        final HBox box = new HBox(icon, signatureLabel);
+        box.setAlignment(Pos.CENTER_LEFT);
+        if (doc == null || doc.isEmpty()) {
+            return box;
         }
-        return new HBox(icon, signatureLabel);
+        final Label docLabel = new Label(decl.docComment());
+        docLabel.getStyleClass().add("docComment");
+        return new VBox(box, docLabel);
     }
 
     private static Label createSignatureLabel(DeclModel<?> decl) {

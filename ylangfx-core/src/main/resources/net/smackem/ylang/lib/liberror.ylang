@@ -1,0 +1,19 @@
+
+__error_imgs := {}
+
+/// returns an image of size len x len that can be used
+/// to signal an error to the user
+fn error_image(len) {
+    img := __error_imgs[len]
+    if img != nil {
+        return img
+    }
+    log("creating error image ", len, "x", len)
+    img = image(len, len)
+    img.clip(img.bounds).
+        plot(img.bounds, #ffffff).
+        plot(line(0;0, len;len), #ff0000).
+        plot(line(len;0, 0;len), #ff0000)
+    __error_imgs[len] = img
+    return img
+}

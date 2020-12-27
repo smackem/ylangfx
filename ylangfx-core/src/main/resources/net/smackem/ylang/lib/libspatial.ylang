@@ -1,0 +1,72 @@
+/// returns a sub-matrix of matrix `inp` with bounds large enough to contain
+/// `geometry`, with all pixels within `geometry` copied.
+/// The remaining parts of the returned matrix are empty.
+fn sub_section(inp, geometry) {
+    source_rect := geometry.bounds
+    target_rect := rect(0;0, source_rect.width, source_rect.height).inflate(1, 1)
+    out := inp.clone_empty(target_rect)
+    for p in geometry {
+        out[p.x - source_rect.x; p.y - source_rect.y] = inp[p]
+    }
+    return out
+}
+
+/// returns matrix `inp` flipped along the x axis
+fn flip_h(inp) {
+    flipped := inp.clone_empty()
+    for p in flipped.bounds {
+        flipped[p.x; flipped.height - p.y - 1] = inp[p]
+    }
+    return flipped
+}
+
+/// returns matrix `inp` flipped along the y axis
+fn flip_v(inp) {
+    flipped := inp.clone_empty()
+    for p in flipped.bounds {
+        flipped[flipped.width - p.x - 1; p.y] = inp[p]
+    }
+    return flipped
+}
+
+/// resizes the matrix `inp` with the given ratio, therefore maintaining
+/// aspect ratio. A ratio of 1 means 100%.
+/// returns the new, resized matrix.
+fn resize(inp, ratio) {
+    out := inp.clone_empty(rect(0;0, inp.bounds.width * ratio, inp.bounds.height * ratio))
+    inp.default(inp[0;0])
+    inv_ratio := 1 / ratio
+    for p in out.bounds {
+        ps := floor(p.x * inv_ratio); floor(p.y * inv_ratio)
+        out[p] = inp[ps]
+    }
+    return out
+}
+
+/// rotates the matrix `inp` by 90 degrees and returns the new, rotated matrix.
+fn rotate90(inp) {
+    out := inp.clone_empty(rect(0;0, inp.bounds.height, inp.bounds.width))
+    for p in out.bounds {
+        out[p] = inp[p.y; p.x]
+    }
+    return out
+}
+
+/// zooms in on the matrix `inp` with a factor of 8, optionally drawing a
+/// pixel grid with color `grid_color` over the zoomed image. 
+/// pass `nil` as grid color to disable the grid.
+fn zoom(inp, grid_color) {
+    ratio := 8
+    out := resize(inp, ratio)
+    if grid_color == nil {
+        return out
+    }
+    out.clip(out.bounds)
+    for x in 0 .. ratio .. out.bounds.width {
+        out.plot(line(x;0, x;out.bounds.height), grid_color)
+    }
+    for y in 0 .. ratio .. out.bounds.height {
+        out.plot(line(0;y, out.bounds.width;y), grid_color)
+    }
+    return out
+}

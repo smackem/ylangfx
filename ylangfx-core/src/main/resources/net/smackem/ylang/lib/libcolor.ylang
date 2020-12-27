@@ -1,0 +1,87 @@
+/// returns a matrix copied from `inp` with contrast stretched
+/// to the normalized range of [0..255].
+fn stretch_contrast(inp) {
+    lower := inp.min()
+    upper := inp.max()
+    range := upper - lower
+    log("lower:", lower, " upper:", upper, " range:", range)
+    out := inp.clone_empty()
+    for p in inp.bounds {
+        px := inp[p]
+        out[p] = (px - lower) * 255 / range
+    }
+    return out
+}
+
+/// alias for `stretch_contrast`
+fn normalize(inp) {
+    return stretch_contrast(inp)
+}
+
+/// combines an image from three kernels (one for each channel),
+/// all of which must have the same dimensions.
+fn combine_image(red_kernel, green_kernel, blue_kernel) {
+    out := image(red_kernel.bounds)
+    for p in out.bounds {
+        out[p] = rgb(red_kernel[p], green_kernel[p], blue_kernel[p])
+    }
+    return out
+}
+
+/// split image `inp` into three kernels, one for each color channel.
+/// returns a map with three entries:
+/// result.red: the red kernel
+/// result.green: the green kernel
+/// result.blue: the blue kernel
+fn split_image(inp) {
+    red_kernel := kernel(inp.bounds)
+    green_kernel := kernel(inp.bounds)
+    blue_kernel := kernel(inp.bounds)
+    for p in inp.bounds {
+        px := inp[p]
+        red_kernel[p] = px.r
+        green_kernel[p] = px.g
+        blue_kernel[p] = px.b
+    }
+    return {
+        red: red_kernel,
+        green: green_kernel,
+        blue: blue_kernel,
+    }
+}
+
+/// blends two matrices `left` and `right` with the given ratio (0..1).
+fn blend(left, right, ratio) {
+    out := left.clone_empty()
+    for p in left.bounds {
+        out[p] = left[p] * ratio + right[p] * (1 - ratio)
+    }
+    return out
+}
+
+/// returns a binarized kernel, with all elements set to 255 that are
+/// >= threshold, all others set to 0.
+/// therefore, threshold is in the range [0..255]
+fn binarize_kernel(inp, threshold) {
+    out := inp.clone_empty()
+    for p in inp.bounds {
+        v := inp[p]
+        out[p] = v >= threshold ? 255 : 0
+    }
+    return out
+}
+
+/// returns a binarized image, with all pixel channels set to 255 that are
+/// >= threshold, all others set to 0.
+/// therefore, threshold is in the range [0..255]
+fn binarize_image(inp, threshold) {
+    out := inp.clone_empty()
+    for p in inp.bounds {
+        px := inp[p]
+        out[p] = rgb(
+            px.r >= threshold ? 255 : 0,
+            px.g >= threshold ? 255 : 0,
+            px.b >= threshold ? 255 : 0)
+    }
+    return out
+}

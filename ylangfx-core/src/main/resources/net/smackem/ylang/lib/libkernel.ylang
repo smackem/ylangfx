@@ -1,0 +1,25 @@
+/// apply function `op` to all pixels of a kernel
+/// inp: kernel, op: fn (number) -> number
+fn filter_kernel(inp, op) {
+    out := kernel(inp.bounds)
+    for p in inp.bounds {
+        px := inp[p]
+        out[p] = op@(px)
+    }
+    return out
+}
+
+/// binarization operation for number `color` [0..255]
+fn binarize_number(color) {
+    return color > 127.5 ? 255 : 0
+}
+
+/// resize kernel with a fixed ratio
+/// inp: kernel, ratio: number (1.0 = 100%)
+fn resize_kernel(inp, ratio) {
+    out := kernel(inp.bounds.width * ratio, inp.bounds.height * ratio, 0)
+    for p in out.bounds {
+        out[p] = inp[p.x / ratio;p.y / ratio]
+    }
+    return out
+}

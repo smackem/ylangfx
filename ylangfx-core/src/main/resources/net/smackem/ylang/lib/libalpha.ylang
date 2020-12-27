@@ -1,0 +1,39 @@
+/// extracts all alpha values into a kernel with the dimensions
+/// of the input image `inp`.
+/// returns the new kernel.
+/// useful for applying kernel operations on the alpha channel, which
+/// can afterwards be merged back into the image with the `image_with_alpha` function.
+fn alpha_kernel(inp) {
+    k := kernel(inp.bounds)
+    for p in inp.bounds {
+        k[p] = inp[p].a
+    }
+    return k
+}
+
+/// convolves the alpha channel of image `inp` with the kernel `k`
+/// and returns a new image.
+fn convolve_alpha(inp, k) {
+    out := image(inp.bounds)
+    kernel_sum := k.sum()
+    for p in inp.bounds {
+        px := inp[p]
+        selection := inp.select_alpha(p, k)
+        selection_sum := selection.sum()
+        alpha := kernel_sum != 0 ? selection_sum / kernel_sum : selection_sum
+        out[p] = rgba(px.r, px.g, px.b, alpha)
+    }
+    return out
+}
+
+/// creates a new image with the same dimensions as image `inp` and
+/// kernel `alpha_kernel`, replacing the input image's alpha channel
+/// with the values of `alpha_kernel`.
+/// returns the new image.
+fn image_with_alpha(inp, alpha_kernel) {
+    out := image(inp.bounds)
+    for p in out.bounds {
+        out[p] = inp[p].a(alpha_kernel[p])
+    }
+    return out
+}
