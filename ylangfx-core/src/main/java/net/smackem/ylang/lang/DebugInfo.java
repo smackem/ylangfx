@@ -6,27 +6,30 @@ import org.antlr.v4.runtime.Token;
 import java.util.Objects;
 
 public class DebugInfo {
-    private final ParserRuleContext ctx;
+    private final CodeMap.Location location;
+    private final int charPos;
+    private final String tokenText;
 
-    private DebugInfo(ParserRuleContext ctx) {
-        this.ctx = ctx;
+    private DebugInfo(CodeMap.Location location, int charPos, String tokenText) {
+        this.location = location;
+        this.charPos = charPos;
+        this.tokenText = tokenText;
     }
 
-    public static DebugInfo fromRuleContext(ParserRuleContext ctx) {
-        return ctx != null ? new DebugInfo(Objects.requireNonNull(ctx)) : null;
-    }
-
-    public int lineNumber() {
-        return this.ctx.start.getLine();
-    }
-
-    public int charPosition() {
-        return this.ctx.start.getCharPositionInLine();
+    public static DebugInfo fromRuleContext(ParserRuleContext ctx, CodeMap codeMap) {
+        if (ctx == null) {
+            return null;
+        }
+        final Token token = ctx.getStart();
+        return new DebugInfo(codeMap.translate(token.getLine()), token.getCharPositionInLine(), token.getText());
     }
 
     @Override
     public String toString() {
-        final Token token = this.ctx.getStart();
-        return "@ line %d:%d (near token '%s')".formatted(token.getLine(), token.getCharPositionInLine(), token.getText());
+        return "@ %s %d:%d (near token '%s')".formatted(
+                this.location.fileName(),
+                this.location.lineNumber(),
+                this.charPos,
+                this.tokenText);
     }
 }

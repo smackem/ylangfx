@@ -237,8 +237,9 @@ public class Interpreter {
                 for (int i = 0; i < instr.intArg(); i++) {
                     args.addFirst(stack.pop());
                 }
-                if (taggedInstr.invokedFunc == null) {
+                if (taggedInstr.invokedFunc == null || taggedInstr.invokedFuncMatches(args) == false) {
                     taggedInstr.invokedFunc = FunctionRegistry.INSTANCE.getFunc(instr.strArg(), args);
+                    taggedInstr.invokedFuncArgs = args;
                 }
                 final Value result = taggedInstr.invokedFunc.invoke(args);
                 stack.push(result);
@@ -335,6 +336,7 @@ public class Interpreter {
 
     private void handleOption(String option, Value value) throws MissingOverloadException {
         if (Objects.equals(option, "DISABLE_YLN")) {
+            log.info("setting option {} = {}", option, value);
             final boolean v = ((BoolVal) UnaryOperator.BOOL.invoke(value)).value();
             RuntimeContext.current().disableYln(v);
             return;
@@ -386,6 +388,17 @@ public class Interpreter {
     private static class TaggedInstruction {
         final Instruction instruction;
         Func invokedFunc;
+        List<Value> invokedFuncArgs;
+
+        boolean invokedFuncMatches(List<Value> args) {
+            int n = args.size();
+            for (int i = 0; i < n; i++) {
+                if (args.get(i).type() != invokedFuncArgs.get(i).type()) {
+                    return false;
+                }
+            }
+            return true;
+        }
 
         TaggedInstruction(Instruction instruction) {
             this.instruction = instruction;

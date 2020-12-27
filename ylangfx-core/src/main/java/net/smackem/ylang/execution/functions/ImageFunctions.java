@@ -37,6 +37,26 @@ public class ImageFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL, ValueType.POINT, ValueType.KERNEL),
                         ImageFunctions::convolveKernel)));
+        registry.put(new FunctionGroup("clone",
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE),
+                        ImageFunctions::imageClone),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL),
+                        CollectionFunctions::kernelClone)));
+        registry.put(new FunctionGroup("clone_empty",
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE),
+                        ImageFunctions::imageCloneEmpty),
+                FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.RECT),
+                        ImageFunctions::imageCloneEmptyWithBounds),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL),
+                        ImageFunctions::kernelCloneEmpty),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.RECT),
+                        ImageFunctions::kernelCloneEmptyWithBounds)));
         registry.put(new FunctionGroup("select",
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL, ValueType.POINT, ValueType.KERNEL),
@@ -108,6 +128,26 @@ public class ImageFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL, ValueType.POLYGON, ValueType.NUMBER),
                         ImageFunctions::plotKernel)));
+    }
+
+    private static Value kernelCloneEmptyWithBounds(List<Value> args) {
+        final RectVal rect = (RectVal) args.get(1);
+        return new KernelVal(Math.round(rect.width()), Math.round(rect.height()), 0);
+    }
+
+    private static Value imageCloneEmptyWithBounds(List<Value> args) {
+        final RectVal rect = (RectVal) args.get(1);
+        return new ImageVal(Math.round(rect.width()), Math.round(rect.height()));
+    }
+
+    private static Value kernelCloneEmpty(List<Value> args) {
+        final KernelVal kernel = (KernelVal) args.get(0);
+        return new KernelVal(kernel.width(), kernel.height(), 0);
+    }
+
+    private static Value imageCloneEmpty(List<Value> args) {
+        final ImageVal image = (ImageVal) args.get(0);
+        return new ImageVal(image.width(), image.height());
     }
 
     private static Value imageCreateWith(List<Value> args) {

@@ -10,7 +10,7 @@ class EmittingVisitor extends BaseVisitor<Program> {
 
     private static final String endLabel = "@end";
     private final FunctionTable functionTable;
-    private final Emitter emitter = new Emitter();
+    private final Emitter emitter;
     private final LinkedList<Scope> scopes = new LinkedList<>();
     private final AllocationTable mainAllocationTable;
     private final Map<String, FunctionDecl> functions = new HashMap<>();
@@ -22,6 +22,7 @@ class EmittingVisitor extends BaseVisitor<Program> {
     public EmittingVisitor(CodeMap codeMap, ModuleDecl module, FunctionTable functionTable) {
         super(codeMap);
         Objects.requireNonNull(module);
+        this.emitter = new Emitter(codeMap);
         this.functionTable = Objects.requireNonNull(functionTable);
         this.mainAllocationTable = new AllocationTable(module.mainBody().localCount());
         for (final FunctionDecl functionDecl : module.functions().values()) {

@@ -9,9 +9,13 @@ import java.util.*;
  * Emitter is used to emit byte code.
  */
 class Emitter {
-
+    private final CodeMap codeMap;
     private boolean disabled;
     private final List<Instruction> instructions = new ArrayList<>();
+
+    Emitter(CodeMap codeMap) {
+        this.codeMap = codeMap;
+    }
 
     /**
      * @return an unmodifiable list containing the {@link Instruction}s that have been emitted.
@@ -50,7 +54,7 @@ class Emitter {
      * @param opCode The {@link OpCode} of the instruction to emit.
      */
     public void emit(ParserRuleContext ctx, OpCode opCode) {
-        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode));
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx, this.codeMap), opCode));
     }
 
     /**
@@ -59,7 +63,7 @@ class Emitter {
      * @param intArg The integer argument.
      */
     public void emit(ParserRuleContext ctx, OpCode opCode, int intArg) {
-        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode, intArg));
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx, this.codeMap), opCode, intArg));
     }
 
     /**
@@ -68,7 +72,7 @@ class Emitter {
      * @param valueArg The floating point argument.
      */
     public void emit(ParserRuleContext ctx, OpCode opCode, Value valueArg) {
-        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode, valueArg));
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx, this.codeMap), opCode, valueArg));
     }
 
     /**
@@ -77,7 +81,7 @@ class Emitter {
      * @param strArg The string argument.
      */
     public void emit(ParserRuleContext ctx, OpCode opCode, String strArg) {
-        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode, strArg));
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx, this.codeMap), opCode, strArg));
     }
 
     /**
@@ -87,11 +91,11 @@ class Emitter {
      * @param strArg The string argument.
      */
     public void emit(ParserRuleContext ctx, OpCode opCode, int intArg, String strArg) {
-        emit(new Instruction(DebugInfo.fromRuleContext(ctx), opCode, intArg, strArg));
+        emit(new Instruction(DebugInfo.fromRuleContext(ctx, this.codeMap), opCode, intArg, strArg));
     }
 
     public void emit(ParserRuleContext ctx, OpCode opCode, int intArg, String strArg, Value valueArg) {
-        final Instruction instr = new Instruction(DebugInfo.fromRuleContext(ctx), opCode, intArg, strArg);
+        final Instruction instr = new Instruction(DebugInfo.fromRuleContext(ctx, this.codeMap), opCode, intArg, strArg);
         instr.setValueArg(valueArg);
         emit(instr);
     }

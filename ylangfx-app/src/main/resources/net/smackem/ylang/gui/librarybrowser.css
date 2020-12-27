@@ -4,7 +4,7 @@
 
 .tree-cell .docComment {
     -fx-font-style: italic;
-    -fx-opacity: 0.8;
+    -fx-opacity: 0.6;
 }
 
 .tree-cell .globalIcon {

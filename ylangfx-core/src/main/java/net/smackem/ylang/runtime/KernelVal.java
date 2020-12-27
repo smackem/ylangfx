@@ -2,12 +2,15 @@ package net.smackem.ylang.runtime;
 
 import net.smackem.ylang.interop.MatrixComposition;
 import net.smackem.ylang.interop.Yln;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
+    private static final Logger log = LoggerFactory.getLogger(KernelVal.class);
     private final NumberVal[] values;
 
     private KernelVal(int width, int height, NumberVal[] values) {
@@ -241,9 +244,11 @@ public class KernelVal extends MatrixVal<NumberVal> implements Iterable<Value> {
 
     private static PixelBufferOperations getBufferOps() {
         final Yln yln = RuntimeContext.current().yln();
-        return yln != null
+        final PixelBufferOperations ops = yln != null
                 ? new NativePixelBufferOperations(yln)
                 : new JavaPixelBufferOperations();
+        log.info("using {} for raster operations", ops.getClass().getName());
+        return ops;
     }
 
     @Override

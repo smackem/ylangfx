@@ -4,6 +4,7 @@ import net.smackem.ylang.execution.MissingOverloadException;
 import net.smackem.ylang.execution.operators.BinaryOperator;
 import net.smackem.ylang.runtime.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -94,6 +95,24 @@ public class CollectionFunctions {
                 FunctionOverload.method(
                         List.of(ValueType.LIST, ValueType.FUNCTION),
                         CollectionFunctions::sortListByComparison)));
+        registry.put(new FunctionGroup("keys",
+                FunctionOverload.method(
+                        List.of(ValueType.MAP),
+                        CollectionFunctions::mapKeys)));
+        registry.put(new FunctionGroup("values",
+                FunctionOverload.method(
+                        List.of(ValueType.MAP),
+                        CollectionFunctions::mapValues)));
+    }
+
+    private static Value mapValues(List<Value> args) {
+        final MapVal map = (MapVal) args.get(0);
+        return new ListVal(new ArrayList<>(map.entries().values()));
+    }
+
+    private static Value mapKeys(List<Value> args) {
+        final MapVal map = (MapVal) args.get(0);
+        return new ListVal(new ArrayList<>(map.entries().keySet()));
     }
 
     private static Value kernelCreateFromWidthAndHeight(List<Value> args) {
@@ -180,7 +199,7 @@ public class CollectionFunctions {
         return ((KernelVal) args.get(0)).sum();
     }
 
-    private static Value kernelClone(List<Value> args) {
+    static Value kernelClone(List<Value> args) {
         return new KernelVal((KernelVal) args.get(0));
     }
 
