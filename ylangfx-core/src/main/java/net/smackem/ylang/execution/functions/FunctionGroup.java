@@ -27,6 +27,10 @@ final class FunctionGroup {
         return this.name;
     }
 
+    public Collection<FunctionOverload> overloads() {
+        return Collections.unmodifiableCollection(this.overloads.values());
+    }
+
     private void put(FunctionOverload overload) {
         if (this.overloads.put(overload.parameters(), overload) != null) {
             throw new IllegalArgumentException(this.name + ": overload already exists: " + overload.parameters());

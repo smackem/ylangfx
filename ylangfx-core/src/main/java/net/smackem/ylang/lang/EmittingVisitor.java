@@ -264,8 +264,8 @@ class EmittingVisitor extends BaseVisitor<Program> {
             return;
         }
         // built-in function
-        if (this.functionTable.contains(ident) == false) {
-            logSemanticError(ctx, "no function with name '" + ident + "' defined!");
+        if (this.functionTable.containsFunction(ident) == false) {
+            logSemanticError(ctx, "no built-in function with name '" + ident + "' defined!");
             return;
         }
         this.emitter.emit(ctx, OpCode.INVOKE, argCount, ident);
@@ -450,15 +450,28 @@ class EmittingVisitor extends BaseVisitor<Program> {
                 this.emitter.emit(ctx, OpCode.CALL_FUNC, argCount);
                 return null;
             }
-            // method receiver is first argument -> argCount + 1
-            this.emitter.emit(ctx, OpCode.INVOKE, argCount + 1, ident);
+            final FunctionDecl function = this.functions.get(ident);
+            if (function != null) {
+                // user-defined function
+                if (function.parameterCount() != argCount + 1) {
+                    logSemanticError(ctx, "function %s expects %d arguments, but only %d passed".formatted(
+                            ident, function.parameterCount(), argCount + 1));
+                }
+                this.emitter.emit(ctx, OpCode.CALL, 0, ident, new NumberVal(argCount + 1));
+            } else {
+                // method receiver is first argument -> argCount + 1
+                if (functionTable.containsMethod(ident) == false) {
+                    logSemanticError(ctx, "no built-in method with name '%s' defined".formatted(ident));
+                }
+                this.emitter.emit(ctx, OpCode.INVOKE, argCount + 1, ident);
+            }
         } else {
             if (ident == null) {
                 // invoke function object
                 this.emitter.emit(ctx, OpCode.CALL_FUNC, 0);
                 return null;
             }
-            if (this.functionTable.contains(ident)) {
+            if (this.functionTable.containsMethod(ident)) {
                 this.emitter.emit(ctx, OpCode.INVOKE, 1, ident);
                 return null;
             }

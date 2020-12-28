@@ -38,8 +38,15 @@ public enum FunctionRegistry implements FunctionTable {
     }
 
     @Override
-    public boolean contains(String name) {
-        return this.repository.containsKey(name);
+    public boolean containsFunction(String name) {
+        final FunctionGroup fg = this.repository.get(name);
+        return fg != null && fg.overloads().stream().anyMatch(overload -> overload.isMethod() == false);
+    }
+
+    @Override
+    public boolean containsMethod(String name) {
+        final FunctionGroup fg = this.repository.get(name);
+        return fg != null && fg.overloads().stream().anyMatch(FunctionOverload::isMethod);
     }
 
     public Value invoke(String name, List<Value> values) throws MissingOverloadException {

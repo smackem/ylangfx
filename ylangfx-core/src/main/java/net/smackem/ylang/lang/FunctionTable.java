@@ -12,5 +12,10 @@ public interface FunctionTable {
     /**
      * Returns {@code true} if a function with the specified {@code name} is registered.
      */
-    boolean contains(String functionName);
+    boolean containsFunction(String functionName);
+
+    /**
+     * Returns {@code true} if a method with the specified {@code name} is registered.
+     */
+    boolean containsMethod(String methodName);
 }
