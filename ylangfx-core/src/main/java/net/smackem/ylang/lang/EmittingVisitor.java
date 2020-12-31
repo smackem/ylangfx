@@ -292,8 +292,12 @@ class EmittingVisitor extends BaseVisitor<Program> {
 
     @Override
     public Program visitLogStmt(YLangParser.LogStmtContext ctx) {
+        final var token = ctx.getStart();
+        final CodeMap.Location loc = codeMap().translate(token.getLine());
+        this.emitter.emit(ctx, OpCode.LD_VAL, new StringVal("[%s %d:%d] ".formatted(
+                loc.fileName(), loc.lineNumber(), token.getCharPositionInLine())));
         super.visitLogStmt(ctx);
-        this.emitter.emit(ctx, OpCode.LOG, ctx.arguments().expr().size());
+        this.emitter.emit(ctx, OpCode.LOG, ctx.arguments().expr().size() + 1);
         return null;
     }
 
@@ -557,7 +561,11 @@ class EmittingVisitor extends BaseVisitor<Program> {
         if (ctx.Ident() != null) {
             this.emitter.emit(ctx, OpCode.LD_VAL, new StringVal(ctx.Ident().getText()));
         } else {
-            emitStringLiteral(ctx.String());
+            final Value value = parseLiteral(ctx.literal());
+            if (value == null) {
+                logSemanticError(ctx, "unknown literal");
+            }
+            this.emitter.emit(ctx, OpCode.LD_VAL, value);
         }
         ctx.expr().accept(this);
         this.emitter.emit(ctx, OpCode.MK_ENTRY);
@@ -580,10 +588,6 @@ class EmittingVisitor extends BaseVisitor<Program> {
         }
         this.emitter.emit(ctx, OpCode.LD_FUNC, 0, ident, new NumberVal(function.parameterCount()));
         return null;
-    }
-
-    private void emitStringLiteral(TerminalNode str) {
-        this.emitter.emit(null, OpCode.LD_VAL, getStringLiteralValue(str));
     }
 
     private static Value getStringLiteralValue(TerminalNode str) {

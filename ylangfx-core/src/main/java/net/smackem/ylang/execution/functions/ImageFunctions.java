@@ -95,11 +95,17 @@ public class ImageFunctions {
                         List.of(ValueType.IMAGE, ValueType.RECT),
                         ImageFunctions::setClip),
                 FunctionOverload.method(
+                        List.of(ValueType.IMAGE, ValueType.NIL),
+                        ImageFunctions::removeClip),
+                FunctionOverload.method(
                         List.of(ValueType.IMAGE),
                         ImageFunctions::getClip),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL, ValueType.RECT),
                         ImageFunctions::setClip),
+                FunctionOverload.method(
+                        List.of(ValueType.KERNEL, ValueType.NIL),
+                        ImageFunctions::removeClip),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
                         ImageFunctions::getClip)));
@@ -222,6 +228,12 @@ public class ImageFunctions {
         final MatrixVal<?> image = (MatrixVal<?>) args.get(0);
         final RectVal rect = (RectVal) args.get(1);
         image.setClipRect(rect.round());
+        return image;
+    }
+
+    private static Value removeClip(List<Value> args) {
+        final MatrixVal<?> image = (MatrixVal<?>) args.get(0);
+        image.setClipRect(null);
         return image;
     }
 

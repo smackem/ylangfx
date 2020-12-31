@@ -40,6 +40,20 @@ public enum ValueType {
         };
     }
 
+    public boolean isMatrix() {
+        return switch (this) {
+            case IMAGE, KERNEL -> true;
+            default -> false;
+        };
+    }
+
+    public boolean isIterable() {
+        return switch (this) {
+            case LIST, RANGE, KERNEL -> true;
+            default -> isGeometry();
+        };
+    }
+
     private final int index;
 
     ValueType(int index) {

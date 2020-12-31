@@ -263,11 +263,11 @@ public class IntegrationTest {
         final Compiler compiler = new Compiler();
         final List<String> errors = new ArrayList<>();
         final Program program = compiler.compileWithoutPreprocessing("""
-                a := b(#a0b0c0)
+                a := #a0b0c0.b()
                 c := #a0b0c0
                 d := [c][0].r
                 e := #ffffff@80.over(#000000)
-                return [a, c.r, c.g(), b(c), d, e]
+                return [a, c.r, c.g(), c.b, d, e]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(program).isNotNull();
         assertThat(errors).isEmpty();
@@ -733,13 +733,15 @@ public class IntegrationTest {
                     loc: 1;2,
                     col: #ff0000,
                     num: 100,
+                    "alpha": 1,
+                    1: -1,
                 }
                 a.loc = 2;3
                 a["col"] = #00ff00
                 b := {}
                 b.xyz = 123
                 b[#ff0000] = 234
-                return [a, a.num, a["num"], a["nope"], b, b.size]
+                return [a, a.num, a["num"], a["nope"], a["alpha"], b, b.size]
                 """, FunctionRegistry.INSTANCE, errors);
         assertThat(errors).isEmpty();
         assertThat(program).isNotNull();
@@ -749,11 +751,14 @@ public class IntegrationTest {
                 new MapVal(List.of(
                     new MapEntryVal(new StringVal("loc"), new PointVal(2, 3)),
                     new MapEntryVal(new StringVal("col"), new RgbVal(0, 0xff, 0, 0xff)),
-                    new MapEntryVal(new StringVal("num"), new NumberVal(100))
+                    new MapEntryVal(new StringVal("num"), new NumberVal(100)),
+                    new MapEntryVal(new StringVal("alpha"), NumberVal.ONE),
+                    new MapEntryVal(NumberVal.ONE, NumberVal.MINUS_ONE)
                 )),
                 new NumberVal(100),
                 new NumberVal(100),
                 NilVal.INSTANCE,
+                NumberVal.ONE,
                 new MapVal(List.of(
                     new MapEntryVal(new StringVal("xyz"), new NumberVal(123)),
                     new MapEntryVal(new RgbVal(0xff, 0, 0, 0xff), new NumberVal(234))
@@ -1042,5 +1047,93 @@ public class IntegrationTest {
         assertThat(errors).hasSize(1);
         assertThat(errors).allMatch(err -> err.contains("return"));
         assertThat(program).isNull();
+    }
+
+    @Test
+    public void types() throws ExecutionException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compileWithoutPreprocessing("""
+                fn x() {
+                }
+                return [
+                    1.type,
+                    "a".type,
+                    #ff0000.type,
+                    (1;2).type,
+                    |1 2 3 4|.type,
+                    nil.type,
+                    image(1, 1).type,
+                    hsv(1, 2, 3).type,
+                    rect(1;2, 3, 4).type,
+                    circle(1;2, 3).type,
+                    polygon([1;2, 3;4, 5;6, 1;2]).type,
+                    [].type,
+                    {}.type,
+                    true.type,
+                    (1 .. 2).type,
+                    line(1;2, 3;4).type,
+                    @x.type,
+                ]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                new StringVal("NUMBER"),
+                new StringVal("STRING"),
+                new StringVal("RGB"),
+                new StringVal("POINT"),
+                new StringVal("KERNEL"),
+                new StringVal("NIL"),
+                new StringVal("IMAGE"),
+                new StringVal("HSV"),
+                new StringVal("RECT"),
+                new StringVal("CIRCLE"),
+                new StringVal("POLYGON"),
+                new StringVal("LIST"),
+                new StringVal("MAP"),
+                new StringVal("BOOLEAN"),
+                new StringVal("RANGE"),
+                new StringVal("LINE"),
+                new StringVal("FUNCTION")
+        )));
+    }
+
+    @Test
+    public void typeCategories() throws ExecutionException {
+        final Compiler compiler = new Compiler();
+        final List<String> errors = new ArrayList<>();
+        final Program program = compiler.compileWithoutPreprocessing("""
+                return [
+                    image(1, 1).is_matrix,
+                    |1 2 3 4|.is_matrix,
+                    (1;2).is_geometry,
+                    circle(1;2, 3).is_geometry,
+                    [].is_iterable,
+                    |1 2 3 4|.is_iterable,
+                    rect(1;2, 3, 4).is_iterable,
+                    1.is_matrix,
+                    1.is_geometry,
+                    1.is_iterable,
+                ]
+                """, FunctionRegistry.INSTANCE, errors);
+        assertThat(errors).isEmpty();
+        assertThat(program).isNotNull();
+        System.out.println(program.toString());
+        final Value retVal = new Interpreter(program, null, Writer.nullWriter()).execute();
+        assertThat(retVal).isEqualTo(new ListVal(List.of(
+                BoolVal.TRUE,
+                BoolVal.TRUE,
+                BoolVal.TRUE,
+                BoolVal.TRUE,
+                BoolVal.TRUE,
+                BoolVal.TRUE,
+                BoolVal.TRUE,
+                BoolVal.FALSE,
+                BoolVal.FALSE,
+                BoolVal.FALSE
+        )));
     }
 }

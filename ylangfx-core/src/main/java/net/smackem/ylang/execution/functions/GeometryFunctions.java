@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 public class GeometryFunctions {
     private GeometryFunctions() {}
 
+    @SuppressWarnings("DuplicatedCode")
     static void register(FunctionRegistry registry) {
         registry.put(new FunctionGroup("rect",
                 FunctionOverload.function(
@@ -80,10 +81,11 @@ public class GeometryFunctions {
         final Collection<ValueType> geometryTypes = ValueType.publicValues().stream()
                 .filter(ValueType::isGeometry)
                 .collect(Collectors.toList());
-        final List<FunctionOverload> intersectOverloads = new ArrayList<>();
-        final List<FunctionOverload> distanceOverloads = new ArrayList<>();
-        final List<FunctionOverload> translateOverloads = new ArrayList<>();
-        final List<FunctionOverload> boundsOverloads = new ArrayList<>();
+        final int typeCount = geometryTypes.size();
+        final List<FunctionOverload> intersectOverloads = new ArrayList<>(typeCount);
+        final List<FunctionOverload> distanceOverloads = new ArrayList<>(typeCount);
+        final List<FunctionOverload> translateOverloads = new ArrayList<>(typeCount);
+        final List<FunctionOverload> boundsOverloads = new ArrayList<>(typeCount);
         for (final ValueType left : geometryTypes) {
             for (final ValueType right : geometryTypes) {
                 intersectOverloads.add(FunctionOverload.method(List.of(left, right), GeometryFunctions::intersect));

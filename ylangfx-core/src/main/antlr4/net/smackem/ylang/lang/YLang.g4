@@ -127,7 +127,7 @@ tuple
     ;
 
 point
-    :  term Pair term
+    : term Pair term
     ;
 
 range
@@ -223,7 +223,7 @@ mapEntries
     ;
 
 mapEntry
-    : (Ident | String) Colon expr
+    : (Ident | literal) Colon expr
     ;
 
 list
