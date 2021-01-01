@@ -22,6 +22,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.WindowEvent;
 import net.smackem.ylang.execution.ExecutionException;
 import net.smackem.ylang.execution.Interpreter;
+import net.smackem.ylang.execution.PanicException;
 import net.smackem.ylang.execution.functions.FunctionRegistry;
 import net.smackem.ylang.lang.Compiler;
 import net.smackem.ylang.lang.Instruction;
@@ -51,15 +52,20 @@ public class ImageProcController {
     private static final String PREF_IMAGE_PATH = "imageProc.imagePath";
     private static final String PREF_HORIZONTAL_SPLIT = "imageProc.horizontalSplit";
     private static final String PREF_DIVIDER_POS = "imageProc.dividerPos";
+    private static final KeyCombination KEY_COMBINATION_RUN;
+    private static final KeyCombination KEY_COMBINATION_SAVE;
     private final ReadOnlyObjectWrapper<Image> sourceImage = new ReadOnlyObjectWrapper<>();
     private final ReadOnlyStringWrapper message = new ReadOnlyStringWrapper();
     private final ReadOnlyStringWrapper logOutput = new ReadOnlyStringWrapper();
     private final ReadOnlyBooleanWrapper isRunning = new ReadOnlyBooleanWrapper();
     private final BooleanProperty horizontalSplit = new SimpleBooleanProperty();
     private final ScriptLibrary scriptLibrary;
-    private static final KeyCombination KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
-    private static final KeyCombination KEY_COMBINATION_SAVE = new KeyCodeCombination(KeyCode.S, KeyCombination.CONTROL_DOWN);
     private final Collection<ScriptModel> scripts = new ArrayList<>();
+
+    static {
+        KEY_COMBINATION_RUN = new KeyCodeCombination(KeyCode.F5);
+        KEY_COMBINATION_SAVE = new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN);
+    }
 
     public ImageProcController() {
         ScriptLibrary lib = null;
@@ -281,9 +287,13 @@ public class ImageProcController {
 
     private String buildErrorMessage(ExecutionException e) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(e.getMessage()).append(System.lineSeparator())
-                .append("caused by ").append(e.getCause().getClass()).append(": ").append(System.lineSeparator())
-                .append("    ").append(e.getCause().getMessage());
+        if (e.getCause() instanceof PanicException) {
+            sb.append("[PANIC] ").append(e.getCause().getMessage());
+        } else {
+            sb.append(e.getMessage()).append(System.lineSeparator())
+                    .append("caused by ").append(e.getCause().getClass()).append(": ").append(System.lineSeparator())
+                    .append("    ").append(e.getCause().getMessage());
+        }
         if (e.stackTrace() != null) {
             for (final Instruction instr : e.stackTrace()) {
                 sb.append(System.lineSeparator()).append("    ").append(instr.debugInfo()).append(" ").append(instr);

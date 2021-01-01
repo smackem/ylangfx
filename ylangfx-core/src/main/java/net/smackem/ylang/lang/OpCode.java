@@ -44,7 +44,8 @@ public enum OpCode {
     RET,        // pop v, pop a, branch to a, push v
     LD_FUNC,    // push func(pc:intArg,name:strArg,argCount: valueArg(NumberVal))
     CALL_FUNC,  // pop intArg arguments, pop FunctionVal, push FunctionVal.invoke(arguments)
-    SET_OPT;    // set option strArg to valueArg
+    SET_OPT,    // set option in runtime-context strArg to valueArg
+    PANIC;      // throw an exception with message strArg
 
     public boolean isLabelRef() {
         return switch (this) {

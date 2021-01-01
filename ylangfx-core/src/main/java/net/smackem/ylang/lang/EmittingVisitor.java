@@ -1,6 +1,7 @@
 package net.smackem.ylang.lang;
 
 import net.smackem.ylang.runtime.*;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.*;
@@ -292,12 +293,31 @@ class EmittingVisitor extends BaseVisitor<Program> {
 
     @Override
     public Program visitLogStmt(YLangParser.LogStmtContext ctx) {
-        final var token = ctx.getStart();
+        final Token token = ctx.getStart();
         final CodeMap.Location loc = codeMap().translate(token.getLine());
         this.emitter.emit(ctx, OpCode.LD_VAL, new StringVal("[%s %d:%d] ".formatted(
                 loc.fileName(), loc.lineNumber(), token.getCharPositionInLine())));
         super.visitLogStmt(ctx);
         this.emitter.emit(ctx, OpCode.LOG, ctx.arguments().expr().size() + 1);
+        return null;
+    }
+
+    @Override
+    public Program visitPanicStmt(YLangParser.PanicStmtContext ctx) {
+        super.visitPanicStmt(ctx);
+        this.emitter.emit(ctx, OpCode.PANIC, ctx.arguments().expr().size());
+        return null;
+    }
+
+    @Override
+    public Program visitAssertStmt(YLangParser.AssertStmtContext ctx) {
+        final String okLabel = nextLabel();
+        ctx.expr().accept(this);
+        this.emitter.emit(ctx, OpCode.NOT);
+        this.emitter.emit(ctx, OpCode.BR_ZERO, okLabel);
+        this.emitter.emit(ctx, OpCode.LD_VAL, new StringVal("runtime assertion failed: " + ctx.expr().getText()));
+        this.emitter.emit(ctx, OpCode.PANIC, 1);
+        this.emitter.emit(ctx, OpCode.LABEL, okLabel);
         return null;
     }
 

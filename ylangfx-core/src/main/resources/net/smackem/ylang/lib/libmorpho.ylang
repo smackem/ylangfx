@@ -1,8 +1,12 @@
+#include "libutil"
+
 /// dilate the given kernel `knl` (which should be binarized before).
 /// grows non-black objects on black background by `radius` pixels.
 /// returns the dilated kernel.
 fn dilate(knl, radius) {
-    out := kernel(knl.bounds)
+    assert(knl.type == Type_Kernel)
+    assert(radius.type == Type_Number)
+    out := knl.clone_empty()
     k := new_morpho_kernel(radius)
     for p in knl.bounds {
         out[p] = knl.convolve(p, k) > 0 ? 255 : 0
@@ -14,7 +18,9 @@ fn dilate(knl, radius) {
 /// shrinks non-black objects on black background by `radius` pixels.
 /// returns the eroded kernel.
 fn erode(knl, radius) {
-    out := kernel(knl.bounds)
+    assert(knl.type == Type_Kernel)
+    assert(radius.type == Type_Number)
+    out := knl.clone_empty()
     K := new_morpho_kernel(radius)
     for p in knl.bounds {
         out[p] = knl.convolve(p, K) < 255 ? 0 : 255
@@ -25,10 +31,27 @@ fn erode(knl, radius) {
 /// creates a round kernel, where all elements within the given `radius`
 /// are set to 1, all others to 0.
 fn new_morpho_kernel(radius) {
+    assert(radius.type == Type_Number)
     k := kernel(radius * 2 + 1, radius * 2 + 1, 0)
     center := radius;radius
     for p in k.bounds() {
         k[p] = hypot(p.x - center.x, p.y - center.y) <= radius ? 1 : 0
     }
     return k
+}
+
+/// performs a morphological opening with the given radius on
+/// the specified kernel, returning a new kernel.
+fn open(knl, radius) {
+    assert(knl.type == Type_Kernel)
+    assert(radius.type == Type_Number)
+    return knl.erode(radius).dilate(radius)
+}
+
+/// performs a morphological closing with the given radius on
+/// the specified kernel, returning a new kernel.
+fn close(knl, radius) {
+    assert(knl.type == Type_Kernel)
+    assert(radius.type == Type_Number)
+    return knl.dilate(radius).erode(radius)
 }

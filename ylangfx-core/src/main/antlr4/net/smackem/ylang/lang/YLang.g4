@@ -30,6 +30,8 @@ statement
     | forStmt
     | whileStmt
     | logStmt
+    | panicStmt
+    | assertStmt
     | swapStmt
     | returnStmt
     )? LineBreak
@@ -83,6 +85,14 @@ whileStmt
 
 logStmt
     : 'log' LParen arguments RParen
+    ;
+
+panicStmt
+    : 'panic' LParen arguments RParen
+    ;
+
+assertStmt
+    : 'assert' LParen expr RParen
     ;
 
 swapStmt

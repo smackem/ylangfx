@@ -1,6 +1,9 @@
+#include "libutil"
+
 /// returns a matrix copied from `inp` with contrast stretched
 /// to the normalized range of [0..255].
 fn stretch_contrast(inp) {
+    assert(inp.is_matrix())
     lower := inp.min()
     upper := inp.max()
     range := upper - lower
@@ -21,6 +24,11 @@ fn normalize(inp) {
 /// combines an image from three kernels (one for each channel),
 /// all of which must have the same dimensions.
 fn combine_image(red_kernel, green_kernel, blue_kernel) {
+    assert(red_kernel.type == Type_Kernel)
+    assert(green_kernel.type == Type_Kernel)
+    assert(blue_kernel.type == Type_Kernel)
+    assert(red_kernel.bounds == green_kernel.bounds)
+    assert(red_kernel.bounds == blue_kernel.bounds)
     out := image(red_kernel.bounds)
     for p in out.bounds {
         out[p] = rgb(red_kernel[p], green_kernel[p], blue_kernel[p])
@@ -34,6 +42,7 @@ fn combine_image(red_kernel, green_kernel, blue_kernel) {
 /// result.green: the green kernel
 /// result.blue: the blue kernel
 fn split_image(inp) {
+    assert(inp.type == Type_Image)
     red_kernel := kernel(inp.bounds)
     green_kernel := kernel(inp.bounds)
     blue_kernel := kernel(inp.bounds)
@@ -52,6 +61,9 @@ fn split_image(inp) {
 
 /// blends two matrices `left` and `right` with the given ratio (0..1).
 fn blend(left, right, ratio) {
+    assert(left.is_matrix() and right.is_matrix())
+    assert(ratio.type == Type_Number)
+    assert(ratio >= 0 and ratio <= 1)
     out := left.clone_empty()
     for p in left.bounds {
         out[p] = left[p] * ratio + right[p] * (1 - ratio)
@@ -59,9 +71,6 @@ fn blend(left, right, ratio) {
     return out
 }
 
-/// returns a binarized kernel, with all elements set to 255 that are
-/// >= threshold, all others set to 0.
-/// therefore, threshold is in the range [0..255]
 fn binarize_kernel(inp, threshold) {
     out := inp.clone_empty()
     for p in inp.bounds {
@@ -71,9 +80,6 @@ fn binarize_kernel(inp, threshold) {
     return out
 }
 
-/// returns a binarized image, with all pixel channels set to 255 that are
-/// >= threshold, all others set to 0.
-/// therefore, threshold is in the range [0..255]
 fn binarize_image(inp, threshold) {
     out := inp.clone_empty()
     for p in inp.bounds {
@@ -84,4 +90,16 @@ fn binarize_image(inp, threshold) {
             px.b >= threshold ? 255 : 0)
     }
     return out
+}
+
+/// returns a binarized matrix, with all pixel channels set to 255 that are
+/// >= threshold, all others set to 0.
+/// therefore, threshold is in the range [0..255]
+fn binarize(inp, threshold) {
+    assert(inp.is_matrix())
+    assert(threshold.type == Type_Number)
+    if inp.type == Type_Kernel {
+        return binarize_kernel(inp, threshold)
+    }
+    return binarize_image(inp, threshold)
 }

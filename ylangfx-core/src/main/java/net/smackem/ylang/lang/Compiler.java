@@ -3,6 +3,8 @@ package net.smackem.ylang.lang;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.Collection;
 import java.util.Objects;
 
 public class Compiler {
+    private final static Logger log = LoggerFactory.getLogger(Compiler.class);
 
     public Program compile(String source, FunctionTable functionTable, FileProvider fileProvider, Collection<String> outErrors) {
         final Preprocessor preprocessor = new Preprocessor(source, Objects.requireNonNull(fileProvider));
@@ -60,6 +63,8 @@ public class Compiler {
         final Program program = ast[0].accept(emitter);
         if (outErrors.addAll(emitter.semanticErrors())) {
             return null;
+        } else {
+            log.info("program compiled to {} instructions", program.instructions().size());
         }
         return program;
     }

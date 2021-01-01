@@ -138,7 +138,7 @@ public class Interpreter {
         }
     }
 
-    private void executeInstr(TaggedInstruction taggedInstr) throws StackException, MissingOverloadException, IOException {
+    private void executeInstr(TaggedInstruction taggedInstr) throws StackException, MissingOverloadException, IOException, PanicException {
         final Stack stack = this.ctx.stack();
         final Instruction instr = taggedInstr.instruction;
         switch (instr.opCode()) {
@@ -330,6 +330,10 @@ public class Interpreter {
                 stack.push(retVal);
             }
             case SET_OPT -> handleOption(instr.strArg(), instr.valueArg());
+            case PANIC -> {
+                final String str = popValuesAsString(stack, instr.intArg());
+                throw new PanicException(str);
+            }
             default -> throw new IllegalStateException("Unexpected value: " + instr.opCode());
         }
     }
@@ -366,7 +370,7 @@ public class Interpreter {
             }
             this.pc--;
             return stack.pop();
-        } catch (IOException | StackException | MissingOverloadException e) {
+        } catch (IOException | StackException | MissingOverloadException | PanicException e) {
             log.error("error executing function", e);
             throw new RuntimeException(e);
         }

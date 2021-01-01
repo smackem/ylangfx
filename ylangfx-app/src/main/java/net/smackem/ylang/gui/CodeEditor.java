@@ -21,9 +21,8 @@ import java.util.regex.Pattern;
 public class CodeEditor extends CodeArea {
     private static final Pattern PATTERN_WHITESPACE = Pattern.compile("^\\s+");
     private static final String[] KEYWORDS = new String[] {
-            "and", "or", "not", "for", "in", "yield",
-            "if", "else", "true", "false", "log",
-            "fn", "return", "nil", "while", "where",
+            "and", "or", "not", "for", "in", "if", "else", "true", "false", "log",
+            "fn", "return", "nil", "while", "where", "panic", "assert",
     };
 
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";

@@ -33,7 +33,7 @@ public class ScriptLibrary implements FileProvider {
                 "libcolor.ylang",
                 "liberror.ylang",
                 "libfilter.ylang",
-                "libkernel.ylang",
+                "libutil.ylang",
                 "libmorpho.ylang",
                 "libspatial.ylang",
                 "libstd.ylang",

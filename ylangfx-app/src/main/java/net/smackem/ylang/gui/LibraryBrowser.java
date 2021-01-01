@@ -179,7 +179,9 @@ public class LibraryBrowser extends BorderPane {
             root.getChildren().add(moduleItem);
             moduleItem.setExpanded(true);
             for (final DeclModel<?> decl : module.children()) {
-                moduleItem.getChildren().add(new TreeItem<>(decl));
+                if (decl.docComment() != null && decl.docComment().isBlank() == false) {
+                    moduleItem.getChildren().add(new TreeItem<>(decl));
+                }
             }
         }
         return root;

@@ -1,0 +1,87 @@
+/// The type id of the NUMBER type.
+/// Numbers are in 32bit floating point format.
+Type_Number := "NUMBER"
+
+/// The type id of the POINT type.
+/// Points are x/y pairs of numbers.
+/// This type implements the trait `geometry`,
+/// so `is_geometry` will return true for any instance of this type.
+/// This type implements the trait `iterable`,
+/// so `is_iterable` will return `true` for any instance of this type.
+Type_Point := "POINT"
+
+/// The type id of the RGB type
+/// RGB values hold pixel colors with 4 channels: R, G, B and A
+Type_Rgb := "RGB"
+
+/// The type id of the HSV type
+/// HSV values store colors with hue, saturation and lightness - without alpha information.
+Type_Hsv := "HSV"
+
+/// The type id of the RECT type
+/// This type implements the trait `geometry`,
+/// so `is_geometry` will return true for any instance of this type.
+/// This type implements the trait `iterable`,
+/// so `is_iterable` will return `true` for any instance of this type.
+Type_Rect := "RECT"
+
+/// The type id of the CIRCLE type
+/// This type implements the trait `geometry`,
+/// so `is_geometry` will return true for any instance of this type.
+/// This type implements the trait `iterable`,
+/// so `is_iterable` will return `true` for any instance of this type.
+Type_Circle := "CIRCLE"
+
+/// The type id of the POLYGON type
+/// This type implements the trait `geometry`,
+/// so `is_geometry` will return true for any instance of this type.
+/// This type implements the trait `iterable`,
+/// so `is_iterable` will return `true` for any instance of this type.
+Type_Polygon := "POLYGON"
+
+/// The type id of the KERNEL type
+/// This type implements the trait `matrix`,
+/// so `is_matrix` will return true for any instance of this type.
+/// This type implements the trait `iterable`,
+/// so `is_iterable` will return `true` for any instance of this type.
+Type_Kernel := "KERNEL"
+
+/// The type id of the LIST type
+/// This type implements the trait `iterable`,
+/// so `is_iterable` will return `true` for any instance of this type.
+Type_List := "LIST"
+
+/// The type id of the MAP type
+Type_Map := "MAP"
+
+/// The type id of the IMAGE type
+/// This type implements the trait `matrix`,
+/// so `is_matrix` will return true for any instance of this type.
+Type_Image := "IMAGE"
+
+/// The type id of the BOOLEAN type
+Type_Boolean := "BOOLEAN"
+
+/// The type id of the STRING type
+Type_String := "STRING"
+
+/// The type id of the NIL type
+Type_Nil := "NIL"
+
+/// The type id of the RANGE type
+/// This type implements the trait `iterable`,
+/// so `is_iterable` will return `true` for any instance of this type.
+Type_Range := "RANGE"
+
+/// The type id of the LINE type
+/// This type implements the trait `geometry`,
+/// so `is_geometry` will return true for any instance of this type.
+/// This type implements the trait `iterable`,
+/// so `is_iterable` will return `true` for any instance of this type.
+Type_Line := "LINE"
+
+/// The type id of the FUNCTION type
+Type_Function := "FUNCTION"
+
+/// The type id of the MAP_ENTRY type
+Type_Tuple := "MAP_ENTRY"

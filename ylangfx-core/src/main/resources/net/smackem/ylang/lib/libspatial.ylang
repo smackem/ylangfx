@@ -1,10 +1,14 @@
+#include "libutil"
+
 /// returns a sub-matrix of matrix `inp` with bounds large enough to contain
 /// `geometry`, with all pixels within `geometry` copied.
 /// The remaining parts of the returned matrix are empty.
 fn sub_section(inp, geometry) {
+    assert(inp.is_matrix())
+    assert(geometry.is_geometry())
     source_rect := geometry.bounds
-    target_rect := rect(0;0, source_rect.width, source_rect.height).inflate(1, 1)
-    out := inp.clone_empty(target_rect)
+    target_rect := rect(0;0, source_rect.width, source_rect.height)
+    out := inp.clone_empty(target_rect).clip(target_rect)
     for p in geometry {
         out[p.x - source_rect.x; p.y - source_rect.y] = inp[p]
     }
@@ -13,6 +17,7 @@ fn sub_section(inp, geometry) {
 
 /// returns matrix `inp` flipped along the x axis
 fn flip_h(inp) {
+    assert(inp.is_matrix())
     flipped := inp.clone_empty()
     for p in flipped.bounds {
         flipped[p.x; flipped.height - p.y - 1] = inp[p]
@@ -22,6 +27,7 @@ fn flip_h(inp) {
 
 /// returns matrix `inp` flipped along the y axis
 fn flip_v(inp) {
+    assert(inp.is_matrix())
     flipped := inp.clone_empty()
     for p in flipped.bounds {
         flipped[flipped.width - p.x - 1; p.y] = inp[p]
@@ -33,6 +39,8 @@ fn flip_v(inp) {
 /// aspect ratio. A ratio of 1 means 100%.
 /// returns the new, resized matrix.
 fn resize(inp, ratio) {
+    assert(inp.is_matrix())
+    assert(ratio.type == Type_Number)
     out := inp.clone_empty(rect(0;0, inp.bounds.width * ratio, inp.bounds.height * ratio))
     inp.default(inp[0;0])
     inv_ratio := 1 / ratio
@@ -45,6 +53,7 @@ fn resize(inp, ratio) {
 
 /// rotates the matrix `inp` by 90 degrees and returns the new, rotated matrix.
 fn rotate90(inp) {
+    assert(inp.is_matrix())
     out := inp.clone_empty(rect(0;0, inp.bounds.height, inp.bounds.width))
     for p in out.bounds {
         out[p] = inp[p.y; p.x]
@@ -56,6 +65,8 @@ fn rotate90(inp) {
 /// pixel grid with color `grid_color` over the zoomed image. 
 /// pass `nil` as grid color to disable the grid.
 fn zoom(inp, grid_color) {
+    assert(inp.is_matrix())
+    assert(grid_color == nil or grid_color.type == Type_Rgb)
     ratio := 8
     out := resize(inp, ratio)
     if grid_color == nil {
