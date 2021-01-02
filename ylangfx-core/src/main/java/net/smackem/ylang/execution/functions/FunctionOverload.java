@@ -9,8 +9,9 @@ class FunctionOverload {
     private final boolean method;
     private final List<ValueType> parameters;
     private final Func func;
+    private final String doc;
 
-    private FunctionOverload(List<ValueType> parameters, Func func, boolean method) {
+    private FunctionOverload(List<ValueType> parameters, String doc, Func func, boolean method) {
         Objects.requireNonNull(parameters);
         Objects.requireNonNull(func);
         if (method && parameters.size() == 0) {
@@ -19,14 +20,23 @@ class FunctionOverload {
         this.parameters = parameters;
         this.func = func;
         this.method = method;
+        this.doc = doc;
     }
 
     public static FunctionOverload function(List<ValueType> parameters, Func func) {
-        return new FunctionOverload(parameters, func, false);
+        return new FunctionOverload(parameters, null, func, false);
+    }
+
+    public static FunctionOverload function(List<ValueType> parameters, String doc, Func func) {
+        return new FunctionOverload(parameters, doc, func, false);
     }
 
     public static FunctionOverload method(List<ValueType> parameters, Func func) {
-        return new FunctionOverload(parameters, func, true);
+        return new FunctionOverload(parameters, null, func, true);
+    }
+
+    public static FunctionOverload method(List<ValueType> parameters, String doc, Func func) {
+        return new FunctionOverload(parameters, doc, func, true);
     }
 
     public boolean isMethod() {
@@ -39,5 +49,9 @@ class FunctionOverload {
 
     public Func func() {
         return this.func;
+    }
+
+    public String doc() {
+        return this.doc;
     }
 }

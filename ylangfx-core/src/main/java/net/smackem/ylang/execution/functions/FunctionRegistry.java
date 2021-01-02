@@ -5,10 +5,7 @@ import net.smackem.ylang.lang.FunctionTable;
 import net.smackem.ylang.runtime.Value;
 import net.smackem.ylang.runtime.ValueType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public enum FunctionRegistry implements FunctionTable {
     INSTANCE;
@@ -63,5 +60,10 @@ public enum FunctionRegistry implements FunctionTable {
             parameters.add(v.type());
         }
         return fg.get(parameters);
+    }
+
+    public String generateDocs() {
+        final DocMarker marker = new DocMarker(this.repository, Set.of(FUNCTION_NAME_SET_AT));
+        return marker.generateDocs();
     }
 }

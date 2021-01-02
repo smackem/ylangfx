@@ -16,92 +16,121 @@ public class CollectionFunctions {
         final List<FunctionOverload> listOverloads = ValueType.publicValues().stream()
                 .map(initialValueType -> FunctionOverload.function(
                         List.of(ValueType.NUMBER, initialValueType),
+                        "create a list of NUMBER repetitions of the second argument",
                         CollectionFunctions::listCreateWith))
                 .collect(Collectors.toList());
         listOverloads.add(FunctionOverload.function(
                 List.of(ValueType.LIST),
+                "create a shallow clone of the specified LIST",
                 CollectionFunctions::listClone));
         listOverloads.add(FunctionOverload.function(
                 List.of(ValueType.NUMBER),
+                "create a list of NUMBER `nil` values",
                 CollectionFunctions::listCreate));
         registry.put(new FunctionGroup("list", listOverloads));
         registry.put(new FunctionGroup("push",
                 ValueType.publicValues().stream()
                         .map(right -> FunctionOverload.method(
                                 List.of(ValueType.LIST, right),
+                                "adds the specified value to the end of the list",
                                 CollectionFunctions::push))
                         .collect(Collectors.toList())));
         registry.put(new FunctionGroup("pop",
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
+                        "removes and returns the last element in the list, throwing an exception if the list is empty",
                         CollectionFunctions::pop)));
         registry.put(new FunctionGroup("remove_at",
                 FunctionOverload.method(
                         List.of(ValueType.LIST, ValueType.NUMBER),
+                        "removes the element at index NUMBER (which is truncated to integer) from the given list",
                         CollectionFunctions::removeAt)));
         registry.put(new FunctionGroup("reverse",
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
+                        "returns a shallow copy of the list with the order of elements reversed",
                         CollectionFunctions::reverse)));
         registry.put(new FunctionGroup("size",
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
+                        "returns the number of elements in the list",
                         CollectionFunctions::listSize),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
+                        "returns the number of elements in the kernel",
                         CollectionFunctions::kernelSize),
                 FunctionOverload.method(
                         List.of(ValueType.MAP),
+                        "returns the number of entries in the map",
                         CollectionFunctions::mapSize)));
         registry.put(new FunctionGroup("kernel",
                 FunctionOverload.function(
                         List.of(ValueType.RECT),
+                        "creates a new kernel with the given bounds and all elements set to 0",
                         CollectionFunctions::kernelFromBounds),
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
+                        "creates a new kernel with the given width and height, all elements set to 0",
                         CollectionFunctions::kernelCreateFromWidthAndHeight),
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
+                        "creates a new kernel with the given width and height, all elements set to the value of the last argument",
                         CollectionFunctions::kernelCreateWith),
                 FunctionOverload.function(
                         List.of(ValueType.KERNEL),
+                        "creates a clone of the given kernel",
                         CollectionFunctions::kernelClone),
                 FunctionOverload.function(
                         List.of(ValueType.IMAGE),
+                        "creates a greyscale image (kernel) from the given image",
                         CollectionFunctions::kernelFromImage)));
         registry.put(new FunctionGroup("gaussian",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
+                        "creates a gaussian kernel (for low-pass-filters) with the given radius",
                         CollectionFunctions::gaussianKernel)));
         registry.put(new FunctionGroup("laplacian",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
+                        "creates a laplacian kernel (for high-pass-filters) with the given radius",
                         CollectionFunctions::laplacianKernel)));
         // kernel width and height are defined in CommonFunctions
         registry.put(new FunctionGroup("sum",
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
+                        "returns the sum of all elements in the list, throwing an exception when encountering incompatible types",
                         CollectionFunctions::listSum),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
+                        "returns the sum of all elements in the kernel",
                         CollectionFunctions::kernelSum)));
         registry.put(new FunctionGroup("sort",
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
+                        "sorts the kernel, modifying it in-place. returns the given kernel.",
                         CollectionFunctions::sortKernel),
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
+                        "sorts the list, modifying it in-place. returns the given list.",
                         CollectionFunctions::sortList),
                 FunctionOverload.method(
-                        List.of(ValueType.LIST, ValueType.FUNCTION),
+                        List.of(ValueType.LIST, ValueType.FUNCTION), """
+                                sorts the list, modifying it in-place with the given comparator function.
+                                the comparator function must accept two elements `a` and `b` and return
+                                0 if `a` and `b` are equal, a value greater than zero if `a` is greater than
+                                `b` or a value less than zero if `a` is less than `b`. 
+                                returns the given kernel.
+                                """,
                         CollectionFunctions::sortListByComparison)));
         registry.put(new FunctionGroup("keys",
                 FunctionOverload.method(
                         List.of(ValueType.MAP),
+                        "returns a list of all keys in the given map",
                         CollectionFunctions::mapKeys)));
         registry.put(new FunctionGroup("values",
                 FunctionOverload.method(
                         List.of(ValueType.MAP),
+                        "returns a list of all values in the given map",
                         CollectionFunctions::mapValues)));
     }
 
