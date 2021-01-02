@@ -15,68 +15,91 @@ public class GeometryFunctions {
         registry.put(new FunctionGroup("rect",
                 FunctionOverload.function(
                         List.of(ValueType.POINT, ValueType.NUMBER, ValueType.NUMBER),
+                        "creates a RECT with the given POINT as upper-left corner and the given width and height",
                         GeometryFunctions::rectXYWH),
                 FunctionOverload.function(
-                        List.of(ValueType.POINT, ValueType.POINT),
+                        List.of(ValueType.POINT, ValueType.POINT),"""
+                            creates a RECT from points `a` and `b`,
+                            where `a` is the upper-left corner and `b` the bottom-right corner.
+                            """,
                         GeometryFunctions::rectLTRB)));
         registry.put(new FunctionGroup("x",
                 FunctionOverload.method(
                         List.of(ValueType.RECT),
+                        "returns the x-coordinate of the RECT's upper-left corner.",
                         GeometryFunctions::rectX),
                 FunctionOverload.method(
                         List.of(ValueType.POINT),
+                        "returns the x-coordinate of the POINT.",
                         GeometryFunctions::pointX)));
         registry.put(new FunctionGroup("y",
                 FunctionOverload.method(
                         List.of(ValueType.RECT),
+                        "returns the y-coordinate of the RECT's upper-left corner.",
                         GeometryFunctions::rectY),
                 FunctionOverload.method(
                         List.of(ValueType.POINT),
+                        "returns the y-coordinate of the POINT.",
                         GeometryFunctions::pointY)));
         registry.put(new FunctionGroup("right",
                 FunctionOverload.method(
                         List.of(ValueType.RECT),
+                        "returns the x-coordinate of the RECT's bottom-right corner.",
                         GeometryFunctions::rectRight)));
         registry.put(new FunctionGroup("bottom",
                 FunctionOverload.method(
                         List.of(ValueType.RECT),
+                        "returns the y-coordinate of the RECT's bottom-right corner.",
                         GeometryFunctions::rectBottom)));
         registry.put(new FunctionGroup("inflate",
                 FunctionOverload.method(
-                        List.of(ValueType.RECT, ValueType.NUMBER, ValueType.NUMBER),
+                        List.of(ValueType.RECT, ValueType.NUMBER, ValueType.NUMBER), """
+                            returns given RECT, inflated by NUMBER `a` in left and right direction,
+                            and inflated by NUMBER `b` in upward and downward.
+                            """,
                         GeometryFunctions::rectInflate)));
         // rect width and height are defined in CommonFunctions
         registry.put(new FunctionGroup("line",
                 FunctionOverload.function(
                         List.of(ValueType.POINT, ValueType.POINT),
+                        "creates a LINE from POINT `a` to POINT `b`",
                         GeometryFunctions::line)));
         registry.put(new FunctionGroup("p1",
                 FunctionOverload.method(
                         List.of(ValueType.LINE),
+                        "returns the start POINT of the given LINE.",
                         GeometryFunctions::linePoint1)));
         registry.put(new FunctionGroup("p2",
                 FunctionOverload.method(
                         List.of(ValueType.LINE),
+                        "returns the end POINT of the given LINE.",
                         GeometryFunctions::linePoint2)));
         registry.put(new FunctionGroup("length",
                 FunctionOverload.method(
                         List.of(ValueType.LINE),
+                        "returns the length of the given LINE.",
                         GeometryFunctions::lineLength)));
         registry.put(new FunctionGroup("circle",
                 FunctionOverload.function(
                         List.of(ValueType.POINT, ValueType.NUMBER),
+                        "creates a new CIRCLE with the given center POINT and radius.",
                         GeometryFunctions::circle)));
         registry.put(new FunctionGroup("center",
                 FunctionOverload.method(
                         List.of(ValueType.CIRCLE),
+                        "returns the center POINT of the given CIRCLE.",
                         GeometryFunctions::circleCenter)));
         registry.put(new FunctionGroup("radius",
                 FunctionOverload.method(
                         List.of(ValueType.CIRCLE),
+                        "returns the radius of the given CIRCLE.",
                         GeometryFunctions::circleRadius)));
         registry.put(new FunctionGroup("polygon",
                 FunctionOverload.function(
-                        List.of(ValueType.LIST),
+                        List.of(ValueType.LIST), """
+                            creates a new POLYGON with the vertices in the given list.
+                            the list must contain at least 4 POINTs, the first and last of which must be equal.
+                            """,
                         GeometryFunctions::polygon)));
         final Collection<ValueType> geometryTypes = ValueType.publicValues().stream()
                 .filter(ValueType::isGeometry)
@@ -88,12 +111,22 @@ public class GeometryFunctions {
         final List<FunctionOverload> boundsOverloads = new ArrayList<>(typeCount);
         for (final ValueType left : geometryTypes) {
             for (final ValueType right : geometryTypes) {
-                intersectOverloads.add(FunctionOverload.method(List.of(left, right), GeometryFunctions::intersect));
-                distanceOverloads.add(FunctionOverload.method(List.of(left, right), GeometryFunctions::distance));
+                intersectOverloads.add(FunctionOverload.method(List.of(left, right),
+                        "intersects this geometry with another geometry and returns a LIST of the intersection POINTs.",
+                        GeometryFunctions::intersect));
+                distanceOverloads.add(FunctionOverload.method(List.of(left, right),
+                        "returns the distance between this geometry and another geometry.",
+                        GeometryFunctions::distance));
             }
-            translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.POINT), GeometryFunctions::translateByPoint));
-            translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.NUMBER, ValueType.NUMBER), GeometryFunctions::translateByXY));
-            boundsOverloads.add(FunctionOverload.method(List.of(left), GeometryFunctions::bounds));
+            translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.POINT),
+                    "returns a copy of this geometry, translated by the given POINT.",
+                    GeometryFunctions::translateByPoint));
+            translateOverloads.add(FunctionOverload.method(List.of(left, ValueType.NUMBER, ValueType.NUMBER),
+                    "returns a copy of this geometry, translated by the given x- and y-offsets.",
+                    GeometryFunctions::translateByXY));
+            boundsOverloads.add(FunctionOverload.method(List.of(left),
+                    "returns the bounding RECT of the given geometry.",
+                    GeometryFunctions::bounds));
         }
         distanceOverloads.add(FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
                 GeometryFunctions::distanceRgb));
@@ -102,9 +135,11 @@ public class GeometryFunctions {
         registry.put(new FunctionGroup("translate", translateOverloads));
         boundsOverloads.add(FunctionOverload.method(
                 List.of(ValueType.IMAGE),
+                "returns the bounds of the given IMAGE. the upper-left corner is always 0;0",
                 GeometryFunctions::matrixBounds));
         boundsOverloads.add(FunctionOverload.method(
                 List.of(ValueType.KERNEL),
+                "returns the bounds of the given KERNEL. the upper-left corner is always 0;0",
                 GeometryFunctions::matrixBounds));
         registry.put(new FunctionGroup("bounds", boundsOverloads));
     }

@@ -15,22 +15,28 @@ public class CommonFunctions {
         registry.put(new FunctionGroup("width",
                 FunctionOverload.method(
                         List.of(ValueType.RECT),
+                        "returns the width of RECT, in pixels",
                         CommonFunctions::rectWidth),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE),
+                        "returns the width of IMAGE, in pixels",
                         CommonFunctions::imageWidth),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
+                        "returns the width of KERNEL, in pixels",
                         CommonFunctions::kernelWidth)));
         registry.put(new FunctionGroup("height",
                 FunctionOverload.method(
                         List.of(ValueType.RECT),
+                        "returns the height of RECT, in pixels",
                         CommonFunctions::rectHeight),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE),
+                        "returns the height of IMAGE, in pixels",
                         CommonFunctions::imageHeight),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
+                        "returns the height of KERNEL, in pixels",
                         CommonFunctions::kernelHeight)));
         final Collection<ValueType> publicTypes = ValueType.publicValues();
         final int typeCount = publicTypes.size();
@@ -39,10 +45,18 @@ public class CommonFunctions {
         final List<FunctionOverload> isGeometryOverloads = new ArrayList<>(typeCount);
         final List<FunctionOverload> isIterableOverloads = new ArrayList<>(typeCount);
         for (final ValueType valueType : publicTypes) {
-            typeOverloads.add(FunctionOverload.method(List.of(valueType), CommonFunctions::type));
-            isMatrixOverloads.add(FunctionOverload.method(List.of(valueType), CommonFunctions::isMatrix));
-            isGeometryOverloads.add(FunctionOverload.method(List.of(valueType), CommonFunctions::isGeometry));
-            isIterableOverloads.add(FunctionOverload.method(List.of(valueType), CommonFunctions::isIterable));
+            typeOverloads.add(FunctionOverload.method(List.of(valueType),
+                    "exists for all types.\nreturns the string literal `" + valueType + "`",
+                    CommonFunctions::type));
+            isMatrixOverloads.add(FunctionOverload.method(List.of(valueType),
+                    "exists for all types.\nreturns `" + valueType.isMatrix() + "` for this type",
+                    CommonFunctions::isMatrix));
+            isGeometryOverloads.add(FunctionOverload.method(List.of(valueType),
+                    "exists for all types.\nreturns `" + valueType.isGeometry() + "` for this type",
+                    CommonFunctions::isGeometry));
+            isIterableOverloads.add(FunctionOverload.method(List.of(valueType),
+                    "exists for all types.\nreturns `" + valueType.isIterable() + "` for this type",
+                    CommonFunctions::isIterable));
         }
         registry.put(new FunctionGroup("type", typeOverloads));
         registry.put(new FunctionGroup("is_matrix", isMatrixOverloads));

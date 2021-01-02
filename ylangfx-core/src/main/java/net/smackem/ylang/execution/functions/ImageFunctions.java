@@ -10,13 +10,22 @@ public class ImageFunctions {
     static void register(FunctionRegistry registry) {
         registry.put(new FunctionGroup("image",
                 FunctionOverload.function(
-                        List.of(ValueType.RECT),
+                        List.of(ValueType.RECT), """
+                            creates an IMAGE with the dimensions of the given RECT.
+                            all pixels of the new image are initialized to `empty` (transparent black).
+                            """,
                         ImageFunctions::imageFromRect),
                 FunctionOverload.function(
-                        List.of(ValueType.NUMBER, ValueType.NUMBER),
+                        List.of(ValueType.NUMBER, ValueType.NUMBER), """
+                            creates an IMAGE with the given width and height.
+                            all pixels of the new image are initialized to `empty` (transparent black).
+                            """,
                         ImageFunctions::imageFromWidthAndHeight),
                 FunctionOverload.function(
-                        List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.RGB),
+                        List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.RGB), """
+                            creates an IMAGE with the dimensions of the given RECT.
+                            all pixels of the new image are initialized to the given RGB value.
+                            """,
                         ImageFunctions::imageCreateWith),
                 FunctionOverload.function(
                         List.of(ValueType.IMAGE),

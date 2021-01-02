@@ -10,6 +10,42 @@ class DocMarker {
     private final Map<String, FunctionGroup> functionRepo;
     private final Set<String> excludedFunctionNames;
     private static final String NL = System.lineSeparator();
+    private static final String HTML_PREFIX = """
+            <html>
+                <head>
+                    <title>YLang</title>
+                    <style>
+                        article:nth-child(odd) {
+                            background: #ddd
+                        }
+                        h2 {
+                            border: 1px solid #888;
+                            padding: 8px;
+                            background-color: #001060;
+                            color: #fff;
+                        }
+                        body {
+                            font-family: 'Droid Sans', Calibri, Helvetica, Arial, sans-serif;
+                        }
+                        article {
+                            padding: 2px 2px 2px 6px;
+                        }
+                        section > h4 {
+                            font-family: 'Fira Code', Consolas, monospace;
+                            padding-bottom: 0px;
+                            margin-bottom: 4px;
+                        }
+                        section > p {
+                            margin-top: 1px;
+                        }
+                    </style>
+                </head>
+                <body>
+            """;
+    private static final String HTML_SUFFIX = """
+                </body>
+            </html>
+            """;
 
     public DocMarker(Map<String, FunctionGroup> functionRepo, Set<String> excludedFunctionNames) {
         this.functionRepo = functionRepo;
@@ -20,22 +56,37 @@ class DocMarker {
 
     public String generateDocs() {
         final StringBuilder buffer = new StringBuilder();
-        buffer.append("<html><head><title>YLang</title></head>").append(NL)
-                .append("<body>").append(NL)
-                .append("<header><h2>Methods</h2></header>").append(NL);
+        buffer.append(HTML_PREFIX)
+                .append("<header><h2>YLang Methods</h2></header>").append(NL);
+        renderNavBar(buffer);
         final Map<ValueType, Collection<FunctionSignature>> methods = collectMethods();
-        for (final var entry : methods.entrySet()) {
-            generateTypeMethodsDoc(buffer, entry.getKey(), entry.getValue());
-        }
-        buffer.append("<header><h2>Functions</h2></header>").append(NL);
+        methods.entrySet().stream()
+                .sorted(Comparator.comparing(entry -> entry.getKey().name()))
+                .forEach(entry -> generateTypeMethodsDoc(buffer, entry.getKey(), entry.getValue()));
+        buffer.append("<header><h2>YLang Functions</h2></header>").append(NL);
         generateFunctionsDoc(buffer);
-        buffer.append("</body>").append(NL)
-                .append("</html>");
+        buffer.append(HTML_SUFFIX);
         return buffer.toString();
     }
 
+    private static void renderNavBar(StringBuilder buffer) {
+        buffer.append("<nav>");
+        boolean[] first = { true };
+        ValueType.publicValues().stream()
+                .sorted(Comparator.comparing(Enum::name))
+                .forEach(type -> {
+                    final String name = type.name();
+                    if (first[0] == false) {
+                        buffer.append("&nbsp;|&nbsp;");
+                    }
+                    buffer.append("<a href=\"#").append(name).append("\">").append(name).append("</a>");
+                    first[0] = false;
+                });
+        buffer.append("</nav>");
+    }
+
     private void generateTypeMethodsDoc(StringBuilder buffer, ValueType type, Collection<FunctionSignature> methods) {
-        buffer.append("<article>").append(NL)
+        buffer.append("<article id=\"").append(type).append("\">").append(NL)
                 .append("<h3>").append(type).append("</h3>").append(NL);
         methods.stream()
             .sorted(Comparator.comparing(sig -> sig.name))
@@ -100,10 +151,12 @@ class DocMarker {
             final String sig = "%s(%s)".formatted(
                     this.name, String.join(", ", parameters));
             final String doc = Strings.nullToEmpty(this.overload.doc())
-                    .replaceAll("[\\r\\n]+", "<br />");
+                    .replaceAll("[\\r\\n]+", "<br />")
+                    .replaceAll("`(\\w+)`", "<em>$1</em>");
             buffer.append("<section>").append(NL)
                     .append("<h4>").append(sig).append("</h4>").append((NL))
-                    .append("<p>").append(doc).append("</p>").append(NL);
+                    .append("<p>").append(doc).append("</p>").append(NL)
+                    .append("</section>").append(NL);
         }
     }
 }
