@@ -38,6 +38,9 @@ class DocMarker {
                         section > p {
                             margin-top: 1px;
                         }
+                        .code {
+                            font-family: 'Fira Code', Consolas, monospace;
+                        }
                     </style>
                 </head>
                 <body>
@@ -152,7 +155,7 @@ class DocMarker {
                     this.name, String.join(", ", parameters));
             final String doc = Strings.nullToEmpty(this.overload.doc())
                     .replaceAll("[\\r\\n]+", "<br />")
-                    .replaceAll("`(\\w+)`", "<em>$1</em>");
+                    .replaceAll("`(.+?)`", "<span class=\"code\">$1</span>");
             buffer.append("<section>").append(NL)
                     .append("<h4>").append(sig).append("</h4>").append((NL))
                     .append("<p>").append(doc).append("</p>").append(NL)
