@@ -15,21 +15,26 @@ public class SpecialFunctions {
         for (final ValueType rvalueType : publicValueTypes) {
             setAtOverloads.add(FunctionOverload.function(
                     List.of(ValueType.LIST, ValueType.NUMBER, rvalueType),
+                    null,
                     SpecialFunctions::setListAtIndex));
             for (final ValueType keyValueType : publicValueTypes) {
                 setAtOverloads.add(FunctionOverload.function(
                         List.of(ValueType.MAP, keyValueType, rvalueType),
+                        null,
                         SpecialFunctions::setMapAtKey));
             }
         }
         setAtOverloads.add(FunctionOverload.function(
                 List.of(ValueType.KERNEL, ValueType.NUMBER, ValueType.NUMBER),
+                null,
                 SpecialFunctions::setKernelAtIndex));
         setAtOverloads.add(FunctionOverload.function(
                 List.of(ValueType.KERNEL, ValueType.POINT, ValueType.NUMBER),
+                null,
                 SpecialFunctions::setKernelAtPoint));
         setAtOverloads.add(FunctionOverload.function(
                 List.of(ValueType.IMAGE, ValueType.POINT, ValueType.RGB),
+                null,
                 SpecialFunctions::setImageAtPoint));
         registry.put(new FunctionGroup(FunctionRegistry.FUNCTION_NAME_SET_AT, setAtOverloads));
     }

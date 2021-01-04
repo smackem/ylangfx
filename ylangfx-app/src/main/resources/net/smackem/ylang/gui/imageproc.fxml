@@ -21,7 +21,9 @@
                <MenuItem text="Save As..." onAction="#saveScriptAs" />
             </items>
          </SplitMenuButton>
+         <Separator orientation="VERTICAL" />
          <Button text="Library Browser" onAction="#openLibraryBrowser" />
+         <Button text="Help" onAction="#openHelp" />
          <Separator orientation="VERTICAL" />
          <ToggleButton fx:id="splitToggle" text="Horizontal" />
       </HBox>

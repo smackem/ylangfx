@@ -12,7 +12,12 @@ import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -36,13 +41,16 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.model.TwoDimensional;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.Duration;
 import java.util.*;
+import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -522,5 +530,13 @@ public class ImageProcController {
         final Tab tab = new Tab("Library Browser", libraryBrowser);
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
+    }
+
+    @FXML
+    private void openHelp(ActionEvent ignored) throws IOException {
+        final Path path = Files.createTempFile("ylangfx", ".html");
+        final String doc = FunctionRegistry.INSTANCE.generateDocs();
+        Files.writeString(path, doc, StandardOpenOption.CREATE);
+        Desktop.getDesktop().browse(path.toUri());
     }
 }

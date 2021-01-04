@@ -1,5 +1,6 @@
 package net.smackem.ylang.gui;
 
+import com.google.common.base.Strings;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventTarget;
@@ -81,6 +82,9 @@ public class LibraryBrowser extends BorderPane {
         final String searchText = searchField.getText().toLowerCase();
         final int[] matchCount = new int[1];
         forEachDeclModel(decl -> {
+            if (Strings.isNullOrEmpty(decl.docComment())) {
+                return;
+            }
             final boolean match = decl.signature().toLowerCase().contains(searchText);
             log.info("{}: match = {}", decl.signature(), match);
             if (match) {

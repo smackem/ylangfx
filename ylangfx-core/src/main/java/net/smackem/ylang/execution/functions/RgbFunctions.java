@@ -135,20 +135,38 @@ class RgbFunctions {
                         "converts this RGB value to its HSV representation and returns the HSV, dropping the alpha channel.",
                         RgbFunctions::hsvFromRgb)));
         registry.put(new FunctionGroup("h",
-                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::hue),
-                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::withHue)));
+                FunctionOverload.method(List.of(ValueType.HSV),
+                        "returns the hue of this HSV in the range 0..360",
+                        RgbFunctions::hue),
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER),
+                        "returns a copy of this HSV with the hue exchanged with the given NUMBER",
+                        RgbFunctions::withHue)));
         registry.put(new FunctionGroup("s",
-                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::saturation),
-                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::withSaturation)));
+                FunctionOverload.method(List.of(ValueType.HSV),
+                        "returns the saturation of this HSV in the range 0..1",
+                        RgbFunctions::saturation),
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER),
+                        "returns a copy of this HSV with the saturation exchanged with the given NUMBER",
+                        RgbFunctions::withSaturation)));
         registry.put(new FunctionGroup("v",
-                FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::value),
-                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::withValue)));
+                FunctionOverload.method(List.of(ValueType.HSV),
+                        "returns the value of this HSV in the range 0..1",
+                        RgbFunctions::value),
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER),
+                        "returns a copy of this HSV with the value exchanged with the given NUMBER",
+                        RgbFunctions::withValue)));
         registry.put(new FunctionGroup("add_hue",
-                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addHue)));
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER),
+                        "returns a copy of this HSV with the given NUMBER added to the hue",
+                        RgbFunctions::addHue)));
         registry.put(new FunctionGroup("add_saturation",
-                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addSaturation)));
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER),
+                        "returns a copy of this HSV with the given NUMBER added to the saturation",
+                        RgbFunctions::addSaturation)));
         registry.put(new FunctionGroup("add_value",
-                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER), RgbFunctions::addValue)));
+                FunctionOverload.method(List.of(ValueType.HSV, ValueType.NUMBER),
+                        "returns a copy of this HSV with the given NUMBER added to the value",
+                        RgbFunctions::addValue)));
     }
 
     private static Value imageOverImage(List<Value> args) {

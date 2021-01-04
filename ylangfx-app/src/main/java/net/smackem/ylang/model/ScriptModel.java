@@ -13,7 +13,7 @@ public class ScriptModel {
     private final IntegerProperty selectedLine = new SimpleIntegerProperty();
 
     public ScriptModel(Path path, String code) {
-        this.fileNameProperty().bind(Bindings.createStringBinding(
+        this.fileName.bind(Bindings.createStringBinding(
                 () -> {
                     final Path p = this.path.get();
                     return p == null ? null : p.getFileName().toString();
@@ -23,7 +23,7 @@ public class ScriptModel {
         this.code.set(code);
     }
 
-    public StringProperty fileNameProperty() {
+    public ReadOnlyStringProperty fileNameProperty() {
         return this.fileName;
     }
 

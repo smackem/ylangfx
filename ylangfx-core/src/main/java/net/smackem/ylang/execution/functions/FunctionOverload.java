@@ -23,16 +23,8 @@ class FunctionOverload {
         this.doc = doc;
     }
 
-    public static FunctionOverload function(List<ValueType> parameters, Func func) {
-        return new FunctionOverload(parameters, null, func, false);
-    }
-
     public static FunctionOverload function(List<ValueType> parameters, String doc, Func func) {
         return new FunctionOverload(parameters, doc, func, false);
-    }
-
-    public static FunctionOverload method(List<ValueType> parameters, Func func) {
-        return new FunctionOverload(parameters, null, func, true);
     }
 
     public static FunctionOverload method(List<ValueType> parameters, String doc, Func func) {

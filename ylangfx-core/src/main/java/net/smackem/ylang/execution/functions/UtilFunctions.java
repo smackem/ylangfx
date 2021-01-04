@@ -15,53 +15,81 @@ public class UtilFunctions {
         registry.put(new FunctionGroup("random",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
+                        "returns an integer random number in the range NUMBER-1..NUMBER-2]",
                         UtilFunctions::integerRandom),
                 FunctionOverload.function(
                         Collections.emptyList(),
+                        "returns a random number in the range 0..1",
                         UtilFunctions::floatRandom)));
         registry.put(new FunctionGroup("min",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
+                        "returns the smaller of the two given NUMBERs",
                         UtilFunctions::minNumber),
                 FunctionOverload.function(
                         List.of(ValueType.RGB, ValueType.RGB),
+                        "returns an RGB value with each color channel set to the minimum of the corresponding color channels in the two given RGBs",
                         UtilFunctions::minRgb),
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
+                        "returns the minimum value in this LIST or `nil` if the list is empty",
                         UtilFunctions::minList),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
+                        "returns the minimum value in this KERNEL",
                         UtilFunctions::minKernel),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE),
+                        "returns an RGB value composed of the minimum R, G, and B values in this IMAGE",
                         UtilFunctions::minImage),
                 FunctionOverload.method(
-                        List.of(ValueType.KERNEL, ValueType.KERNEL),
+                        List.of(ValueType.KERNEL, ValueType.KERNEL), """
+                            applies the `min(NUMBER, NUMBER)` operation to the pixels in the given KERNELs.
+                            for binarized kernels, this is equivalent to the `AND` operation.
+                            returns the resulting KERNEL.
+                            """,
                         UtilFunctions::minKernelWithKernel),
                 FunctionOverload.method(
-                        List.of(ValueType.IMAGE, ValueType.IMAGE),
+                        List.of(ValueType.IMAGE, ValueType.IMAGE), """
+                            applies the `min(RGB, RGB)` operation to the pixels in the given IMAGEs.
+                            for binarized images, this is equivalent to the `AND` operation.
+                            returns the resulting IMAGE.
+                            """,
                         UtilFunctions::minImageWithImage)));
         registry.put(new FunctionGroup("max",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER),
+                        "returns the greater of the two given NUMBERs",
                         UtilFunctions::maxNumber),
                 FunctionOverload.function(
                         List.of(ValueType.RGB, ValueType.RGB),
+                        "returns an RGB value with each color channel set to the maximum of the corresponding color channels in the two given RGBs",
                         UtilFunctions::maxRgb),
                 FunctionOverload.method(
                         List.of(ValueType.LIST),
+                        "returns the maximum value in this LIST or `nil` if the list is empty",
                         UtilFunctions::maxList),
                 FunctionOverload.method(
                         List.of(ValueType.KERNEL),
+                        "returns the maximum value in this KERNEL",
                         UtilFunctions::maxKernel),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE),
+                        "returns an RGB value composed of the maximum R, G, and B values in this IMAGE",
                         UtilFunctions::maxImage),
                 FunctionOverload.method(
-                        List.of(ValueType.KERNEL, ValueType.KERNEL),
+                        List.of(ValueType.KERNEL, ValueType.KERNEL), """
+                            applies the `max(NUMBER, NUMBER)` operation to the pixels in the given KERNELs.
+                            for binarized kernels, this is equivalent to the `OR` operation.
+                            returns the resulting KERNEL.
+                            """,
                         UtilFunctions::maxKernelWithKernel),
                 FunctionOverload.method(
-                        List.of(ValueType.IMAGE, ValueType.IMAGE),
+                        List.of(ValueType.IMAGE, ValueType.IMAGE), """
+                            applies the `max(RGB, RGB)` operation to the pixels in the given IMAGEs.
+                            for binarized images, this is equivalent to the `OR` operation.
+                            returns the resulting IMAGE.
+                            """,
                         UtilFunctions::maxImageWithImage)));
     }
 
