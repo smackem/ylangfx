@@ -11,84 +11,128 @@ class RgbFunctions {
         registry.put(new FunctionGroup("rgb",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
+                        "creates an RGB value with the given channel values (r, g, and b) and an alpha value of 255",
                         RgbFunctions::rgb),
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
+                        "creates a grey RGB value with all three color channels set to the given number and alpha 255",
                         RgbFunctions::grey),
                 FunctionOverload.method(
                         List.of(ValueType.HSV),
+                        "converts this HSV value into RGB format and returns the newly created RGB value",
                         RgbFunctions::rgbFromHsv)));
         registry.put(new FunctionGroup("rgb01",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
+                        "creates an RGB value from the given channel values (r, g, and b) in the range `0..1` and an alpha value of 255",
                         RgbFunctions::rgb01),
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER),
+                        "creates a grey RGB value from the given number in the range `0..1` and alpha 255",
                         RgbFunctions::grey01)));
         registry.put(new FunctionGroup("rgba",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
+                        "creates an RGB value with the given channel values (r, g, b and a)",
                         RgbFunctions::rgba),
-                FunctionOverload.function(
-                        List.of(ValueType.RGB, ValueType.NUMBER),
-                        RgbFunctions::withAlpha),
-                FunctionOverload.function(
+                FunctionOverload.method(
                         List.of(ValueType.HSV, ValueType.NUMBER),
+                        "converts this HSV value into RGB format, sets alpha to the given NUMBER and returns the newly created RGB value",
                         RgbFunctions::rgbFromHsvWithAlpha)));
         registry.put(new FunctionGroup("rgba01",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
+                        "creates an RGB value from the given channel values (r, g, b and a) in the range `0..1`",
                         RgbFunctions::rgba01),
-                FunctionOverload.function(
-                        List.of(ValueType.RGB, ValueType.NUMBER),
-                        RgbFunctions::withAlpha01),
-                FunctionOverload.function(
+                FunctionOverload.method(
                         List.of(ValueType.HSV, ValueType.NUMBER),
+                        "converts this HSV value into RGB format, sets alpha to the given NUMBER * 255 and returns the newly created RGB value",
                         RgbFunctions::rgbFromHsvWithAlpha01)));
         // rgb methods
         registry.put(new FunctionGroup("r",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::red),
-                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER), RgbFunctions::withRed)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the value of the red color channel. the normalized range is 0..255, but all other values are possible.",
+                        RgbFunctions::red),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER),
+                        "returns a copy of this RGB value with the red color channel exchanged with the given NUMBER.",
+                        RgbFunctions::withRed)));
         registry.put(new FunctionGroup("r01",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::red01)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the value of the red color channel projected to the range 0..1",
+                        RgbFunctions::red01)));
         registry.put(new FunctionGroup("g",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::green),
-                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER), RgbFunctions::withGreen)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the value of the green color channel. the normalized range is 0..255, but all other values are possible.",
+                        RgbFunctions::green),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER),
+                        "returns a copy of this RGB value with the green color channel exchanged with the given NUMBER.",
+                        RgbFunctions::withGreen)));
         registry.put(new FunctionGroup("g01",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::green01)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the value of the green color channel projected to the range 0..1",
+                        RgbFunctions::green01)));
         registry.put(new FunctionGroup("b",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::blue),
-                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER), RgbFunctions::withBlue)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the value of the blue color channel. the normalized range is 0..255, but all other values are possible.",
+                        RgbFunctions::blue),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER),
+                        "returns a copy of this RGB value with the blue color channel exchanged with the given NUMBER.",
+                        RgbFunctions::withBlue)));
         registry.put(new FunctionGroup("b01",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::blue01)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the value of the blue color channel projected to the range 0..1",
+                        RgbFunctions::blue01)));
         registry.put(new FunctionGroup("a",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::alpha),
-                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER), RgbFunctions::withAlpha)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the value of the alpha channel. the normalized range is 0..255, but all other values are possible.",
+                        RgbFunctions::alpha),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER),
+                        "returns a copy of this RGB value with the alpha channel exchanged with the given NUMBER.",
+                        RgbFunctions::withAlpha)));
         registry.put(new FunctionGroup("a01",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::alpha01)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the value of the alpha channel projected to the range 0..1",
+                        RgbFunctions::alpha01),
+                FunctionOverload.method(List.of(ValueType.RGB, ValueType.NUMBER),
+                        "returns a copy of this RGB value with the alpha channel (range 0..1) exchanged with the given NUMBER.",
+                        RgbFunctions::withAlpha01)));
         registry.put(new FunctionGroup("intensity",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the intensity of this RGB value. the normalized range is 0..255, but all values are possible.",
+                        RgbFunctions::intensity)));
         registry.put(new FunctionGroup("i",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the intensity of this RGB value. the normalized range is 0..255, but all values are possible.",
+                        RgbFunctions::intensity)));
         registry.put(new FunctionGroup("intensity01",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity01)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the intensity of this RGB value projected to the range 0..1",
+                        RgbFunctions::intensity01)));
         registry.put(new FunctionGroup("i01",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::intensity01)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns the intensity of this RGB value projected to the range 0..1",
+                        RgbFunctions::intensity01)));
         registry.put(new FunctionGroup("over",
                 FunctionOverload.method(
                         List.of(ValueType.RGB, ValueType.RGB),
+                        "applies the alpha-compositing function `over` to two RGB values, painting this RGB over the second RGB.",
                         RgbFunctions::rgbOverRgb),
                 FunctionOverload.method(
                         List.of(ValueType.IMAGE, ValueType.IMAGE),
+                        "applies the alpha-compositing function `over` to two IMAGEs, painting this IMAGE over the second IMAGE.",
                         RgbFunctions::imageOverImage)));
         registry.put(new FunctionGroup("grey",
-                FunctionOverload.method(List.of(ValueType.RGB), RgbFunctions::greyscale)));
+                FunctionOverload.method(List.of(ValueType.RGB),
+                        "returns an RGB value with all color channels set to the intensity of the given RGB, copying the alpha channel value",
+                        RgbFunctions::greyscale)));
         registry.put(new FunctionGroup("hsv",
                 FunctionOverload.function(
                         List.of(ValueType.NUMBER, ValueType.NUMBER, ValueType.NUMBER),
+                        "returns an HSV value constructed from the given hue, saturation and value.",
                         RgbFunctions::hsv),
                 FunctionOverload.method(
                         List.of(ValueType.RGB),
+                        "converts this RGB value to its HSV representation and returns the HSV, dropping the alpha channel.",
                         RgbFunctions::hsvFromRgb)));
         registry.put(new FunctionGroup("h",
                 FunctionOverload.method(List.of(ValueType.HSV), RgbFunctions::hue),
@@ -108,8 +152,8 @@ class RgbFunctions {
     }
 
     private static Value imageOverImage(List<Value> args) {
-        ImageVal i1 = (ImageVal) args.get(0);
-        ImageVal i2 = (ImageVal) args.get(1);
+        final ImageVal i1 = (ImageVal) args.get(0);
+        final ImageVal i2 = (ImageVal) args.get(1);
         return i1.over(i2);
     }
 

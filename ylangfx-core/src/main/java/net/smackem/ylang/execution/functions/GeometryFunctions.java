@@ -129,6 +129,7 @@ public class GeometryFunctions {
                     GeometryFunctions::bounds));
         }
         distanceOverloads.add(FunctionOverload.method(List.of(ValueType.RGB, ValueType.RGB),
+                "returns the distance between this RGB and the other RGB as in sqrt(dR*dR + dG*dG + dB*dB)",
                 GeometryFunctions::distanceRgb));
         registry.put(new FunctionGroup("intersect", intersectOverloads));
         registry.put(new FunctionGroup("distance", distanceOverloads));
