@@ -20,6 +20,13 @@ public class PolygonVal extends GeometryVal<PointVal> {
         this(checkVertices(vertices), true);
     }
 
+    /**
+     * @return an unmodifiable list of the vertices that define this {@link PolygonVal}.
+     */
+    public List<? extends PointVal> vertices() {
+        return Collections.unmodifiableList(this.vertices);
+    }
+
     @Override
     public GeometryVal<PointVal> translate(PointVal pt) {
         final List<PointVal> vertices = this.vertices.stream()

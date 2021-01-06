@@ -101,6 +101,11 @@ public class GeometryFunctions {
                             the list must contain at least 4 POINTs, the first and last of which must be equal.
                             """,
                         GeometryFunctions::polygon)));
+        registry.put(new FunctionGroup("vertices",
+                FunctionOverload.method(
+                        List.of(ValueType.POLYGON),
+                        "returns a LIST containing the POINTs that define this POLYGON.",
+                        GeometryFunctions::polygonVertices)));
         final Collection<ValueType> geometryTypes = ValueType.publicValues().stream()
                 .filter(ValueType::isGeometry)
                 .collect(Collectors.toList());
@@ -143,6 +148,11 @@ public class GeometryFunctions {
                 "returns the bounds of the given KERNEL. the upper-left corner is always 0;0",
                 GeometryFunctions::matrixBounds));
         registry.put(new FunctionGroup("bounds", boundsOverloads));
+    }
+
+    private static Value polygonVertices(List<Value> args) {
+        final PolygonVal polygon = (PolygonVal) args.get(0);
+        return new ListVal(polygon.vertices());
     }
 
     private static Value matrixBounds(List<Value> args) {

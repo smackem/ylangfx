@@ -3,6 +3,7 @@
 #include "libspatial"
 #include "libfilter"
 #include "libmorpho"
+#include "libgeom"
 
 /// libstd includes the entire standard ylang library, it does not
 /// define any functions.

@@ -1,0 +1,70 @@
+#include "libutil"
+
+outline_funcs := {}
+
+fn outline_rect(g) {
+    return [
+        line(g.x;g.y, g.right;g.y),
+        line(g.right;g.y, g.right;g.bottom),
+        line(g.right;g.bottom, g.x;g.bottom),
+        line(g.x;g.bottom, g.x;g.y),
+    ]
+}
+
+fn outline_line(g) {
+    return [g, line(g.p2, g.p1)]
+}
+
+fn outline_polygon(g) {
+    prev := nil
+    lines := []
+    for vertex in g.vertices {
+        if prev != nil {
+            lines.push(line(prev, vertex))
+        }
+        prev = vertex
+    }
+    return lines
+}
+
+fn outline_circle(g) {
+    delta := 6
+    if g.radius in 0 .. 15 {
+        delta = 60
+    } else if g.radius in 15 .. 50 {
+        delta = 30
+    } else if g.radius in 50 .. 150 {
+        delta = 15
+    } else if g.radius in 150 .. 300 {
+        delta = 9
+    }
+    prev := nil
+    lines := []
+    for angle in 0 .. delta .. 361 {
+        p := g.center.x + sin(angle) * g.radius; g.center.y + cos(angle) * g.radius
+        if prev != nil {
+            lines.push(line(prev, p))
+        }
+        prev = p
+    }
+    return lines
+}
+
+fn outline_point(g) {
+    return [line(g, g)]
+}
+
+/// returns a list of lines that make up the outline of the
+/// given geometry. the last point of the last line in the
+/// returned list is equal to the first point of the first line.
+fn outline(geometry) {
+    assert(geometry.is_geometry)
+    if outline_funcs.size == 0 {
+        outline_funcs[Type_Rect] = @outline_rect
+        outline_funcs[Type_Line] = @outline_line
+        outline_funcs[Type_Polygon] = @outline_polygon
+        outline_funcs[Type_Circle] = @outline_circle
+        outline_funcs[Type_Point] = @outline_point
+    }
+    return outline_funcs[geometry.type]@(geometry)
+}
