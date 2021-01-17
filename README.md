@@ -7,22 +7,29 @@ IDE for for ylang, an image-manipulation language
 ylang2 is the successor to the first version, which was hosted by a command-line utility written in Go (https://github.com/smackem/ylang).
 
 The major advantages of ylang 2 over ylang 1 are the following:
-- support for multiple images (not just one input and one output image)
-- image pixels are adressed with the `[]` operator, not the `@` operator
-
+* support for multiple images (not just one input and one output image)
+* image pixels are adressed with the `[]` operator, not the `@` operator<br/>
   e.g. pixel inversion (ylang 1: `@pt = -@pt`) is now written `out[pt] = -inp[pt]`, where `inp` and `out` are two image instances
-- kernels can be used like greyscale images
-- highly optimized, optional C backend `yln`
-
-  to make use of the C backend, compile yln using CMake for you platform and pass the directory containing the resulting library to ylangfx:
+* kernels can be used like greyscale images
+* highly optimized, optional C backend `yln`<br/>
+  to make use of the C backend, compile yln using CMake for your platform and pass the directory containing the resulting library to ylangfx:
   `java -jar {PATH_TO_YLANGFX-APP.JAR} -Djava.library.path={DIR_CONTAINING_YLN}`
-- ability to include library files
-- a standard library with functions for morphological operations, filters and more image manipulation tools
-
+* ability to include library files
+* a standard library with functions for morphological operations, filters and more image manipulation tools<br/>
   the standard library is included as source code and can be browsed with the Library Browser
-- support for panics and assertions
-- better error messages from the compiler as well from the execution engine, including stack traces
-- help system that displays all built-in types and methods
+* support for panics and assertions
+* scripts can `return` objects of any type - not just images.<br/>
+  if a script returns a list or map, all images and kernels contained in these objects will be displayed by the IDE
+* functions can be adressed using the operator `@`:
+  ```
+  fn compare(a, b) {
+    return a - b
+  }
+  [5, 1, 10].sort(@compare)
+  ```
+  lambda syntax is no longer supported.
+* better error messages from the compiler as well as from the execution engine, including stack traces
+* a help system that displays all built-in types and methods
 
 ## How to build
 
