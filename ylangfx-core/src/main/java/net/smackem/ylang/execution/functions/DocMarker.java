@@ -147,12 +147,11 @@ class DocMarker {
         }
 
         void renderHtml(StringBuilder buffer) {
-            final Collection<String> parameters = this.overload.parameters()
+            final List<String> parameters = this.overload.parameters()
                     .stream()
                     .map(Object::toString)
                     .collect(Collectors.toList());
-            final String sig = "%s(%s)".formatted(
-                    this.name, String.join(", ", parameters));
+            final String sig = renderSignature(parameters);
             final String doc = Strings.nullToEmpty(this.overload.doc())
                     .replaceAll("[\\r\\n]+", "<br />")
                     .replaceAll("`(.+?)`", "<span class=\"code\">$1</span>");
@@ -160,6 +159,16 @@ class DocMarker {
                     .append("<h4>").append(sig).append("</h4>").append((NL))
                     .append("<p>").append(doc).append("</p>").append(NL)
                     .append("</section>").append(NL);
+        }
+
+        String renderSignature(List<String> parameters) {
+            if (this.overload.isMethod()) {
+                final String thisParam = parameters.remove(0);
+                return "%s.%s(%s)".formatted(
+                        thisParam, this.name, String.join(", ", parameters));
+            }
+            return "%s(%s)".formatted(
+                    this.name, String.join(", ", parameters));
         }
     }
 }
