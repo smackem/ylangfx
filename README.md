@@ -37,6 +37,7 @@ The major advantages of ylang 2 over ylang 1 are the following:
     for p in img.bounds {
       out[p] = filter@(img[p])
     }
+    return out
   }
   fn binarize(color) {
     return color.i01 > 0.5 ? #ffffff : #000000
