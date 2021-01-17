@@ -8,6 +8,8 @@ ylang2 is the successor to the first version, which was hosted by a command-line
 
 The major advantages of ylang 2 over ylang 1 are the following:
 * support for multiple images (not just one input and one output image)
+* the input image can be adressed using the identifier `$in`:<br/>
+  `return $in` is a complete ylang2 script that just returns the input image
 * image pixels are adressed with the `[]` operator, not the `@` operator<br/>
   e.g. pixel inversion (ylang 1: `@pt = -@pt`) is now written `out[pt] = -inp[pt]`, where `inp` and `out` are two image instances
 * kernels can be used like greyscale images
@@ -27,7 +29,20 @@ The major advantages of ylang 2 over ylang 1 are the following:
   }
   [5, 1, 10].sort(@compare)
   ```
-  lambda syntax is no longer supported.
+  lambda syntax is no longer supported.<br>
+  also use the `@` operator to invoke function objects:
+  ```
+  fn apply_color_filter(img, filter) {
+    out := img.clone()
+    for p in img.bounds {
+      out[p] = filter@(img[p])
+    }
+  }
+  fn binarize(color) {
+    return color.i01 > 0.5 ? #ffffff : #000000
+  }
+  return apply_color_filter($in, @binarize)
+  ```
 * better error messages from the compiler as well as from the execution engine, including stack traces
 * a help system that displays all built-in types and methods
 
