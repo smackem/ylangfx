@@ -9,10 +9,10 @@
 float get_kernel_sum(const Kernel *kernel) {
     assert(kernel != NULL);
     int size = kernel->width * kernel->height;
-    const float *pValue = kernel->values;
+    const float *value_ptr = kernel->values;
     float sum = 0;
-    for ( ; size > 0; size--, pValue++) {
-        sum += *pValue;
+    for ( ; size > 0; size--, value_ptr++) {
+        sum += *value_ptr;
     }
     return sum;
 }
